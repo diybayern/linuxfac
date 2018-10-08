@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+
+# after installing new lib, we must re-do ldconfig.
+ldconfig
+sync
+

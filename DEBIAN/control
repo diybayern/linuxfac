@@ -1,0 +1,10 @@
+Package: packname
+Priority: extra
+Section: checkinstall
+Installed-Size: 7204
+Maintainer: root@ubuntu
+Architecture: amd64
+Version: currentversion
+Provides: rainsys
+Description: Package created with checkinstall 1.6.2
+
