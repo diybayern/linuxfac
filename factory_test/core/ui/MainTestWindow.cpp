@@ -15,6 +15,7 @@ MainTestWindow::~MainTestWindow()
         delete _main_test_window;
         _main_test_window = NULL;
     }
+    LOG_INFO("Exit new Factory test!!!!!!");
 }
 
 MainTestWindow* MainTestWindow::_main_test_window = NULL;
@@ -474,6 +475,7 @@ void MainTestWindow::show_main_test_window()
     get_current_res_w = _desktopWidget->width();
     this->resize(_desktopWidget->width(), _desktopWidget->height());
     this->show();
+    LOG_INFO("Welcome to new factory!!!");
 }
 
 QString MainTestWindow::ui_get_test_count()

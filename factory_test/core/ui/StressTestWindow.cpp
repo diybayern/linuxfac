@@ -222,6 +222,7 @@ void StressTestWindow::update_stress_label_value(QString item, QString result)
 
         if (item.compare(item_info.name) == 0) {
 
+            LOG_INFO("update_stress_label_value item =  %s, result = %s",item.toStdString(),result.toStdString());
             QLabel* label = item_info.label;
             label->setText(result);
             label->update();
@@ -293,6 +294,7 @@ void StressTestWindow::_set_picture(QPixmap& pix)
     }
 
     foreach (image_layout_attr item, _image_label_list) {
+        LOG_INFO("_set_picture");
         QLabel* lb = item.lb_image;
         lb->setPixmap(pix);
         lb->update();
