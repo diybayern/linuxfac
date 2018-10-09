@@ -189,6 +189,7 @@ void* StressTest::test_all(void* arg)
             break;
         }
 		
+		LOG_INFO("-------------------- update stress info --------------------");
         get_current_open_time(&tmp_dst);
         diff_running_time(&tmp_dst, &init_time);
 		if (tmp_dst.day == 0 && tmp_dst.hour == 0 && tmp_dst.minute == 2 && tmp_dst.second == 0) {
@@ -197,7 +198,8 @@ void* StressTest::test_all(void* arg)
 		}
         snprintf(datebuf, CMD_BUF_SIZE, "%d天%d时%d分%d秒", tmp_dst.day, tmp_dst.hour, tmp_dst.minute, tmp_dst.second);
         uihandle->update_stress_label_value("运行时间", datebuf);
-
+		LOG_INFO("running time:%s ",datebuf);
+		
 		uihandle->update_stress_label_value("CPU温度",execute_command("bash " + GET_CPU_TEMP_SCRIPT));
         
         uihandle->update_stress_label_value("CPU频率",get_current_cpu_freq());		

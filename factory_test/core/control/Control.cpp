@@ -93,6 +93,7 @@ Control* Control::get_control()
 
 void Control::init_base_info()
 {
+	LOG_INFO("******************** init base info ********************");
     string dmi = execute_command("cat " + GET_BASEINFO_INI);
 	if (dmi != "error") {
 		get_baseinfo(_baseInfo,dmi);
@@ -103,11 +104,13 @@ void Control::init_base_info()
 
 void Control::init_hw_info()
 {
+	LOG_INFO("******************** init hwinfo ********************");
     get_hwinfo(_hwInfo);
 }
 
 void Control::ui_init()
 {
+	LOG_INFO("******************** init ui ********************");
 	if (check_file_exit(WHOLE_TEST_FILE)) {
 		_whole_test_state = true;
 	} else {
@@ -224,8 +227,10 @@ void Control::ui_init()
 void Control::retry_sn_mac_test()
 {
 	if (_sn_mac == "MAC") {
+		LOG_INFO("******************** retry test mac ********************");
 		_uiHandle->show_sn_mac_message_box("MAC");
 	} else if (_sn_mac == "SN") {
+	LOG_INFO("******************** retry test sn ********************");
 		_uiHandle->show_sn_mac_message_box("SN");
 	}
 }
@@ -250,10 +255,12 @@ void Control::check_sn_mac_compare_result(string message)
 		if (message.size() != mac.size() || message != mac) {
 			_uiHandle->update_sn_mac_test_result("MAC", "FAIL");
 			_uiHandle->show_sn_mac_comparison_result("MAC", "FAIL");
+			LOG_INFO("mac test failed");
 			return ;
 		} else {
 			_uiHandle->update_sn_mac_test_result("MAC", "PASS");
 			_uiHandle->show_sn_mac_comparison_result("MAC", "PASS");
+			LOG_INFO("mac test success");
 			return ;
 		}
     }
@@ -263,10 +270,12 @@ void Control::check_sn_mac_compare_result(string message)
 		if (message.size() != sn.size() || message != sn) {
 			_uiHandle->update_sn_mac_test_result("SN", "FAIL");
 			_uiHandle->show_sn_mac_comparison_result("SN", "FAIL");
+			LOG_INFO("sn test failed");
 			return ;
 		} else {
 			_uiHandle->update_sn_mac_test_result("SN", "PASS");
 			_uiHandle->show_sn_mac_comparison_result("SN", "PASS");
+			LOG_INFO("sn test success");
 			return ;
 		}
     }
@@ -282,6 +291,7 @@ void Control::show_test_confirm_dialog(string item)
 
 void Control::init_func_test()
 {
+	LOG_INFO("******************** init func test ********************");
 	SoundTest* sound = (SoundTest*) _funcBase[SOUND];
     sound->init();
 	
@@ -297,6 +307,7 @@ void Control::init_func_test()
 
 void Control::init_fac_config()
 {
+	LOG_INFO("******************** init fac config ********************");
 	UsbTest* usb = (UsbTest*)_funcBase[USB];
 	if (!usb->usb_test_read_status()) {
 		LOG_ERROR("init copy fac config error");
@@ -313,50 +324,50 @@ void Control::init_fac_config()
 
 void Control::start_interface_test()
 {
-    LOG_INFO("start interface test");
+	LOG_INFO("******************** start interface test ********************");
     _testStep = STEP_INTERFACE;
 	_funcBase[INTERFACE]->start_test(_baseInfo);
 }
 
 void Control::start_sound_test()
 {
+	LOG_INFO("******************** start sound test ********************");
     _funcBase[SOUND]->start_test(_baseInfo);
-    LOG_INFO("start sound test");
 }
 
 void Control::start_display_test()
 {
+	LOG_INFO("******************** start display test ********************");
     _uiHandle->show_display_ui();
-    LOG_INFO("start display test");
 }
 
 void Control::start_bright_test()
 {
+	LOG_INFO("******************** start bright test ********************");
     _funcBase[BRIGHT]->start_test(_baseInfo);
-    LOG_INFO("start bright test");
 }
 
 void Control::start_camera_test()
 {
+	LOG_INFO("******************** start camera test ********************");
     _funcBase[CAMERA]->start_test(_baseInfo);
-    LOG_INFO("start camera test");
 }
 
 void Control::start_stress_test()
 {
+	LOG_INFO("******************** start stress test ********************");
     _funcBase[STRESS]->start_test(_baseInfo);
-    LOG_INFO("start_stress_test");
 }
 
 void Control::start_next_process()
 {
+	LOG_INFO("******************** start next process ********************");
     _funcBase[NEXT_PROCESS]->start_test(_baseInfo);
-    LOG_INFO("start next process");
 }
 
 void Control::start_upload_log()
 {
-    LOG_INFO("start upload log");
+	LOG_INFO("******************** start upload log ********************");
     upload_mes_log();
 }
 
@@ -382,6 +393,7 @@ void Control::set_brightness_dialog_button_state(bool state)
 
 void Control::show_main_test_ui()
 {
+	LOG_INFO("******************** show factory test ui ********************");
     _uiHandle->to_show_main_test_ui();
 	auto_test_mac_sn();
 }
@@ -389,6 +401,7 @@ void Control::show_main_test_ui()
 void Control::auto_test_mac_sn() {
 	if (!_lock_file_status) {
 		_sn_mac = "MAC";
+		LOG_INFO("******************** start test mac ********************");
 		_uiHandle->show_sn_mac_message_box("MAC");
 	}
 }
@@ -400,6 +413,7 @@ int Control::get_test_step()
 
 void Control::init_mes_log()
 {
+	LOG_INFO("******************** init mes log ********************");
     int i=0;
     int j=0;
     char date[64] = { 0, };
@@ -571,11 +585,13 @@ int Control::get_screen_width()
 
 void Control::auto_start_stress_test()
 {
+	LOG_INFO("******************** check auto stress test ********************");
     if (check_file_exit(STRESS_LOCK_FILE.c_str())) {
 		_lock_file_status = true;
         LOG_INFO("auto start stress test");
         _stress_test_stage = execute_command("cat " + STRESS_LOCK_FILE);
         LOG_INFO("stress stage:%s",_stress_test_stage.c_str());
+		LOG_INFO("******************** start stress test ********************");
         _funcBase[STRESS]->start_test(_baseInfo);
     } else {
     	_lock_file_status = false;
@@ -797,6 +813,7 @@ void Control::set_sn_mac_test_result(string sn_mac, string result)
 {
 	if (sn_mac == "MAC" && result == "PASS" && _whole_test_state) {
 		sleep(1);
+		LOG_INFO("******************** start test sn ********************");
 		_sn_mac = "SN";
 		_uiHandle->show_sn_mac_message_box("SN");
 	}
