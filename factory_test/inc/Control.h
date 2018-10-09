@@ -243,6 +243,10 @@ public:
     bool get_pcba_whole_lock_state() {
         return _pcba_whole_lock_state;
     }
+
+    FacArg* get_fac_arg() {
+        return _facArg;
+    }
     
 private:
     void init_base_info();

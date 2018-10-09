@@ -11,9 +11,6 @@ netbuf* ftp_handle;
 #define DEFAULT_FTP_IP       "172.21.5.48"
 #define DEFAULT_FTP_USER     "test"
 #define DEFAULT_FTP_PASSWD   "test"
-#define DEFAULT_WIFI_SSID    "sfc-test"
-#define DEFAULT_WIFI_PASSWD  "12345678"
-#define DEFAULT_WIFI_ENP     "WPA"
 
 /*
 **execute command and return output result
@@ -368,22 +365,19 @@ int get_fac_config_from_conf(const string conf_path, FacArg *fac)
 	char* ssid = (char*)malloc(128);
 	memset(ssid, 0, 128);
 	if(read_conf_line(conf_path, "wifi_ssid",ssid) == false){
-		memcpy(ssid, DEFAULT_WIFI_SSID, strlen(DEFAULT_WIFI_SSID));
-		LOG_INFO("use default wifi_ssid\n");
+		LOG_INFO("no wifi_ssid config\n");
 	}
 		  
 	char* wifi_passwd = (char*)malloc(128);
 	memset(wifi_passwd, 0, 128);
 	if(read_conf_line(conf_path, "wifi_passwd",wifi_passwd) == false){
-		memcpy(wifi_passwd, DEFAULT_WIFI_PASSWD, strlen(DEFAULT_WIFI_PASSWD));
-		LOG_INFO("use default wifi_passwd\n");
+		LOG_INFO("no wifi_passwd config\n");
 	}
 			
 	char* wifi_enp = (char*)malloc(128);			
 	memset(wifi_enp, 0, 128);
 	if(read_conf_line(conf_path, "wifi_enp", wifi_enp) == false){
-		memcpy(wifi_enp, DEFAULT_WIFI_ENP, strlen(DEFAULT_WIFI_ENP));
-		LOG_INFO("use default wifi_enp\n");
+		LOG_INFO("no wifi_enp config\n");
 	}
 
 	fac->wifi_ssid = ssid;

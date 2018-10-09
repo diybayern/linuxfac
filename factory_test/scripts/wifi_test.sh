@@ -9,6 +9,7 @@
 #
 
 TEST_WIFI="sfc-test"
+
 SIGNAL_THRESHOLD=70
 VORBOSE_LOG=0
 
@@ -18,13 +19,16 @@ IP_SUCCESS=0
 IS_WEP_PASSWD=0
 IS_WPA_PASSWD=0
 
-FACOTORY_DIR=/usr/bin/factory
+FACOTORY_DIR=/usr/local/bin/factory
 WIFI_SCAN_AWK=$FACOTORY_DIR/wifi_scan.sh
 WIFI_SCAN_RESULT=/tmp/wifi_scan.tmp
 WIFI_TEST_CONFIG_INFO=/tmp/wifi_test_info.tmp
 WIFI_TEST_RESULT=/tmp/wifi.status
 WIFI_SSID_MAC=/tmp/ssid.mac
-WIFI_CONFIG_FILE=/tmp/wifi_config.ini
+SSID=$1
+PASSWD=$2
+ENP=$3
+# WIFI_CONFIG_FILE=/tmp/wifi_config.ini
 FACTORY_SHELL_LOG=/var/log/factory_test_bash.log
 WPA_CONFIG=/tmp/wpa.conf
 WPA_SUPPLICANT_EXIST=0
@@ -116,12 +120,11 @@ do
 done
 
 # try to find wifi config ini and parse ssid & passwd
+# write wifi test config info to tmp file for factory test could show them on screan
 
-if [  -f "$WIFI_CONFIG_FILE" ]; then
-    SSID=`awk '/SSID/{print $2}' $WIFI_CONFIG_FILE | tr -d "\r"`
-    PASSWD=`awk '/PASSWORD/{print $2}' $WIFI_CONFIG_FILE | tr -d "\r"`
-    ENP=`awk '/ENP/{print $2}' $WIFI_CONFIG_FILE | tr -d "\r"`
-
+if [ -z "$SSID" || -z "$ENP" || -z "$PASSWD" ]; then
+    echo "NOT FOUNT WIFI CONFIG FILE. USE THE DEFAULT CONFIG INFO. SSID : $TEST_WIFI ." | tee $WIFI_TEST_CONFIG_INFO
+else
     if [ -n "$SSID" ]; then
         TEST_WIFI=$SSID
     fi
@@ -137,16 +140,8 @@ if [  -f "$WIFI_CONFIG_FILE" ]; then
     fi
 
     echo "parse netword ssid is : $SSID ,password is: $PASSWD , enp is $ENP" | tee -a $FACTORY_SHELL_LOG
-fi
-
-# write wifi test config info to tmp file for factory test could show them on screan
-
-if [ -f "$WIFI_CONFIG_FILE" ]; then
     echo "DETECTED WIFI CONFIG FILE. SSID : $TEST_WIFI  PASSWORD : $PASSWD  ENP : $ENP ." | tee $WIFI_TEST_CONFIG_INFO
-else
-    echo "NOT FOUNT WIFI CONFIG FILE. USE THE DEFAULT CONFIG INFO. SSID : $TEST_WIFI ." | tee $WIFI_TEST_CONFIG_INFO
 fi
-
 
 # test wifi scan function
 

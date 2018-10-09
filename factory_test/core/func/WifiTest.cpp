@@ -420,7 +420,10 @@ void* WifiTest::test_all(void*)
 	control->set_interface_test_status(WIFI_TEST_NAME, false);
 	wifi_screen_log += "==================== wifi test ====================\n";
 	bool is_pass = false;
-	string str = execute_command("bash " + WIFI_TEST_SCRIPT);
+	FacArg* _facArg = control->get_fac_arg();
+	string cmd = "bash " + WIFI_TEST_SCRIPT + " " + _facArg->wifi_ssid
+											+ " " + _facArg->wifi_passwd + " " + _facArg->wifi_enp;
+	string str = execute_command(cmd);
     if (str == "error"){
     	LOG_ERROR("wifi init error!\n");                        
     }else {
