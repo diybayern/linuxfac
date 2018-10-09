@@ -94,7 +94,9 @@ int main(int argc, char *argv[])
        font.setPointSize(9);
     }
     a.setFont(font);
-	LOG_INFO("******************** init control ********************");
+	LOG_INFO("************************************************************");
+	LOG_INFO("******************** start factory test ********************");
+	LOG_INFO("************************************************************");
 	Control* control = Control::get_control();
 	control->init_func_test();
     control->show_main_test_ui();
