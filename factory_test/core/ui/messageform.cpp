@@ -327,6 +327,10 @@ bool MessageBox(const int mode,const QString &test_item, const QString &title,co
 
     form->setTestItem(test_item);
 
+    if (test_item == "亮度测试") {
+        form->bt_ok->setEnabled(false);
+    }
+
     int ret = form->startExec();
 
     delete form;

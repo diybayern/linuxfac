@@ -22,6 +22,7 @@ UiHandle::UiHandle()
     connect(this, SIGNAL(sig_show_sn_mac_comparison_result(QString, QString)), MainTestWindow::get_main_test_window(), SLOT(slot_show_sn_mac_comparison_result(QString, QString)));
     connect(this, SIGNAL(to_update_stress_test_pass_or_fail(QString)), MainTestWindow::get_main_test_window(), SLOT(slot_update_stress_test_pass_or_fail(QString)));
     connect(this, SIGNAL(to_update_sn_mac_state(QString,QString)), MainTestWindow::get_main_test_window(), SLOT(update_sn_mac_state(QString,QString)));
+    connect(this, SIGNAL(to_set_brightness_dialog_button_state(bool)), MainTestWindow::get_main_test_window(), SLOT(slot_set_brightness_dialog_button_state(bool)));
 }
 
 UiHandle::~UiHandle()
@@ -206,6 +207,11 @@ void UiHandle::slot_retry_sn_mac()
 void UiHandle::set_stress_test_pass_or_fail(string result)
 {
     emit to_update_stress_test_pass_or_fail(QString::fromStdString(result));
+}
+
+void UiHandle::set_brightness_dialog_button_state(bool state)
+{
+    emit to_set_brightness_dialog_button_state(state);
 }
 
 QObject* UiHandle::get_qobject(string name)

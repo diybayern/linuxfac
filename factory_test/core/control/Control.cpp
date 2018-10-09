@@ -374,6 +374,12 @@ void Control::confirm_test_result(string func)
     _uiHandle->confirm_test_result_dialog(func);
 }
 
+void Control::set_brightness_dialog_button_state(bool state)
+{
+    LOG_INFO("set_brightness_dialog_button_state");
+    _uiHandle->set_brightness_dialog_button_state(state);
+}
+
 void Control::show_main_test_ui()
 {
     _uiHandle->to_show_main_test_ui();

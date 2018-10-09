@@ -86,6 +86,10 @@ void BrightTest::bright_test_all(string bright_level)
 					+ to_string(bright_value) + "\n");
             goto error_return;
         }
+
+        if (bright_cnt == (bright_num - 1)) {
+            Control::get_control()->set_brightness_dialog_button_state(true);
+        }
 	}
     bright_set &= bright_set_mask;
     if(bright_set != bright_set_mask)

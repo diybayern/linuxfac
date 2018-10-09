@@ -129,6 +129,7 @@ public:
         static Control* _control;
     void set_test_result(string func,string result,string ui_log);
     void confirm_test_result(string func);
+    void set_brightness_dialog_button_state(bool state);
     static Control* get_control();
     void show_main_test_ui();
     void auto_test_mac_sn();

@@ -614,3 +614,12 @@ void MainTestWindow::update_stress_label_value(QString item, QString result)
     }
 
 }
+
+void MainTestWindow::slot_set_brightness_dialog_button_state(bool state)
+{
+    if (NULL != g_form) {
+        if (NULL != g_form->bt_ok) {
+            g_form->bt_ok->setEnabled(state);
+        }
+    }
+}
