@@ -66,6 +66,7 @@ void StressTestWindow::mediaPlay()
 StressTestWindow::StressTestWindow(QWidget *parent)
     : QWidget(parent)
 {
+    setWindowFlags(Qt::Window | Qt::WindowDoesNotAcceptFocus);
     if (this->objectName().isEmpty()) {
         this->setObjectName(QString::fromUtf8("StressTestWindow"));
     }
@@ -158,8 +159,8 @@ StressTestWindow::StressTestWindow(QWidget *parent)
 
     //connect and start thread
     connect(ImageTestThread::get_image_test_thread(), SIGNAL(sig_send_one_pixmap(QPixmap)), this, SLOT(slot_get_one_pixmap(QPixmap)));
-#if 0
-    connect(VideoTestThread::get_video_test_thread(), SIGNAL(sig_send_one_frame(QImage)), this, SLOT(slot_get_one_frame(QImage)));
+#if 1
+    connect(VideoTestThread::get_video_test_thread(), SIGNAL(sig_send_one_frame(QPixmap)), this, SLOT(slot_get_one_frame(QPixmap)));
 #endif
     ImageTestThread::get_image_test_thread()->start_run();
     VideoTestThread::get_video_test_thread()->start_play();
@@ -262,11 +263,13 @@ void StressTestWindow::start_exec()
 {
     show();
 }
-#if 0
-void StressTestWindow::slot_get_one_frame(QImage img)
+#if 1
+void StressTestWindow::slot_get_one_frame(QPixmap img)
 {
-    mImage = img.copy();
-    update();
+    if (NULL != _lb_video) {
+        _lb_video->setPixmap(img);
+        _lb_video->update();
+    }
 }
 #endif
 

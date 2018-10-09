@@ -65,9 +65,8 @@ private:
     bool _m_stopped;
 
 signals:
-#if 0
-    void sig_send_one_frame(QImage);
-#endif
+    void sig_send_one_frame(QPixmap img);
+
 public slots:
     void slot_finish_video_test_thread();
 };

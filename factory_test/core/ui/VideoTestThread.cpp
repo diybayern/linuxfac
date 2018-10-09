@@ -133,10 +133,11 @@ int VideoTestThread::ffmpeg_video_change_format(AVFrame* frame, int dst_w, int d
 
     QImage tmpImg((uchar *)buffer, dst_w, dst_h, QImage::Format_RGBA8888);
     QPixmap pixmap2(QPixmap::fromImage (tmpImg));
-
+    /*
     if (NULL != StressTestWindow::g_get_stress_test_window()) {
         StressTestWindow::g_get_stress_test_window()->_lb_video->setPixmap(pixmap2);
-    }
+    }*/
+    emit sig_send_one_frame(pixmap2);
 
     av_free(buffer);
     av_frame_unref(pFrameRGB);

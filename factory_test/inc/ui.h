@@ -324,8 +324,8 @@ protected:
 #endif
 
 private slots:
-    #if 0
-    void slot_get_one_frame(QImage img);
+    #if 1
+    void slot_get_one_frame(QPixmap img);
     #endif
     void slot_get_one_pixmap(QPixmap pix);
 
