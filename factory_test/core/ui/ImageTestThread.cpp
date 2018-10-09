@@ -11,8 +11,8 @@ ImageTestThread* ImageTestThread::get_image_test_thread()
 
 ImageTestThread::ImageTestThread(QThread *parent) : QThread(parent)
 {
-    this->filepath1 = "girl.jpg";
-    this->filepath2 = "car.jpg";
+    this->filepath1 = "./res/girl.jpg";
+    this->filepath2 = "./res/car.jpg";
     this->_m_stopped = false;
 }
 

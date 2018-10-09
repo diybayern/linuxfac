@@ -72,16 +72,16 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const int timeout) : Q
         lb_icon->setGeometry(QRect(20, 0, 80, 80));
 
         if (mode == Message) {
-            lb_icon->setPixmap(QPixmap("./img/message.png"));
+            lb_icon->setPixmap(QPixmap("./res/message.png"));
 
         } else if (mode == Warnning || mode == DOING) {
-            lb_icon->setPixmap(QPixmap("./img/warning.png"));
+            lb_icon->setPixmap(QPixmap("./res/warning.png"));
 
         } else if (mode == SNMAC_Error) {
-            lb_icon->setPixmap(QPixmap("./img/failure.png"));
+            lb_icon->setPixmap(QPixmap("./res/failure.png"));
 
         } else if (mode == SNMAC_Success || mode == Success) {
-            lb_icon->setPixmap(QPixmap("./img/correct.png"));
+            lb_icon->setPixmap(QPixmap("./res/correct.png"));
         }
     }
 

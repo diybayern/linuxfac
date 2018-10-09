@@ -13,7 +13,7 @@ VideoTestThread::VideoTestThread(QThread *parent) : QThread(parent)
 {
     this->_m_stopped = false;
     this->videoindex = -1;
-    this->filepath = "movie.mp4";
+    this->filepath = "./res/movie.mp4";
     this->pFormatCtx        = NULL;
     this->pCodec            = NULL;
     this->pCodecCtx         = NULL;
