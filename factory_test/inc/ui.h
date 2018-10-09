@@ -23,6 +23,7 @@
 #include "ImageTestThread.h"
 #include "messageform.h"
 #include "UiHandle.h"
+#include "fac_log.h"
 #if 0
 extern "C" {
     #include <glib.h>

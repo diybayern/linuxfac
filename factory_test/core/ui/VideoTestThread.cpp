@@ -35,21 +35,21 @@ int VideoTestThread::ffmpeg_read_stream()
     //(0) alloc storage to save the info of the video
     pFormatCtx = avformat_alloc_context();
     if (NULL == pFormatCtx) {
-        qDebug()<<"malloc format failed.";
+        LOG_ERROR("malloc format failed.");
         return _FAIL;
     }
 
     //(1) open video file
     if(avformat_open_input(&pFormatCtx,filepath,NULL,NULL)!=0)
     {
-           qDebug()<<"Couldn't open input stream.";
-           return _FAIL;
+        LOG_ERROR("Couldn't open input stream.");
+        return _FAIL;
     }
 
     //(2) to get which format of the video
     videoindex = av_find_best_stream(pFormatCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
     if (videoindex < 0) {
-        qDebug()<<"not video find in " <<filepath;
+        LOG_ERROR("not video find");
         return _FAIL;
     }
     /*		
@@ -82,14 +82,14 @@ int VideoTestThread::ffmpeg_read_stream()
 
     if(pCodec == NULL)
     {
-        qDebug()<<"Codec not found.";
+        LOG_ERROR("Codec not found.");
         return _FAIL;
     }
 
     //(4) open the decoder
     if(avcodec_open2(pCodecCtx, pCodec, NULL) < 0)
     {
-        qDebug()<<"Could not open codec.";
+        LOG_ERROR("Could not open codec.");
         return _FAIL;
     }
 
@@ -161,18 +161,18 @@ int VideoTestThread::ffmpeg_video_decode(unsigned char* buf, int size)
     ret = avcodec_decode_video2(pCodecCtx, &frame, &decoded, &pkt);
     if (ret < 0) {
         av_free_packet(&pkt);
-        qDebug()<<"avcodec_decode_video failed ret = "<<ret;
+        LOG_ERROR("avcodec_decode_video failed");
         return _FAIL;
     } else if (!decoded) {
         av_free_packet(&pkt);
-        qDebug()<<"no frame is decoded.";
+        LOG_ERROR("no frame is decoded.");
         return _FAIL;
     }
 
     ret = ffmpeg_video_change_format(&frame, sws_width, sws_height);
 
     if (_OUT == ret){
-        qDebug()<<"exit video test.";
+        LOG_ERROR("exit video test.");
     }
     return ret;
 }
@@ -235,7 +235,7 @@ void VideoTestThread::run()
 
             ret = ffmpeg_read_stream();
             if (ret == _FAIL) {
-                qDebug()<<"read ffmpeg stream fail.";
+                LOG_ERROR("read ffmpeg stream fail.");
                 break;
             }
         }
@@ -244,7 +244,7 @@ void VideoTestThread::run()
         err = av_read_frame(pFormatCtx, &pkt);
         if (err < 0) {
             if (err == AVERROR_EOF) {
-                qDebug()<<"read data end.";
+                LOG_ERROR("read data end.");
                 video_type = VIDEO_INIT;
                 continue;
             }

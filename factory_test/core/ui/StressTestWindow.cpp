@@ -170,7 +170,7 @@ StressTestWindow::StressTestWindow(QWidget *parent)
 
 StressTestWindow::~StressTestWindow()
 {
-    qDebug()<<"~StressTestWindow";
+    LOG_INFO("~StressTestWindow.");
     //gst_element_set_state (del_data.playbin, GST_STATE_NULL);
     //gst_object_unref (del_data.playbin);
 }
@@ -202,8 +202,10 @@ void StressTestWindow::finish_stress_window()
 void StressTestWindow::update_stress_test_pass_or_fail(QString result)
 {
     if (result.compare("PASS") == 0) {
+        LOG_INFO("update_stress_test_pass_or_fail PASS");
         _pm_pass_fail = _text2Pixmap(result, QColor(0, 255, 0));
     } else {
+        LOG_INFO("update_stress_test_pass_or_fail FAIL");
         _pm_pass_fail = _text2Pixmap(result, QColor(255, 0, 0));
     }
     _pm_pass_fail = _pm_pass_fail.scaled(st_w/2/2/2, (st_h - st_h/3)/2, Qt::KeepAspectRatio, Qt::SmoothTransformation);

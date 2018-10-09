@@ -217,7 +217,7 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const int timeout) : Q
 MessageForm::~MessageForm()
 {
     disconnect(this);
-    qDebug()<<"~MessageForm()";
+    LOG_INFO("~MessageForm()");
 }
 
 bool MessageForm::eventFilter(QObject *obj, QEvent *event)
