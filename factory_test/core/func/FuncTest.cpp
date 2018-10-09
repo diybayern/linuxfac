@@ -171,7 +171,7 @@ void* StressTest::test_all(void* arg)
     uihandle->update_stress_label_value("SN序列号",(control->get_hw_info())->sn);
     uihandle->update_stress_label_value("MAC地址",(control->get_hw_info())->mac);
 
-    if (control->get_is_idv()) {
+    if (baseInfo->platform == "IDV") {
         pthread_create(&pid_t2, NULL, gpu_stress_test, NULL);
     }
     
@@ -234,7 +234,7 @@ bool NextProcess::create_stress_test_lock()
     }
 }
 
-void NextProcess::next_process_handle() 
+void NextProcess::next_process_handle(BaseInfo* baseInfo) 
 {
     int next_process_f = -1;
 	UiHandle* uihandle = UiHandle::get_uihandle();
@@ -247,10 +247,12 @@ void NextProcess::next_process_handle()
     }
 
     uihandle->confirm_test_result_waiting("正在处理，请等待...");
-    next_process_f = system("bash /etc/diskstatus_mgr.bash --product-detach");
-    usleep(1000000);
 
-    LOG_INFO("bache check result value is %d\n",WEXITSTATUS(next_process_f));
+	if (baseInfo->emmc_cap != "0" && baseInfo->emmc_cap != "") {
+	    next_process_f = system("bash /etc/diskstatus_mgr.bash --product-detach");
+    	usleep(1000000);
+		LOG_INFO("bache check result value is %d\n",WEXITSTATUS(next_process_f));
+	}
     pthread_mutex_unlock(&g_next_process_lock);
 	
     if (WEXITSTATUS(next_process_f) == 0) {
@@ -272,9 +274,10 @@ void NextProcess::next_process_handle()
     return;
 }
 
-void* NextProcess::test_all(void*)
+void* NextProcess::test_all(void* arg)
 {
-	next_process_handle();
+	BaseInfo* baseInfo = (BaseInfo*)arg;
+	next_process_handle(baseInfo);
 	return NULL;
 }
 

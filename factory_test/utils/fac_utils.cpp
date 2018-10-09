@@ -220,15 +220,15 @@ int get_int_value(const string str)
     }
 }
 
-void get_baseinfo(BaseInfo* baseInfo, const string baseinfo) {
+void get_baseinfo(BaseInfo* baseInfo, const string info) {
 	map<string, string> tmap;
 	string str;
 	char buf[128] = {0};
 	int cnt = 0;
 	int idx;
-	for (unsigned int i = 0; i < baseinfo.size(); i++) {
-        if (baseinfo[i] != ';') {
-            buf[cnt++]  = baseinfo[i];
+	for (unsigned int i = 0; i < info.size(); i++) {
+        if (info[i] != ';') {
+            buf[cnt++]  = info[i];
         } else {
             buf[cnt] = '\0';
             str = string(buf);
@@ -251,6 +251,7 @@ void get_baseinfo(BaseInfo* baseInfo, const string baseinfo) {
     string usb_3 = usb.substr(0, idx);
 	string usb_t = usb.substr(idx+1, usb.length()-idx-1); 
 
+	baseInfo->platform		= tmap["PLATFORM"];
 	baseInfo->mem_cap       = tmap["MEM"];
 	baseInfo->usb_total_num = usb_t;
 	baseInfo->usb_3_num     = usb_3;

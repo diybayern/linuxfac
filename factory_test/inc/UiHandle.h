@@ -37,7 +37,9 @@ class UiHandle: public QObject
         void show_sn_mac_comparison_result(string sn_mac, string result);
         void update_sn_mac_test_result(string sn_mac, string result);
         bool get_is_complete_test() {return _is_complete_test;}
+        bool get_idv_or_vdi()   {return _is_idv;}
         void set_is_complete_test(bool category) {_is_complete_test = category;}
+        void set_is_idv_or_vdi(bool type) {_is_idv = type;}
         void set_brightness_dialog_button_state(bool state);
         int get_screen_width();
         int get_screen_height();
@@ -48,6 +50,7 @@ class UiHandle: public QObject
     private:
         static UiHandle* _ui_handle;
         bool _is_complete_test;
+        bool _is_idv;
 
     signals:
         void to_draw_main_test_window();

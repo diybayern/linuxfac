@@ -181,6 +181,10 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const int timeout) : Q
             } else {
                 bt_confirm->setText(tr("下道工序"));
             }
+
+			if (!UiHandle::get_uihandle()->get_idv_or_vdi()) {
+				bt_confirm->setText(tr("关机"));
+			}
             connect(bt_confirm, SIGNAL(clicked()), this, SLOT(proButtonConfirm()));
             connect(this, SIGNAL(sig_confirm_shut_down_or_next_process(QString)), UiHandle::get_uihandle(), SLOT(slot_confirm_shut_down_or_next_process(QString)));
 

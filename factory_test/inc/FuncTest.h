@@ -85,9 +85,9 @@ class NextProcess : public FuncBase
 {
 public:
     NextProcess();
-    static void* test_all(void*);
+    static void* test_all(void* arg);
     void start_test(BaseInfo* baseInfo);
-    static void next_process_handle();
+    static void next_process_handle(BaseInfo* baseInfo);
     static bool create_stress_test_lock();
     static void init();
 private:

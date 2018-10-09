@@ -71,7 +71,6 @@ Control::Control():QObject()
     _autoUploadLog = true;
     _mes_log_file = "";
 	_auto_upload_mes = true;
-    _is_idv = true;
 	
     init_base_info();
     init_hw_info();
@@ -96,6 +95,14 @@ void Control::init_base_info()
     string dmi = execute_command("cat " + GET_BASEINFO_INI);
 	if (dmi != "error") {
 		get_baseinfo(_baseInfo,dmi);
+		LOG_INFO("product is %s", (_baseInfo->platform).c_str());
+		if (_baseInfo->platform == "IDV") {
+			_is_idv = true;
+			LOG_INFO("idv true");
+		} else {
+			_is_idv = false;
+			LOG_INFO("vdi");
+		}
 	} else {
 		LOG_ERROR("get hwcfg.ini information error");
 	}
@@ -167,10 +174,8 @@ void Control::ui_init()
     _uiHandle->add_main_test_button(STRESS_TEST_NAME);
     _uiHandle->add_main_test_button(UPLOAD_LOG_NAME);
 
-    if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
-        if (!_whole_test_state) {
-             _uiHandle->add_main_test_button(NEXT_PROCESS_NAME);
-        }
+    if (_is_idv && !_whole_test_state) {
+    	_uiHandle->add_main_test_button(NEXT_PROCESS_NAME);
     }    
     
     if (_whole_test_state) {
@@ -179,6 +184,7 @@ void Control::ui_init()
         _uiHandle->add_complete_or_single_test_label("单板测试");
     }
 	_uiHandle->set_is_complete_test(_whole_test_state);
+	_uiHandle->set_is_idv_or_vdi(_is_idv);
 	
     _uiHandle->sync_main_test_ui();
     
@@ -207,10 +213,8 @@ void Control::ui_init()
     connect(_uiHandle->get_qobject(STRESS_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_stress_test()));
     connect(_uiHandle->get_qobject(UPLOAD_LOG_NAME), SIGNAL(clicked()), this, SLOT(start_upload_log()));
 
-	if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
-        if (!_whole_test_state) {
-    		connect(_uiHandle->get_qobject(NEXT_PROCESS_NAME), SIGNAL(clicked()), this, SLOT(start_next_process()));
-        }
+	if (_is_idv && !_whole_test_state) {
+   		connect(_uiHandle->get_qobject(NEXT_PROCESS_NAME), SIGNAL(clicked()), this, SLOT(start_next_process()));
 	}
 	connect(_uiHandle, SIGNAL(to_show_test_confirm_dialog(string)), this, SLOT(show_test_confirm_dialog(string)));
     connect(_uiHandle, SIGNAL(sig_ui_handled_test_result(string, string)), this, SLOT(set_test_result_pass_or_fail(string, string)));
@@ -287,7 +291,7 @@ void Control::show_test_confirm_dialog(string item)
 void Control::init_func_test()
 {
 	SoundTest* sound = (SoundTest*) _funcBase[SOUND];
-    sound->init();
+    sound->init(_baseInfo);
 	
 	NetTest* net = (NetTest*) _funcBase[NET];
     net->init();

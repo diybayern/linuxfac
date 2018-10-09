@@ -220,10 +220,6 @@ public:
 
     void init_func_test();
 
-    bool get_is_idv(){
-        return _is_idv;
-    }
-    
     int get_fac_config_status(){
         return _fac_config_status;
     }
@@ -277,9 +273,9 @@ private:
     bool _auto_upload_mes;
     int _interfaceRunStatus;
     string _sn_mac;
-    bool _is_idv;
     int _fac_config_status;
     bool _whole_test_state;
+    bool _is_idv;
     bool _stress_test_window_quit_status;
     bool _pcba_whole_lock_state;
     bool _lock_file_status;

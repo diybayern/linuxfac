@@ -45,7 +45,7 @@ public:
     static void* test_all(void*);
     void start_test(BaseInfo* baseInfo);
 
-    static bool init();
+    static bool init(BaseInfo* baseInfo);
 
 private:
     Control* _control;

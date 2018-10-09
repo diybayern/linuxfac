@@ -83,7 +83,8 @@ const string FAC_CONFIG_FILE      = "/tmp/fac_config.conf";
 typedef unsigned long long int uint64;
 
 struct BaseInfo {
-    BaseInfo():mem_cap(""),
+    BaseInfo():platform(""),
+        mem_cap(""),
         usb_total_num(""),
         usb_3_num(""),
         cpu_type(""),
@@ -99,7 +100,8 @@ struct BaseInfo {
         lcd_info("")
         {
         }
-        
+
+    string platform;
     string mem_cap;
     string usb_total_num;
     string usb_3_num;

@@ -455,7 +455,7 @@ bool SoundTest::stop_playback()
     return true;
 }
 
-bool SoundTest::init()
+bool SoundTest::init(BaseInfo* baseInfo)
 {
     g_record_info = (SndInfo *) malloc(sizeof(SndInfo));
     if (!g_record_info) {
@@ -487,7 +487,7 @@ bool SoundTest::init()
     g_playback_info->card           = DEFAULT_CARD_NAME;
 	
 
-    if (Control::get_control()->get_is_idv()) {
+    if (baseInfo->platform == "IDV") {
         if (system("if pulseaudio --check; then pulseaudio -k; else touch /tmp/no_pulseaudio; fi") < 0) {
             LOG_ERROR("pulseaudio -k error\n");
             return false;
@@ -533,7 +533,6 @@ void* SoundTest::test_all(void*)
 void SoundTest::start_test(BaseInfo* baseInfo)
 {	
     pthread_t tid;
-	init();
     pthread_create(&tid,NULL,test_all,baseInfo);
 }
 
