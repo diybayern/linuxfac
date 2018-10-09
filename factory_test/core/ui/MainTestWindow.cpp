@@ -623,3 +623,8 @@ void MainTestWindow::slot_set_brightness_dialog_button_state(bool state)
         }
     }
 }
+
+void MainTestWindow::slot_recv_result_from_scangun()
+{
+    QTimer::singleShot(1000, this, SLOT(compute_result()));
+}

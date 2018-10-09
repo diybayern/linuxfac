@@ -208,6 +208,8 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const int timeout) : Q
 
         }
     }
+    connect(this, SIGNAL(sig_send_result_from_scangun()), MainTestWindow::get_main_test_window(), SLOT(slot_recv_result_from_scangun()));
+
     this->timeout = timeout;
     timerId = 0;
 }
@@ -227,7 +229,8 @@ bool MessageForm::eventFilter(QObject *obj, QEvent *event)
         {
             QString str = le_snmac->text();
             g_sn_mac_message = str;
-            QTimer::singleShot(1000, MainTestWindow::get_main_test_window(), SLOT(compute_result()));
+            //QTimer::singleShot(1000, MainTestWindow::get_main_test_window(), SLOT(compute_result()));
+            emit sig_send_result_from_scangun();
             return true;
         }
     }
@@ -239,11 +242,9 @@ void MessageForm::timerEvent(QTimerEvent *evt)
 {
     if (evt->timerId() == timerId)
     {
-        if (g_mode != SNMAC) {
+        killTimer(timerId);
+        accept();
 
-            killTimer(timerId);
-            accept();
-        }
         emit sig_send_sn_mac_test_result(_m_test_item, _m_snmac_state);
     }
 }

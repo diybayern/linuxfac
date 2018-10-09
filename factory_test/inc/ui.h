@@ -249,7 +249,8 @@ class MainTestWindow : public QDialog
         void slot_update_stress_test_pass_or_fail(QString result);
         void update_sn_mac_state(QString sn_mac, QString result);
         void slot_set_brightness_dialog_button_state(bool state);
-
+		void slot_recv_result_from_scangun();
+		
     private slots:
         void on_state_changed(int state);
         void _record_play_audio();

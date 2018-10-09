@@ -160,11 +160,11 @@ int VideoTestThread::ffmpeg_video_decode(unsigned char* buf, int size)
 
     ret = avcodec_decode_video2(pCodecCtx, &frame, &decoded, &pkt);
     if (ret < 0) {
-	av_free_packet(&pkt);
+        av_free_packet(&pkt);
         qDebug()<<"avcodec_decode_video failed ret = "<<ret;
         return _FAIL;
     } else if (!decoded) {
-	av_free_packet(&pkt);
+        av_free_packet(&pkt);
         qDebug()<<"no frame is decoded.";
         return _FAIL;
     }

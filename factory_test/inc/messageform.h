@@ -49,6 +49,7 @@ signals:
     void sig_send_sn_mac_test_result(QString snmac, QString result);
     void sig_confirm_shut_down_or_next_process(QString process);
     void sig_retry_sn_mac_test();
+    void sig_send_result_from_scangun();
 
 private slots:
     void proButtonOK();
