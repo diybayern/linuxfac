@@ -47,12 +47,12 @@ int VideoTestThread::ffmpeg_read_stream()
     }
 
     //(2) to get which format of the video
-    /*
     videoindex = av_find_best_stream(pFormatCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
     if (videoindex < 0) {
         qDebug()<<"not video find in " <<filepath;
         return _FAIL;
-    }*/
+    }
+    /*		
     if(avformat_find_stream_info(pFormatCtx,NULL)<0)
     {
         printf("Couldn't find stream information.\n");
@@ -73,7 +73,7 @@ int VideoTestThread::ffmpeg_read_stream()
     {
         printf("Didn't find a video stream.\n");
         return _FAIL;
-    }
+    }*/
 
     //(3) to find the decoder
     pCodecCtx = pFormatCtx->streams[videoindex]->codec;
