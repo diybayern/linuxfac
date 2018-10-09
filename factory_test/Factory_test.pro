@@ -17,16 +17,11 @@ SOURCES += main.cpp\
     core/func/BrightTest.cpp \
     core/func/CameraTest.cpp \
     core/func/EdidTest.cpp \
-    core/func/FanTest.cpp \
-    core/func/FuncBase.cpp \
     core/func/FuncTest.cpp \
     core/func/HddTest.cpp \
     core/func/MemTest.cpp \
     core/func/NetTest.cpp \
-    core/func/NextProcess.cpp \
     core/func/SoundTest.cpp \
-    core/func/StressTest.cpp \
-    core/func/UploadMes.cpp \
     core/func/UsbTest.cpp \
     core/func/WifiTest.cpp \
     core/func/i2c.cpp \
@@ -54,7 +49,6 @@ HEADERS  += \
     inc/NetTest.h \
     inc/SoundTest.h \
     inc/ui.h \
-    inc/UploadMes.h \
     inc/WifiTest.h \
     inc/BrightTest.h \
     inc/CameraTest.h \
