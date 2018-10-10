@@ -62,10 +62,12 @@ bool NetTest::net_get_eth_name(char* eth_name, int size)
     ifreq = (struct ifreq*) buf;
     num = ifconf.ifc_len / sizeof(struct ifreq);
 
-    //TODO:eth_name?? 
+    //TODO:eth_name 
     for (i = 0; i < num; i++) {
     	LOG_INFO("net card name %s\n", ifreq->ifr_name);
-        strncpy(eth_name, ifreq->ifr_name, size);
+    	if (strncmp("eth", ifreq->ifr_name, 3) == 0 || strncmp("br", ifreq->ifr_name, 2) == 0) {
+     	   strncpy(eth_name, ifreq->ifr_name, size);
+   		}
 
     	ifreq++;
     }
