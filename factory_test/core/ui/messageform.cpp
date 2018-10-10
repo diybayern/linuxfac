@@ -2,9 +2,8 @@
 
 QPointer<MessageForm> g_form = NULL;
 QString g_sn_mac_message;
-static int g_mode = 0;
 
-MessageForm::MessageForm(QWidget *parent, const int mode, const int timeout) : QDialog(parent)
+MessageForm::MessageForm(QWidget *parent, const int mode, const QString button, const int timeout) : QDialog(parent)
 {
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
     setWindowModality(Qt::ApplicationModal);
@@ -176,15 +175,7 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const int timeout) : Q
             bt_confirm->setObjectName(QString::fromUtf8("bt_confirm"));
             bt_confirm->setGeometry(QRect(150, 150, 100, 40));
             bt_confirm->setFont(font);
-            if (UiHandle::get_uihandle()->get_is_complete_test()) {
-                bt_confirm->setText(tr("关机"));
-            } else {
-                bt_confirm->setText(tr("下道工序"));
-            }
-
-			if (!UiHandle::get_uihandle()->get_idv_or_vdi()) {
-				bt_confirm->setText(tr("关机"));
-			}
+            bt_confirm->setText(button);
             connect(bt_confirm, SIGNAL(clicked()), this, SLOT(proButtonConfirm()));
             connect(this, SIGNAL(sig_confirm_shut_down_or_next_process(QString)), UiHandle::get_uihandle(), SLOT(slot_confirm_shut_down_or_next_process(QString)));
 
@@ -302,19 +293,18 @@ int MessageForm::startExec()
     return exec();
 }
 
-bool MessageBox(const int mode,const QString &test_item, const QString &title,const QString &text,const int timeout)
+bool MessageBox(const int mode, const QString &test_item, const QString &title, const QString &text, const QString &button, const int timeout)
 {
 
     int timeoutTemp = timeout;
 
-    g_mode = mode;
     if (g_form != NULL)
     {
         delete g_form;
         g_form = NULL;
     }
 
-    QPointer<MessageForm> form = new MessageForm(NULL, mode, timeoutTemp);
+    QPointer<MessageForm> form = new MessageForm(NULL, mode, button, timeoutTemp);
     g_form = form;
 
     form->setTitle(title);

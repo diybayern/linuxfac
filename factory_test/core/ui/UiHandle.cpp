@@ -13,7 +13,7 @@ UiHandle::UiHandle()
 	connect(this, SIGNAL(to_confirm_test_result_dialog(QString)), MainTestWindow::get_main_test_window(), SLOT(confirm_test_result_dialog(QString)));  
     connect(this, SIGNAL(to_start_audio_progress_dialog()), MainTestWindow::get_main_test_window(), SLOT(start_audio_progress_dialog()));
     connect(this, SIGNAL(to_confirm_test_result_warning(QString)), MainTestWindow::get_main_test_window(), SLOT(confirm_test_result_warning(QString)));
-    connect(this, SIGNAL(to_confirm_test_result_success(QString)), MainTestWindow::get_main_test_window(), SLOT(confirm_test_result_success(QString)));
+    connect(this, SIGNAL(to_confirm_test_result_success(QString, QString)), MainTestWindow::get_main_test_window(), SLOT(confirm_test_result_success(QString, QString)));
     connect(this, SIGNAL(to_confirm_test_result_waiting(QString)), MainTestWindow::get_main_test_window(), SLOT(confirm_test_result_waiting(QString)));
     connect(this, SIGNAL(sig_set_interface_test_state(int)), MainTestWindow::get_main_test_window(), SLOT(slot_set_interface_test_state(int)));
     connect(MainTestWindow::get_main_test_window(), SIGNAL(to_quit_test_window(QString)), this, SLOT(quit_test_window(QString)));
@@ -83,9 +83,9 @@ void UiHandle::confirm_test_result_warning(string title)
     emit to_confirm_test_result_warning(QString::fromStdString(title));
 }
 
-void UiHandle::confirm_test_result_success(string title)
+void UiHandle::confirm_test_result_success(string title, string process)
 {
-    emit to_confirm_test_result_success(QString::fromStdString(title));
+    emit to_confirm_test_result_success(QString::fromStdString(title), QString::fromStdString(process));
 }
 
 void UiHandle::confirm_test_result_waiting(string title)

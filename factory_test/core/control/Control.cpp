@@ -98,10 +98,8 @@ void Control::init_base_info()
 		LOG_INFO("product is %s", (_baseInfo->platform).c_str());
 		if (_baseInfo->platform == "IDV") {
 			_is_idv = true;
-			LOG_INFO("idv true");
 		} else {
 			_is_idv = false;
-			LOG_INFO("vdi");
 		}
 	} else {
 		LOG_ERROR("get hwcfg.ini information error");
@@ -183,8 +181,6 @@ void Control::ui_init()
     } else {
         _uiHandle->add_complete_or_single_test_label("单板测试");
     }
-	_uiHandle->set_is_complete_test(_whole_test_state);
-	_uiHandle->set_is_idv_or_vdi(_is_idv);
 	
     _uiHandle->sync_main_test_ui();
     
@@ -540,8 +536,12 @@ void Control::upload_mes_log() {
         response = response_to_chinese(response);
         LOG_INFO("upload %s",response);
 		if (!strcmp(response,"上传成功")) {
-			_uiHandle->confirm_test_result_success("upload success");
-			set_test_result(UPLOAD_LOG_NAME,"PASS",response);
+            if (_whole_test_state) {
+                _uiHandle->confirm_test_result_success("upload success", "关机");
+            } else {
+                _uiHandle->confirm_test_result_success("upload success", "下道工序");
+            }
+            set_test_result(UPLOAD_LOG_NAME,"PASS",response);
 		} else {
 			_uiHandle->confirm_test_result_warning("upload fail");
 			set_test_result(UPLOAD_LOG_NAME,"FAIL",response);

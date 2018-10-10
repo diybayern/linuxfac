@@ -20,7 +20,7 @@ class UiHandle: public QObject
         void add_stress_test_label(string item);
         void confirm_test_result_dialog(string title);
         void confirm_test_result_warning(string title);
-        void confirm_test_result_success(string title);
+        void confirm_test_result_success(string title, string process);
         void confirm_test_result_waiting(string title);
         void set_test_result(string item, string result);
         void set_stress_test_pass_or_fail(string result);
@@ -36,10 +36,6 @@ class UiHandle: public QObject
         void ui_set_interface_test_state(int state);
         void show_sn_mac_comparison_result(string sn_mac, string result);
         void update_sn_mac_test_result(string sn_mac, string result);
-        bool get_is_complete_test() {return _is_complete_test;}
-        bool get_idv_or_vdi()   {return _is_idv;}
-        void set_is_complete_test(bool category) {_is_complete_test = category;}
-        void set_is_idv_or_vdi(bool type) {_is_idv = type;}
         void set_brightness_dialog_button_state(bool state);
         int get_screen_width();
         int get_screen_height();
@@ -49,8 +45,6 @@ class UiHandle: public QObject
 
     private:
         static UiHandle* _ui_handle;
-        bool _is_complete_test;
-        bool _is_idv;
 
     signals:
         void to_draw_main_test_window();
@@ -64,7 +58,7 @@ class UiHandle: public QObject
         void to_confirm_test_result_dialog(QString title);
         void to_start_audio_progress_dialog();
         void to_confirm_test_result_warning(QString title);
-        void to_confirm_test_result_success(QString title);
+        void to_confirm_test_result_success(QString title, QString process);
         void to_confirm_test_result_waiting(QString title);
         void to_show_test_confirm_dialog(string item);
         void sig_ui_handled_test_result(string test_item, string result);

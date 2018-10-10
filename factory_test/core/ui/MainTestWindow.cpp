@@ -70,27 +70,27 @@ void MainTestWindow::add_complete_or_single_test_label(QString config)
 
 void MainTestWindow::confirm_test_result_dialog(QString title)
 {	
-    MessageBox(MessageForm::Message, title, title + "结果确认", "请确认"+title+"结果是PASS 还是 FAIL", 0);
+    MessageBox(MessageForm::Message, title, title + "结果确认", "请确认"+title+"结果是PASS 还是 FAIL", "", 0);
 }
 
 void MainTestWindow::confirm_test_result_warning(QString title)
 {
-    MessageBox(MessageForm::Warnning, title, "警告", title, 0);
+    MessageBox(MessageForm::Warnning, title, "警告", title, "", 0);
 }
 
-void MainTestWindow::confirm_test_result_success(QString title)
+void MainTestWindow::confirm_test_result_success(QString title, QString process)
 {
-    MessageBox(MessageForm::Success, title, "提示", title, 0);
+    MessageBox(MessageForm::Success, title, "提示", title, process, 0);
 }
 
 void MainTestWindow::show_sn_mac_message_box(QString sn_mac)
 {
-    MessageBox(MessageForm::SNMAC, sn_mac,  sn_mac + "测试", sn_mac, 0);
+    MessageBox(MessageForm::SNMAC, sn_mac,  sn_mac + "测试", sn_mac, "", 0);
 }
 
 void MainTestWindow::confirm_test_result_waiting(QString title)
 {
-    MessageBox(MessageForm::DOING, title,  "提示", title, 0);
+    MessageBox(MessageForm::DOING, title,  "提示", title, "", 0);
 }
 
 void MainTestWindow::get_result_string(QString func, QString result)
@@ -594,10 +594,10 @@ void MainTestWindow::slot_set_interface_test_state(int state)
 void MainTestWindow::slot_show_sn_mac_comparison_result(QString sn_mac, QString result)
 {
     if (result.compare("PASS") == 0) {
-        MessageBox(MessageForm::SNMAC_Success, sn_mac, "扫描成功", sn_mac + "比对成功", 1000);
+        MessageBox(MessageForm::SNMAC_Success, sn_mac, "扫描成功", sn_mac + "比对成功", "", 1000);
 
     } else {
-        MessageBox(MessageForm::SNMAC_Error, sn_mac, "警告", sn_mac + "比对失败,请重试！", 0);
+        MessageBox(MessageForm::SNMAC_Error, sn_mac, "警告", sn_mac + "比对失败,请重试！", "", 0);
 
     }
 }

@@ -29,7 +29,7 @@ public:
         Success,
         NOICON
     };
-    MessageForm(QWidget *parent = 0,const int mode=0,const int timeout = 0);
+    MessageForm(QWidget *parent = 0,const int mode=0, const QString button=0, const int timeout = 0);
     ~MessageForm();
     int startExec();
 
@@ -98,6 +98,6 @@ private:
 
 extern QString g_sn_mac_message;
 extern QPointer<MessageForm> g_form;
-extern bool MessageBox(const int mode,const QString &test_item, const QString &title,const QString &text,const int timeout);
+extern bool MessageBox(const int mode, const QString &test_item, const QString &title, const QString &text, const QString &button, const int timeout);
 
 #endif // MESSAGEFORM_H
