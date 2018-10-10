@@ -75,6 +75,8 @@ public:
     void start_test(BaseInfo* baseInfo);
     static void* gpu_stress_test(void* arg);
     static void* camera_stress_test(void*);
+    static bool start_cpuburn_stress();
+    static void stop_cpuburn_stress();
 
 private:
     Control* _control;

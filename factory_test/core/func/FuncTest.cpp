@@ -105,6 +105,46 @@ void* StressTest::camera_stress_test(void* arg)
 	return NULL;
 }
 
+bool StressTest::start_cpuburn_stress()
+{
+	string result;
+	int ret;
+	int processornum = 0;
+
+	result = execute_command("cat /proc/cpuinfo| grep \"processor\"| wc -l");
+	if (result != "error") {
+		LOG_ERROR("cpuprocessor num is %s\n", result.c_str());
+		processornum = strtoul(result.c_str(), NULL, 16);
+	}
+
+    stop_cpuburn_stress();
+
+    if (processornum > 32) processornum = 32;
+    while(processornum-- > 0) {
+        char cmd_burn[CMD_BUF_SIZE];
+        memset(cmd_burn, 0, CMD_BUF_SIZE);
+        sprintf (cmd_burn,"taskset 0x%d burnP6 &",(1<<(processornum)));
+        LOG_ERROR("cmd:%s\n",cmd_burn);
+        ret = system(cmd_burn);
+ 
+        if (ret < 0) {
+            LOG_ERROR("cmd run \"burnP6 &\" error!!!\n");
+            return false;
+        }
+	}
+	return true;
+}
+
+void StressTest::stop_cpuburn_stress()
+{
+	int ret;
+	ret = system("killall burnP6");
+	if (ret < 0) {
+		LOG_ERROR("cmd run \"killall burnP6\" error!!!\n");
+	}
+}
+
+
 void* StressTest::test_all(void* arg)
 {
 	BaseInfo* baseInfo = (BaseInfo*)arg;
@@ -173,13 +213,17 @@ void* StressTest::test_all(void* arg)
 
     if (baseInfo->platform == "IDV") {
         pthread_create(&pid_t2, NULL, gpu_stress_test, NULL);
+		start_cpuburn_stress();
     }
     
     get_current_open_time(&init_time);
     while(true)
     {
         if (!control->is_stress_test_window_quit_safely()) {
-            stop_gpu_stress_test();
+            if (baseInfo->platform == "IDV") {
+				stop_gpu_stress_test();
+				stop_cpuburn_stress();
+            }
 			if (get_int_value(baseInfo->camera_exist) == 1) {
 				camera->close_xawtv_window();
 			}
