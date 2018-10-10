@@ -1,5 +1,4 @@
 #include "../../inc/ui.h"
-#include "../../inc/messageform.h"
 
 MainTestWindow::MainTestWindow(QWidget *parent)
         : QDialog(parent)
@@ -123,6 +122,12 @@ void MainTestWindow::add_interface_test_button(QString item)
     InterfaceTestItem listitem;
     listitem.itemname = item;
     _interface_test_list.append(listitem);
+}
+
+void MainTestWindow::closeEvent(QCloseEvent *event)
+{
+    emit sig_factory_delete_event();
+    event->accept();
 }
 
 void MainTestWindow::add_main_label(QString item, QString result)

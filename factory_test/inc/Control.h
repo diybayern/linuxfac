@@ -299,6 +299,7 @@ public slots:
     void check_sn_mac_compare_result(string message);
     void confirm_shut_down_or_next_process(string process);
     void retry_sn_mac_test();
+    void slot_factory_delete_event();
 };
 
 #endif // CONTROL_H

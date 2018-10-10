@@ -72,6 +72,7 @@ class UiHandle: public QObject
         void sig_ui_retry_sn_mac();
         void to_update_sn_mac_state(QString sn_mac, QString result);
         void to_set_brightness_dialog_button_state(bool state);
+        void sig_ui_factory_delete_event();
 
     public slots:
         void quit_test_window(QString item);
@@ -81,6 +82,7 @@ class UiHandle: public QObject
         void slot_get_message_from_scangun(QString message);
         void slot_confirm_shut_down_or_next_process(QString process);
         void slot_retry_sn_mac();
+        void slot_factory_delete_event();
 };
 
 

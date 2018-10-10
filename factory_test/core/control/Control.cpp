@@ -219,6 +219,7 @@ void Control::ui_init()
     connect(_uiHandle, SIGNAL(sig_ui_get_message_from_scangun(string)), this, SLOT(check_sn_mac_compare_result(string)));
     connect(_uiHandle, SIGNAL(sig_ui_confirm_shut_down_or_next_process(string)), this, SLOT(confirm_shut_down_or_next_process(string)));
     connect(_uiHandle, SIGNAL(sig_ui_retry_sn_mac()), this, SLOT(retry_sn_mac_test()));
+    connect(_uiHandle, SIGNAL(sig_ui_factory_delete_event()), this, SLOT(slot_factory_delete_event()));
 }
 
 void Control::retry_sn_mac_test()
@@ -826,6 +827,11 @@ void Control::set_sn_mac_test_result(string sn_mac, string result)
 bool Control::is_stress_test_window_quit_safely()
 {
     return _stress_test_window_quit_status;
+}
+
+void Control::slot_factory_delete_event()
+{
+    factory_delete_event();
 }
 
 bool Control::factory_delete_event()

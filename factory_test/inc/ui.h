@@ -222,11 +222,14 @@ class MainTestWindow : public QDialog
         QPushButton* _get_interface_test_button();
         QList<InterfaceTestItemPri> if_test_pri_list;
         void _set_interface_test_item_enable(bool state);
+    protected:
+        void closeEvent(QCloseEvent *event);
 
     signals:
         void to_quit_test_window(QString item);
         void sig_check_state_changed(QString item, bool state);
         void sig_get_message_from_scangun(QString message);
+        void sig_factory_delete_event();
 
     public slots:
         void draw_main_test_window();
