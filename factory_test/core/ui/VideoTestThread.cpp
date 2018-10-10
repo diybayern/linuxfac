@@ -80,12 +80,6 @@ int VideoTestThread::ffmpeg_read_stream()
     pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
     pCodecCtx->codec_id = pCodec->id;
 
-    if(pCodec == NULL)
-    {
-        LOG_ERROR("Codec not found.");
-        return _FAIL;
-    }
-
     //(4) open the decoder
     if(avcodec_open2(pCodecCtx, pCodec, NULL) < 0)
     {
