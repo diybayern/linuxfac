@@ -15,6 +15,97 @@ MainTestWindow::~MainTestWindow()
         delete _main_test_window;
         _main_test_window = NULL;
     }
+
+    if (NULL != _grid_main_label_layout) {
+       delete _grid_main_label_layout;
+        _grid_main_label_layout = NULL;
+    }
+
+    if (NULL != _hbox_main_label_layout) {
+       delete _hbox_main_label_layout;
+        _hbox_main_label_layout = NULL;
+    }
+
+    if (NULL != _grid_main_test_layout) {
+       delete _grid_main_test_layout;
+        _grid_main_test_layout = NULL;
+    }
+
+    if (NULL != _vbox_main_test_layout) {
+       delete _vbox_main_test_layout;
+        _vbox_main_test_layout = NULL;
+    }
+
+    if (NULL != _hbox_main_test_layout) {
+       delete _hbox_main_test_layout;
+        _hbox_main_test_layout = NULL;
+    }
+
+    if (NULL != _lineedit_test_count) {
+       delete _lineedit_test_count;
+        _lineedit_test_count = NULL;
+    }
+
+    if (NULL != _checkbox_auto_upload_log) {
+       delete _checkbox_auto_upload_log;
+        _checkbox_auto_upload_log = NULL;
+    }
+
+    if (NULL != _lab_test_count) {
+       delete _lab_test_count;
+        _lab_test_count = NULL;
+    }
+
+    if (NULL != _hbox_test_count_layout) {
+       delete _hbox_test_count_layout;
+        _hbox_test_count_layout = NULL;
+    }
+
+    if (NULL != _hbox_checkbox_auto_upload_log) {
+       delete _hbox_checkbox_auto_upload_log;
+        _hbox_checkbox_auto_upload_log = NULL;
+    }
+
+    if (NULL != _vbox_test_count_auto_upload_layout) {
+       delete _vbox_test_count_auto_upload_layout;
+        _vbox_test_count_auto_upload_layout = NULL;
+    }
+
+    if (NULL != _hbox_bottom_left_layout) {
+       delete _hbox_bottom_left_layout;
+        _hbox_bottom_left_layout = NULL;
+    }
+
+    if (NULL != _editInfo) {
+       delete _editInfo;
+        _editInfo = NULL;
+    }
+
+    if (NULL != _vbox_screenlog_layout) {
+       delete _vbox_screenlog_layout;
+        _vbox_screenlog_layout = NULL;
+    }
+
+    if (NULL != _vbox_function_layout) {
+       delete _vbox_function_layout;
+        _vbox_function_layout = NULL;
+    }
+
+    if (NULL != _grid_main_test_window_layout) {
+       delete _grid_main_test_window_layout;
+        _grid_main_test_window_layout = NULL;
+    }
+
+    if (NULL != _spilter_line) {
+       delete _spilter_line;
+        _spilter_line = NULL;
+    }
+
+    if (NULL != _lab_complete_or_single_test) {
+       delete _lab_complete_or_single_test;
+        _lab_complete_or_single_test = NULL;
+    }
+
     LOG_INFO("Exit new Factory test!!!!!!");
 }
 
