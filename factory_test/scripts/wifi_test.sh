@@ -122,7 +122,7 @@ done
 # try to find wifi config ini and parse ssid & passwd
 # write wifi test config info to tmp file for factory test could show them on screan
 
-if [ -z "$SSID" || -z "$ENP" || -z "$PASSWD" ]; then
+if [[ -z "$SSID" || -z "$ENP" || -z "$PASSWD" ]]; then
     echo "NOT FOUNT WIFI CONFIG FILE. USE THE DEFAULT CONFIG INFO. SSID : $TEST_WIFI ." | tee $WIFI_TEST_CONFIG_INFO
 else
     if [ -n "$SSID" ]; then
