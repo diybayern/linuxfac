@@ -550,7 +550,7 @@ void Control::upload_mes_log() {
         response = response_to_chinese(response);
         LOG_INFO("upload %s",response);
 		if (!strcmp(response,"上传成功")) {
-            if (_whole_test_state) {
+            if (_whole_test_state || !_is_idv) {
                 _uiHandle->confirm_test_result_success("upload success", "关机");
             } else {
                 _uiHandle->confirm_test_result_success("upload success", "下道工序");
@@ -827,4 +827,17 @@ bool Control::is_stress_test_window_quit_safely()
 {
     return _stress_test_window_quit_status;
 }
+
+bool Control::factory_delete_event()
+{
+    LOG_INFO("factory test delete_event occurred.\n");
+	SoundTest* sound = (SoundTest*) _funcBase[SOUND];
+	bool ret = sound->sound_record_restore(_baseInfo);
+	if (ret) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 

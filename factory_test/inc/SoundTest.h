@@ -46,6 +46,7 @@ public:
     void start_test(BaseInfo* baseInfo);
 
     static bool init(BaseInfo* baseInfo);
+    static bool sound_record_restore(BaseInfo* baseInfo);
 
 private:
     static bool open_sound_card(SndInfo *info);
