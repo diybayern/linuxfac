@@ -834,16 +834,11 @@ void Control::slot_factory_delete_event()
     factory_delete_event();
 }
 
-bool Control::factory_delete_event()
+void Control::factory_delete_event()
 {
     LOG_INFO("factory test delete_event occurred.\n");
 	SoundTest* sound = (SoundTest*) _funcBase[SOUND];
-	bool ret = sound->sound_record_restore(_baseInfo);
-	if (ret) {
-		return true;
-	} else {
-		return false;
-	}
+	sound->sound_record_restore(_baseInfo);
 }
 
 

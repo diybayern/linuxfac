@@ -539,7 +539,7 @@ void SoundTest::start_test(BaseInfo* baseInfo)
 bool SoundTest::sound_record_restore(BaseInfo* baseInfo)
 {
     if (baseInfo->platform == "IDV") {
-        if (system("if ! -f /tmp/no_pulseaudio; then pulseaudio --start --log-target=syslog &; else rm -f /tmp/no_pulseaudio; fi") < 0) {
+        if (system("if [ ! -f /tmp/no_pulseaudio ]; then pulseaudio --start --log-target=syslog; else rm -f /tmp/no_pulseaudio; fi") < 0) {
             LOG_ERROR("pulseaudio --start error\n");
             return false;
         }

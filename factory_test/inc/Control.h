@@ -142,7 +142,7 @@ public:
     int get_screen_width();
     bool is_stress_test_window_quit_safely();
     int get_test_step();
-    bool factory_delete_event();
+    void factory_delete_event();
 
     UiHandle* get_ui_handle() {
         return _uiHandle;
