@@ -43,17 +43,6 @@ bool NetTest::net_get_eth_name(char* eth_name, int size)
         return false;
     }
 
-	strcpy(eth_name, "br0");
-#if 0    // set default value
-    if (is_product_idv(global_product_id)
-        || (global_product_id == PRODUCT_RAIN100V2_V1_32)
-        || (global_product_id == PRODUCT_RAIN200PRO_EXAM)
-        || (global_product_id == PRODUCT_RAIN200PRO_EXAM_V1_20) ) {
-        strcpy(eth_name, "br0");
-    } else {
-        strcpy(eth_name, "eth0");
-    }
-#endif
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
         LOG_ERROR("create socket failed\n");
@@ -73,19 +62,12 @@ bool NetTest::net_get_eth_name(char* eth_name, int size)
     ifreq = (struct ifreq*) buf;
     num = ifconf.ifc_len / sizeof(struct ifreq);
 
+    //TODO:eth_name?? 
     for (i = 0; i < num; i++) {
     	LOG_INFO("net card name %s\n", ifreq->ifr_name);
-    	if (strncmp("eth", ifreq->ifr_name, 3) == 0) {
-     	   strncpy(eth_name, ifreq->ifr_name, size);
-    	} else if (strncmp("br", ifreq->ifr_name, 2) == 0) {
-            /**
-             * Rain200Pro-Exam has the eth name beginning with 'br'.
-             * real ethernet card ethN is bridged to brN.
-             */
-        	strncpy(eth_name, ifreq->ifr_name, size);
-   		}
+        strncpy(eth_name, ifreq->ifr_name, size);
 
-    ifreq++;
+    	ifreq++;
     }
 
     close(fd);
