@@ -16,7 +16,7 @@
 #include "FuncBase.h"
 #include "UiHandle.h"
 
-#define   FUNC_TYPE_NUM     (14)
+#define   FUNC_TYPE_NUM     (15)
 
 enum FuncType
 {
@@ -33,7 +33,8 @@ enum FuncType
     BRIGHT,
     CAMERA,
     STRESS,
-    NEXT_PROCESS
+    NEXT_PROCESS,
+    UPLOAD_MES_LOG,
 };
 
 enum InterfaceRunStatus

@@ -79,6 +79,14 @@ public:
     static void init();
 };
 
+class UploadMesLog : public FuncBase
+{
+public:
+    UploadMesLog();
+    static void* test_all(void *);
+    void start_test(BaseInfo* baseInfo);
+};
+
 class InterfaceTest : public FuncBase
 {
 public:

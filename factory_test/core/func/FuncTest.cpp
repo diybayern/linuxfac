@@ -249,7 +249,7 @@ void* StressTest::test_all(void* arg)
         uihandle->update_stress_label_value("Cpu",get_cpu_info(&st_cpu));
 
         sleep(1);
-    }	
+    }	
 	return NULL;
 }
 
@@ -333,6 +333,23 @@ void NextProcess::start_test(BaseInfo* baseInfo)
 
 void NextProcess::init(){
     pthread_mutex_init(&g_next_process_lock, NULL);
+}
+
+UploadMesLog::UploadMesLog()
+{
+}
+
+void UploadMesLog::start_test(BaseInfo* baseInfo)
+{
+    pthread_t tid;
+    pthread_create(&tid,NULL,test_all,baseInfo);
+}
+
+void* UploadMesLog::test_all(void *)
+{
+    Control *control = Control::get_control();
+    control->upload_mes_log();
+    return NULL;
 }
 
 InterfaceTest::InterfaceTest()

@@ -19,6 +19,7 @@ Control::Control():QObject()
     _funcBase[CAMERA]       = new CameraTest();
     _funcBase[STRESS]       = new StressTest();
     _funcBase[NEXT_PROCESS] = new NextProcess();
+    _funcBase[UPLOAD_MES_LOG] = new UploadMesLog();
     
     _uiHandle               = UiHandle::get_uihandle();
 
@@ -362,7 +363,7 @@ void Control::start_next_process()
 void Control::start_upload_log()
 {
 	LOG_INFO("******************** start upload log ********************");
-    upload_mes_log();
+    _funcBase[UPLOAD_MES_LOG]->start_test(_baseInfo);
 }
 
 
@@ -546,7 +547,8 @@ void Control::upload_mes_log() {
 		upload_log += "ftp path:\t\t" + (string)_facArg->ftp_dest_path + "\n";
 		update_screen_log(upload_log);
 
-		//_uiHandle->confirm_test_result_waiting("upload log ...");
+        _uiHandle->confirm_test_result_waiting("upload log ...");
+        sleep(1);
         char* response = ftp_send_file(MES_FILE,_facArg);
         response = response_to_chinese(response);
         LOG_INFO("upload %s",response);
