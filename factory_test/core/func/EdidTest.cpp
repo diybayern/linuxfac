@@ -209,7 +209,7 @@ error:
     LOG_INFO("\tparse edid : \t\t\t\t%s\n", PRINT_RESULT(parse_ret));
 
 print:
-	LOG_INFO("\nedid test result: \t\t\t\t%s\n", PRINT_RESULT1(ret));
+	LOG_INFO("edid test result: \t\t\t\t%s\n", PRINT_RESULT1(ret));
 	return ret;
 }
 

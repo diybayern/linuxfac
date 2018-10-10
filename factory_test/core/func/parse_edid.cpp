@@ -74,6 +74,7 @@ int parseedid() {
 	int idx;
 	byte sum = 0;
 	char modelname[13];
+	char modetmp[128];
 	//int ptm;
 //	int compsync = 0;
 	int hres;
@@ -208,8 +209,6 @@ int parseedid() {
 			hblank = edid[i+3] + ((edid[i+4] & 0x0f) << 8);
 			vactive = edid[i+5] + ((edid[i+7] & 0xf0) << 4);
 			vblank = edid[i+6] + ((edid[i+7] & 0x0f) << 8);
-
-			//printf("\tModeline \t\"%dx%d\" ", hactive, vactive);
 			
 			pixclk = (edid[i+1] << 8) | (edid[i]);
 
@@ -224,18 +223,22 @@ int parseedid() {
 			vsyncoff = ((edid[i+10] & 0xf0) >> 4) | ((edid[i+11] & 0x0C) << 2);
 			vsyncwidth = (edid[i+10] & 0x0f) | ((edid[i+11] & 0x03) << 4);
 
-
-			sprintf(modearray[currentmode], "%s%u %u %u %u ", modearray[currentmode], hactive, hactive+hsyncoff, hactive+hsyncoff+hsyncwidth, hactive+hblank);
-			sprintf(modearray[currentmode], "%s%u %u %u %u ", modearray[currentmode], vactive, vactive+vsyncoff, vactive+vsyncoff+vsyncwidth, vactive+vblank);
+			sprintf(modetmp, "%s%u %u %u %u ", modearray[currentmode], (unsigned int)hactive, 
+				(unsigned int)hactive+hsyncoff, (unsigned int)hactive+hsyncoff+hsyncwidth, (unsigned int)hactive+hblank);
+			strcpy(modearray[currentmode], modetmp);
+			sprintf(modetmp, "%s%u %u %u %u ", modearray[currentmode], (unsigned int)vactive, 
+				(unsigned int)vactive+vsyncoff, (unsigned int)vactive+vsyncoff+vsyncwidth, (unsigned int)vactive+vblank);
+			strcpy(modearray[currentmode], modetmp);
 
 			if ( (edid[i+17]&0x80) || ((edid[i+17]&0x18) == 0x18) ) {
-				sprintf(modearray[currentmode], "%s%shsync %svsync %s", modearray[currentmode], ((edid[i+17]&0x10) && (edid[i+17]&0x02)) ? "+": "-", ((edid[i+17]&0x10) && (edid[i+17]&0x04)) ? "+": "-", (edid[i+17]&0x80) ? "interlace": "");
+				sprintf(modetmp, "%s%shsync %svsync %s", modearray[currentmode], ((edid[i+17]&0x10) && (edid[i+17]&0x02)) ? "+": "-", ((edid[i+17]&0x10) && (edid[i+17]&0x04)) ? "+": "-", (edid[i+17]&0x80) ? "interlace": "");
+				strcpy(modearray[currentmode], modetmp);
+
 			//hehe... there's been at least 2 bugs in the old parse-edid the whole time - somebody caught the htimings one, and I just caught two problems right here - lack of checking for analog sync and getting hsync and vsync backwards... yes, vsync and hsync have been flipped this whole time. Glad I'm rewriting
 			//printf("%s\n", modearray[currentmode]);
 			currentmode++;
 			
 			}
-			//printf("\tEndmode\n");
 		}
 	}
 
@@ -261,10 +264,6 @@ int parseedid() {
 			refresh = (edid[i+1] & 0x3F) + 60;
 			LOG_INFO("\t#Not giving standard mode: ");
 			LOG_INFO("%ix%i, %iHz\n", hres, vres, refresh);
-			/*
-			printf("\tMode\t\"%ix%i\"\n", hres, vres);
-			printf("\t\tDotClock\t%.6f\n", (float)((hres * vres) * (((edid[i+1] & 0x3f) + 60)) / 1000000)); //(pixels/screen) * (screen/sec) / a million = megapixels/sec, aka dot clock in mHz
-			printf("\t\tHTimings\t\n");*/
 		}
 	}
 
@@ -273,6 +272,7 @@ int parseedid() {
 
 int parseextb() {
 	int i, curloc;
+	char modetmp[128];
 	//char nativename[64];
 	byte sum =0;
 	LOG_INFO("\n\t#Extension block found. Parsing...\n");
@@ -356,12 +356,16 @@ int parseextb() {
 			vsyncwidth = (extb[i+10] & 0x0f) | ((extb[i+11] & 0x03) << 4);
 
 
-			sprintf(modearray[currentmode], "%s%u %u %u %u ", modearray[currentmode], hactive, hactive+hsyncoff, hactive+hsyncoff+hsyncwidth, hactive+hblank);
-			sprintf(modearray[currentmode], "%s%u %u %u %u ", modearray[currentmode], vactive, vactive+vsyncoff, vactive+vsyncoff+vsyncwidth, vactive+vblank);
-
+			sprintf(modetmp, "%s%u %u %u %u ", modearray[currentmode], (unsigned int)hactive, 
+				(unsigned int)hactive+hsyncoff, (unsigned int)hactive+hsyncoff+hsyncwidth, (unsigned int)hactive+hblank);
+			strcpy(modearray[currentmode], modetmp);
+			sprintf(modetmp, "%s%u %u %u %u ", modearray[currentmode], (unsigned int)vactive, 
+				(unsigned int)vactive+vsyncoff, (unsigned int)vactive+vsyncoff+vsyncwidth, (unsigned int)vactive+vblank);
+			strcpy(modearray[currentmode], modetmp);
 
 			if ( (extb[i+17]&0x80) || ((extb[i+17]&0x18) == 0x18) ) {
-				sprintf(modearray[currentmode], "%s%shsync %svsync %s", modearray[currentmode], ((extb[i+17]&0x10) && (extb[i+17]&0x02)) ? "+": "-", ((extb[i+17]&0x10) && (extb[i+17]&0x04)) ? "+": "-", (extb[i+17]&0x80) ? "interlace": "");
+				sprintf(modetmp, "%s%shsync %svsync %s", modearray[currentmode], ((extb[i+17]&0x10) && (extb[i+17]&0x02)) ? "+": "-", ((extb[i+17]&0x10) && (extb[i+17]&0x04)) ? "+": "-", (extb[i+17]&0x80) ? "interlace": "");
+				strcpy(modearray[currentmode], modetmp);
 			//hehe... there's been at least 2 bugs in the old parse-edid the whole time - somebody caught the htimings one, and I just caught two problems right here - lack of checking for analog sync and getting hsync and vsync backwards... yes, vsync and hsync have been flipped this whole time. Glad I'm rewriting
 
 			}

@@ -308,6 +308,7 @@ bool read_conf_line(const string conf_path, const char* tag,char* value)
         }
 		LOG_INFO("not find %s", tag);
     }
+	fclose(conf_fp);
     return false;
 }
 
@@ -498,7 +499,7 @@ char* lower_to_capital(const char* lower_str, char* capital_str)
 
 int get_cpu_freq_by_id(int id){
 
-    int ret = 0;
+    bool ret = false;
 	char cmd[128] = {0,};
 
 	sprintf(cmd, "cat /sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_cur_freq", id);

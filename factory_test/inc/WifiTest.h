@@ -22,8 +22,6 @@ struct WifiInfo {
     unsigned int recv_num;
 };
 
-class Control;
-
 class WifiTest : public FuncBase
 {
 public:
@@ -33,7 +31,6 @@ public:
     void start_test(BaseInfo* baseInfo);
 
 private:
-    Control* _control;
     static bool wifi_get_wlan_name(char* wlan_name, int size);
     static bool wifi_get_wlan_index(char* wlan_name, unsigned int* index);
     static bool wifi_get_mac_addr(unsigned char* wlan_name, unsigned char* hw_buf);

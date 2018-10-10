@@ -108,10 +108,9 @@ void SoundTest::init_volume()
 
 void* SoundTest::record_loop(void *arg)
 {
-    int count = 0;
 //    FILE * outfile = NULL;
 
-    int ret = 0;
+    bool ret = false;
     SndInfo *info = (SndInfo *) arg;
 //    int retry_cnt = 80;
     char *buf = NULL;
@@ -162,8 +161,8 @@ void* SoundTest::record_loop(void *arg)
             fflush(outfile);
             fclose(outfile);
 #endif
-			count = write_local_data(SOUND_RECORD_FILE, "a+", buf, buffer_size);
-			if(count == false)
+			ret = write_local_data(SOUND_RECORD_FILE, "a+", buf, buffer_size);
+			if(ret == false)
 				break;
         } else {
             LOG_ERROR("read size not period_size:%ld", recv_len);
@@ -183,7 +182,8 @@ err_record:
 
 void* SoundTest::playback_loop(void *arg)
 {
-    int ret = 0;
+    bool flag = false;
+	int ret = 0;
     SndInfo *info = (SndInfo *)arg;
     FILE *infile = NULL;
     snd_pcm_sframes_t write_frame;
@@ -192,8 +192,8 @@ void* SoundTest::playback_loop(void *arg)
 
     pthread_detach(pthread_self());
 
-    ret = open_sound_card(info);
-    if (ret != true) {
+    flag = open_sound_card(info);
+    if (flag != true) {
         LOG_ERROR("open Sound Cardit fail \n");
         return NULL;
     }
@@ -265,7 +265,7 @@ SoundTest::SoundTest()
 {
 }
 
-int SoundTest::open_sound_card(SndInfo *info)
+bool SoundTest::open_sound_card(SndInfo *info)
 {
     int err = -1;
     bool result = false;

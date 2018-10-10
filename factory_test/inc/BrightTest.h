@@ -5,8 +5,6 @@
 #include "Control.h"
 #include "FuncBase.h"
 
-class Control;
-
 class BrightTest : public FuncBase
 {
 public:
@@ -15,9 +13,7 @@ public:
     static void bright_test_all(string bright_level);
     static void *test_all(void *arg);
     void start_test(BaseInfo* baseInfo);
-
-private:
-    Control* _control;
+    
 };
 
 #endif

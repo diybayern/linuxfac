@@ -5,8 +5,6 @@
 #include "Control.h"
 #include "FuncBase.h"
 
-class Control;
-
 class CameraTest : public FuncBase
 {
 public:
@@ -18,7 +16,6 @@ public:
     static void close_xawtv_window();
 
 private: 
-    Control* _control;
     static void start_camera_xawtv();
     static unsigned long get_window_id(const char *winid_file);
     static bool check_if_xawtv_started();

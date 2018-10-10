@@ -10,8 +10,6 @@
 
 typedef struct LRMI_regs reg_frame;
 
-class Control;
-
 class EdidTest : public FuncBase
 {
 public:
@@ -20,7 +18,6 @@ public:
     void start_test(BaseInfo* baseInfo);
 
 private:
-    Control* _control;
     static int edid_test_all(unsigned int num);
     static int read_edid(unsigned int controller, char* output);
     static int do_vbe_ddc_service(unsigned BX, reg_frame* regs);

@@ -10,17 +10,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-class Control;
-
 class CpuTest : public FuncBase
 {
 public:
     CpuTest();
     bool is_cpu_test_pass(BaseInfo* baseInfo);
     void start_test(BaseInfo* baseInfo);
-
-private:
-    Control* _control;
 };
 
 
@@ -31,9 +26,6 @@ public:
     static string fan_speed_test(string speed);
     static void *test_all(void *arg);
     void start_test(BaseInfo* baseInfo);
-
-private:
-    Control* _control;
 };
 
 class UsbTest : public FuncBase
@@ -60,10 +52,6 @@ public:
     bool usb_test_read_status();
     static bool usb_test_read_cfg(USB_INFO_T* info);
     static bool usb_test_read_cfg(const char* dir);
-
-private:
-    Control* _control;
-
 };
 
 
@@ -77,9 +65,6 @@ public:
     static void* camera_stress_test(void*);
     static bool start_cpuburn_stress();
     static void stop_cpuburn_stress();
-
-private:
-    Control* _control;
 };
 
 
@@ -92,9 +77,6 @@ public:
     static void next_process_handle(BaseInfo* baseInfo);
     static bool create_stress_test_lock();
     static void init();
-private:
-    Control* _control;
-    
 };
 
 class InterfaceTest : public FuncBase
@@ -103,10 +85,6 @@ public:
     InterfaceTest();
     static void* test_all(void *arg);
     void start_test(BaseInfo* baseInfo);
-
-private:
-    Control* _control;
-    
 };
 
 

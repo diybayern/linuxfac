@@ -21,8 +21,6 @@ struct NetInfo {
 	unsigned int recv_num;
 };
 
-class Control;
-
 class NetTest : public FuncBase
 {
 public:
@@ -33,8 +31,6 @@ public:
     void start_test(BaseInfo* baseInfo);
 
 private:
-    Control* _control;
-
     static bool net_get_eth_name(char* eth_name, int size);
     static bool net_get_eth_index(char* eth_name, unsigned int* index);
     static bool net_get_mac_addr0(unsigned char* eth_name, unsigned char* hw_buf);

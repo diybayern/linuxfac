@@ -48,8 +48,7 @@ public:
     static bool init(BaseInfo* baseInfo);
 
 private:
-    Control* _control;
-    static int open_sound_card(SndInfo *info);
+    static bool open_sound_card(SndInfo *info);
     static void close_sound_card(SndInfo *info);
     static void* record_loop(void *arg);
     static void* playback_loop(void *arg);

@@ -23,19 +23,21 @@ void os_log(const char* msg, va_list list) {
     char line[LINE_SZ] = {0};
     FILE* log_file_fp = NULL;
     int file_size = 0;
-    
+
+    pthread_mutex_lock(&mutex);
     log_file_fp = fopen(WRITE_LOG_PATH, "a+");
 
-    if (log_file_fp)
-        pthread_mutex_lock(&mutex);
+	if (log_file_fp == NULL) {
+		pthread_mutex_unlock(&mutex);
+		return;
+	}
 
     snprintf(line, sizeof(line), "%s", msg);
     vfprintf(log_file_fp, line, list);
     fflush(log_file_fp);
     fclose(log_file_fp);
     
-    if (log_file_fp)
-        pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(&mutex);
     
     get_file_size(WRITE_LOG_PATH, &file_size);
     if (file_size >= LOG_MAX_SIZE) {

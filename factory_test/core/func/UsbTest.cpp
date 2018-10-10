@@ -86,7 +86,7 @@ UsbTest::get_child(struct udev* udev, struct udev_device* parent, const char* su
 
 void UsbTest::get_usb_mass_storage(USB_INFO_T* info) {
 
-	int ret = false;
+	bool ret = false;
 	int index = 0;
 	struct udev* udev = NULL;
 	struct udev_list_entry *entry = NULL;

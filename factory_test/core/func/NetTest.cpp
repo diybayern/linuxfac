@@ -240,7 +240,7 @@ void* NetTest::net_recv_loopback_msg(void *arg) {
 
 bool NetTest::init()
 {
-    int ret = 0;
+    bool ret = false;
     pthread_t pid;
     NetInfo* info;
 
@@ -273,8 +273,8 @@ bool NetTest::init()
         return false;
     }
 
-    ret = pthread_create(&pid, NULL, net_recv_loopback_msg, info);
-    if (ret < 0) {
+    int tmp = pthread_create(&pid, NULL, net_recv_loopback_msg, info);
+    if (tmp < 0) {
         LOG_ERROR("create thread failed\n");
         free(info);
         return false;
@@ -354,8 +354,8 @@ bool NetTest::net_get_eth_info(NetInfo *info)
     }
 
     /* Get eth status */
-    ret = net_get_eth_status(fd, (char *)eth_name, &info->eth_status);
-    if (ret == false) {
+    bool flag = net_get_eth_status(fd, (char *)eth_name, &info->eth_status);
+    if (flag == false) {
         close(fd);
         return false;
     }

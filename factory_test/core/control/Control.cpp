@@ -408,6 +408,7 @@ void Control::init_mes_log()
     int j=0;
     char date[64] = { 0, };
     char new_mac_name[128];
+	char tmp[128];
     struct tm *timenow = NULL;
     time_t timep;
  
@@ -430,8 +431,9 @@ void Control::init_mes_log()
         remove(MES_FILE);
     }
 
-    sprintf(_facArg->ftp_dest_path,"%s%s.txt",_facArg->ftp_dest_path,mac_capital);
-    LOG_INFO("_facArg->ftp_dest_path:%s",_facArg->ftp_dest_path);
+    sprintf(tmp, "%s%s.txt",_facArg->ftp_dest_path,mac_capital);
+	strcpy(_facArg->ftp_dest_path, tmp);
+	LOG_INFO("_facArg->ftp_dest_path:%s",_facArg->ftp_dest_path);
     
     time(&timep);
     timenow = localtime(&timep);
@@ -480,7 +482,7 @@ void Control::update_mes_log(string tag,string value)
     char line[200];
     char* sp = NULL;
     int file_size;
-    int first=1;
+    int first = 1;
  
     bzero(line,sizeof(line));
  
@@ -492,6 +494,11 @@ void Control::update_mes_log(string tag,string value)
     file_size = ftell(fp);
     fseek(fp,0,SEEK_SET);
     char* buf = (char*)malloc(file_size+128);
+	if (NULL == buf) {
+		fclose(fp);
+		return ;
+	}
+	
     bzero(buf,file_size);
  
     while (fgets(line, sizeof(line), fp) != NULL) {
@@ -507,13 +514,20 @@ void Control::update_mes_log(string tag,string value)
  
     fclose(fp);
     fp = fopen(MES_FILE, "w");
-    int len = strlen(buf);
-    fwrite(buf, 1, len, fp);
+	if (fp == NULL) {
+		return ;
+	}
+
+	if (buf != NULL) {
+    	int len = strlen(buf);
+    	fwrite(buf, 1, len, fp);
+	}
     fclose(fp);
 
     if (buf != NULL) {
         free(buf);
     }
+
 }
 
 
