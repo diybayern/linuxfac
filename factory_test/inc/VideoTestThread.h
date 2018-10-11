@@ -66,6 +66,7 @@ private:
 
 signals:
     void sig_send_one_frame(QPixmap img);
+    void sig_g_decode_status(int status);
 
 public slots:
     void slot_finish_video_test_thread();

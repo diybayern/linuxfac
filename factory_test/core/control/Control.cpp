@@ -871,6 +871,11 @@ void Control::slot_factory_delete_event()
     factory_delete_event();
 }
 
+int Control::get_decode_status()
+{
+    return _uiHandle->get_g_decode_status();
+}
+
 void Control::factory_delete_event()
 {
     LOG_INFO("factory test delete_event occurred.\n");

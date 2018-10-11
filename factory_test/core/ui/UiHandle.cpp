@@ -220,6 +220,11 @@ void UiHandle::slot_factory_delete_event()
     emit sig_ui_factory_delete_event();
 }
 
+void UiHandle::slot_g_decode_status(int status)
+{
+    set_g_decode_status(status);
+}
+
 QObject* UiHandle::get_qobject(string name)
 {
     QObject *obj = new QObject;

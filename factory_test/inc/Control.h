@@ -156,6 +156,7 @@ public:
     void factory_delete_event();
     static void* update_mes_log_thread(void* arg);
     void start_update_mes_log(MesInfo* info);
+    int get_decode_status();
 
     UiHandle* get_ui_handle() {
         return _uiHandle;

@@ -11,6 +11,7 @@ VideoTestThread* VideoTestThread::get_video_test_thread()
 
 VideoTestThread::VideoTestThread(QThread *parent) : QThread(parent)
 {
+    connect(this, SIGNAL(sig_g_decode_status(int)), UiHandle::get_uihandle(), SLOT(slot_g_decode_status(int)));
     this->_m_stopped = false;
     this->videoindex = -1;
     this->filepath = "./res/movie.mp4";
@@ -247,6 +248,9 @@ void VideoTestThread::run()
 
         if (pkt.stream_index == videoindex) {
             ret = ffmpeg_video_decode(pkt.data, pkt.size);
+            if (_FAIL == ret) {
+                emit sig_g_decode_status(ret);
+            }
             if (_OUT == ret) {
                 break;
             }

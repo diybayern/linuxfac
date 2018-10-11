@@ -195,11 +195,6 @@ void* StressTest::test_all(void* arg)
 	control->set_stress_test_window_quit_status(true);
 	uihandle->show_stress_test_ui();
 	
-    if (control->get_pcba_whole_lock_state()) {
-        sleep(1);
-        uihandle->confirm_test_result_warning("上次拷机退出异常");
-    }
-	
 	if (get_int_value(baseInfo->camera_exist) == 1) {
         pthread_create(&pid_t1, NULL, camera_stress_test, camera);
     }
@@ -215,6 +210,11 @@ void* StressTest::test_all(void* arg)
         pthread_create(&pid_t2, NULL, gpu_stress_test, NULL);
     }
 	start_cpuburn_stress();
+
+    if (control->get_pcba_whole_lock_state()) {
+        sleep(1);
+        uihandle->confirm_test_result_warning("上次拷机退出异常");
+    }
 	
     get_current_open_time(&init_time);
     while(true)

@@ -37,6 +37,8 @@ class UiHandle: public QObject
         void show_sn_mac_comparison_result(string sn_mac, string result);
         void update_sn_mac_test_result(string sn_mac, string result);
         void set_brightness_dialog_button_state(bool state);
+        int get_g_decode_status() {return _g_decode_status;}
+        void set_g_decode_status(int status) {_g_decode_status = status;}
         int get_screen_width();
         int get_screen_height();
         bool get_auto_upload_check_state();
@@ -45,6 +47,7 @@ class UiHandle: public QObject
 
     private:
         static UiHandle* _ui_handle;
+        int _g_decode_status;
 
     signals:
         void to_draw_main_test_window();
@@ -83,6 +86,7 @@ class UiHandle: public QObject
         void slot_confirm_shut_down_or_next_process(QString process);
         void slot_retry_sn_mac();
         void slot_factory_delete_event();
+        void slot_g_decode_status(int status);
 };
 
 
