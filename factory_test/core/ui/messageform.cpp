@@ -224,6 +224,9 @@ bool MessageForm::eventFilter(QObject *obj, QEvent *event)
         {
             QString str = le_snmac->text();
             g_sn_mac_message = str;
+            if (str == "") {
+                return true;
+            }
             //QTimer::singleShot(1000, MainTestWindow::get_main_test_window(), SLOT(compute_result()));
             emit sig_send_result_from_scangun();
             return true;

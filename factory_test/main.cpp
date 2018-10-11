@@ -18,7 +18,7 @@ void* semi_auto_test_control(void*)
 				&& funcFinishStatus->bright_finish
 				&& funcFinishStatus->camera_finish) {
 				if (control->get_auto_upload_mes_status()) {
-					control->start_upload_log();
+					control->upload_mes_log();
 			    }
 			}
             
