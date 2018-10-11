@@ -213,17 +213,17 @@ void* StressTest::test_all(void* arg)
 
     if (baseInfo->platform == "IDV") {
         pthread_create(&pid_t2, NULL, gpu_stress_test, NULL);
-		start_cpuburn_stress();
     }
-    
+	start_cpuburn_stress();
+	
     get_current_open_time(&init_time);
     while(true)
     {
         if (!control->is_stress_test_window_quit_safely()) {
             if (baseInfo->platform == "IDV") {
 				stop_gpu_stress_test();
-				stop_cpuburn_stress();
             }
+			stop_cpuburn_stress();
 			if (get_int_value(baseInfo->camera_exist) == 1) {
 				camera->close_xawtv_window();
 			}
