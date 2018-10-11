@@ -251,7 +251,7 @@ void get_baseinfo(BaseInfo* baseInfo, const string info) {
     string usb_3 = usb.substr(0, idx);
 	string usb_t = usb.substr(idx+1, usb.length()-idx-1); 
 
-	baseInfo->platform		= tmap["PLATFORM"];
+	baseInfo->platform		= tmap["PLAT"];
 	baseInfo->mem_cap       = tmap["MEM"];
 	baseInfo->usb_total_num = usb_t;
 	baseInfo->usb_3_num     = usb_3;
