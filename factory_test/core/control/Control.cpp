@@ -27,6 +27,7 @@ Control::Control():QObject()
     _baseInfo               = new BaseInfo;
     _hwInfo                 = new HwInfo;
     _facArg                 = new FacArg;
+    _mesInfo                = new MesInfo;
 
     _funcFinishStatus                   = new FuncFinishStatus;
     _funcFinishStatus->interface_finish = false;
@@ -547,20 +548,20 @@ void Control::upload_mes_log() {
 		upload_log += "ftp path:\t\t" + (string)_facArg->ftp_dest_path + "\n";
 		update_screen_log(upload_log);
 
-        _uiHandle->confirm_test_result_waiting("upload log ...");
+        _uiHandle->confirm_test_result_waiting("正在上传中...");
         sleep(1);
         char* response = ftp_send_file(MES_FILE,_facArg);
         response = response_to_chinese(response);
         LOG_INFO("upload %s",response);
 		if (!strcmp(response,"上传成功")) {
             if (_whole_test_state || !_is_idv) {
-                _uiHandle->confirm_test_result_success("upload success", "关机");
+                _uiHandle->confirm_test_result_success("上传成功", "关机");
             } else {
-                _uiHandle->confirm_test_result_success("upload success", "下道工序");
+                _uiHandle->confirm_test_result_success("上传成功", "下道工序");
             }
             set_test_result(UPLOAD_LOG_NAME,"PASS",response);
 		} else {
-			_uiHandle->confirm_test_result_warning("upload fail");
+			_uiHandle->confirm_test_result_warning("上传失败");
 			set_test_result(UPLOAD_LOG_NAME,"FAIL",response);
 		}
     } else {
@@ -763,55 +764,89 @@ void Control::set_interface_test_result(string func, bool status) {
 	}
 }
 
+void* Control::update_mes_log_thread(void* arg)
+{
+    MesInfo*info = (MesInfo*)arg;
+    Control::get_control()->update_mes_log(info->func, info->status);
+    return NULL;
+}
+
+void Control::start_update_mes_log(MesInfo* info)
+{
+    pthread_t tid;
+    pthread_create(&tid,NULL,update_mes_log_thread,info);
+}
+
 
 void Control::set_test_result_pass_or_fail(string func, string result)
 {
+
     if (result == "PASS") {
         if (func == SOUND_TEST_NAME) {
             _funcFinishStatus->sound_finish= true;
-			update_mes_log("AUDIO", "PASS");
+            _mesInfo->func = "AUDIO";
+            _mesInfo->status = "PASS";
+            start_update_mes_log(_mesInfo);
         }
         if (func == DISPLAY_TEST_NAME) {
             _funcFinishStatus->display_finish= true;
-			update_mes_log("DISPLAY", "PASS");
+            _mesInfo->func = "DISPLAY";
+            _mesInfo->status = "PASS";
+            start_update_mes_log(_mesInfo);
         }
         if (func == BRIGHT_TEST_NAME) {
             _funcFinishStatus->bright_finish= true;
-			update_mes_log("BRIGHTNESS", "PASS");
+            _mesInfo->func = "BRIGHTNESS";
+            _mesInfo->status = "PASS";
+            start_update_mes_log(_mesInfo);
         }
         if (func == CAMERA_TEST_NAME) {
             _funcFinishStatus->camera_finish= true;
 			CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
 			camera->close_xawtv_window();
-			update_mes_log("CAMERA", "PASS");
+            _mesInfo->func = "CAMERA";
+            _mesInfo->status = "PASS";
+            start_update_mes_log(_mesInfo);
         }
         if (func == STRESS_TEST_NAME) {
             _funcFinishStatus->stress_finish= true;
-			update_mes_log("STRESS", "PASS");
+            _mesInfo->func = "STRESS";
+            _mesInfo->status = "PASS";
+            start_update_mes_log(_mesInfo);
         }
     } else {
 
         if (func == SOUND_TEST_NAME) {
             _funcFinishStatus->sound_finish= false;
-			update_mes_log("AUDIO", "FAIL");
+            _mesInfo->func = "AUDIO";
+            _mesInfo->status = "FAIL";
+            start_update_mes_log(_mesInfo);
         }
         if (func == DISPLAY_TEST_NAME) {
             _funcFinishStatus->display_finish= false;
-			update_mes_log("DISPLAY", "FAIL");
+            _mesInfo->func = "DISPLAY";
+            _mesInfo->status = "FAIL";
+            start_update_mes_log(_mesInfo);
         }
         if (func == BRIGHT_TEST_NAME) {
             _funcFinishStatus->bright_finish= false;
-			update_mes_log("BRIGHTNESS", "FAIL");
+            _mesInfo->func = "BRIGHTNESS";
+            _mesInfo->status = "FAIL";
+            start_update_mes_log(_mesInfo);
         }
         if (func == CAMERA_TEST_NAME) {
             _funcFinishStatus->camera_finish= false;
 			CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
 			camera->close_xawtv_window();
-			update_mes_log("CAMERA", "FAIL");
+            _mesInfo->func = "CAMERA";
+            _mesInfo->status = "FAIL";
+            start_update_mes_log(_mesInfo);
         }
         if (func == STRESS_TEST_NAME) {
             _funcFinishStatus->stress_finish= false;
-			update_mes_log("STRESS", "FAIL");
+            _mesInfo->func = "STRESS";
+            _mesInfo->status = "FAIL";
+            start_update_mes_log(_mesInfo);
         }
     }
     _uiHandle->set_test_result(func, result);

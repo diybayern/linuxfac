@@ -120,6 +120,16 @@ struct InterfaceSelectStatus {
     bool wifi_select;
 };
 
+struct MesInfo {
+    MesInfo():func(""),
+        status("")
+    {
+    }
+
+    string func;
+    string status;
+};
+
 class UsbTest;
 class Control : public QObject
 {
@@ -127,7 +137,7 @@ class Control : public QObject
 public:
     //explicit Control(QObject *parent = 0);
     Control();
-        static Control* _control;
+    static Control* _control;
     void set_test_result(string func,string result,string ui_log);
     void confirm_test_result(string func);
     void set_brightness_dialog_button_state(bool state);
@@ -144,6 +154,8 @@ public:
     bool is_stress_test_window_quit_safely();
     int get_test_step();
     void factory_delete_event();
+    static void* update_mes_log_thread(void* arg);
+    void start_update_mes_log(MesInfo* info);
 
     UiHandle* get_ui_handle() {
         return _uiHandle;
@@ -260,6 +272,7 @@ private:
     UiHandle* _uiHandle;
     BaseInfo* _baseInfo;
     HwInfo* _hwInfo;
+    MesInfo* _mesInfo;
     FuncFinishStatus* _funcFinishStatus;
     InterfaceTestStatus* _interfaceTestStatus;
     InterfaceSelectStatus* _interfaceSelectStatus;

@@ -693,7 +693,7 @@ void MainTestWindow::slot_show_sn_mac_comparison_result(QString sn_mac, QString 
         MessageBox(MessageForm::SNMAC_Success, sn_mac, "扫描成功", sn_mac + "比对成功", "", 1000);
 
     } else {
-        MessageBox(MessageForm::SNMAC_Error, sn_mac, "警告", sn_mac + "比对失败,请重试！", "", 0);
+        MessageBox(MessageForm::SNMAC_Error, sn_mac, "错误", sn_mac + "比对失败,请重试！", "", 0);
 
     }
 }
