@@ -88,7 +88,7 @@ int VideoTestThread::ffmpeg_read_stream()
         return _FAIL;
     }
 
-    av_dump_format(pFormatCtx, 0, filepath, 0);
+    //av_dump_format(pFormatCtx, 0, filepath, 0); //TODO
 
     return _SUCCESS;
 }
