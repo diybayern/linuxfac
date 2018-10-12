@@ -75,7 +75,10 @@ const string STRESS_STAT          = FACTORY_PATH + "stress";
 #define MAC_ADDR_LEN      (6)
 #define CMD_BUF_SIZE      (256)
 
-#define MES_FILE          "/var/log/mes.txt"
+#define MES_FILE          ("/var/log/mes.txt")
+#define STRESS_RECORD     ("/tmp/stress.txt")
+#define LOG_FILE          ("/var/log/qt.log")
+#define LOG_FILE_BAK      ("/var/log/qt_bak.log")
 
 #define NEXT_LOCK         ("next")
 #define PCBA_LOCK         ("PCBA")
@@ -221,7 +224,7 @@ void get_baseinfo(BaseInfo* baseInfo,const string baseinfo);
 int get_fac_config_from_conf(const string conf_path, FacArg *fac);
 char* ftp_send_file(const char* local_file_path, FacArg* fac);
 char* response_to_chinese(const char* response);
-bool combine_fac_log_to_mes(string sendLogPath);
+bool combine_fac_log_to_mes(string sendLogPath, string path);
 bool is_digit(string str);
 char* delNL(char *line);
 char* lower_to_capital(const char* lower_str, char* capital_str);

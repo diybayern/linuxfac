@@ -1,10 +1,6 @@
 #include "../inc/fac_log.h"
 #include "../inc/fac_utils.h"
 
-#define WRITE_LOG_PATH                        "/var/log/qt.log"
-#define WRITE_LOG_BAK                         "/var/log/qt_bak.log"
-#define UPLOAD_MES_LOG                         "/var/log/mes.txt"
-
 #define LOG_MAX_SIZE    (5<<20)
 #define LOG_MAX_LEN     (1024)
 #define LINE_SZ         (1024)
@@ -25,7 +21,7 @@ void os_log(const char* msg, va_list list) {
     int file_size = 0;
 
     pthread_mutex_lock(&mutex);
-    log_file_fp = fopen(WRITE_LOG_PATH, "a+");
+    log_file_fp = fopen(LOG_FILE, "a+");
 
 	if (log_file_fp == NULL) {
 		pthread_mutex_unlock(&mutex);
@@ -39,9 +35,9 @@ void os_log(const char* msg, va_list list) {
     
     pthread_mutex_unlock(&mutex);
     
-    get_file_size(WRITE_LOG_PATH, &file_size);
+    get_file_size(LOG_FILE, &file_size);
     if (file_size >= LOG_MAX_SIZE) {
-		rename(WRITE_LOG_PATH, WRITE_LOG_BAK);
+		rename(LOG_FILE, LOG_FILE_BAK);
 	}
 }
 
@@ -122,9 +118,9 @@ void write_mes_log(const char *fmt, ...)
     vsnprintf(buf, 512, fmt, args);
     va_end(args);
 
-    fp = fopen(UPLOAD_MES_LOG, "a+");
+    fp = fopen(MES_FILE, "a+");
     if (fp == NULL) {
-        LOG_ERROR("Failed to open send log file %s\n", UPLOAD_MES_LOG);
+        LOG_ERROR("Failed to open send log file %s\n", MES_FILE);
         free(buf);
         return;
     }
@@ -134,4 +130,35 @@ void write_mes_log(const char *fmt, ...)
 
     free(buf);
 }
+
+
+void write_stress_record(const char *fmt, ...)
+{
+    va_list args;
+    char *buf;
+    FILE *fp;
+
+    buf = (char *)malloc(512);
+    if (buf == NULL) {
+        LOG_ERROR("Failed to alloc memory(size %d) for mes log.\n", 512);
+        return;
+    }
+
+    va_start(args, fmt);
+    vsnprintf(buf, 512, fmt, args);
+    va_end(args);
+
+    fp = fopen(STRESS_RECORD, "a+");
+    if (fp == NULL) {
+        LOG_ERROR("Failed to open send log file %s\n", MES_FILE);
+        free(buf);
+        return;
+    }
+    fprintf(fp, "%s", buf);
+    fflush(fp);
+    fclose(fp);
+
+    free(buf);
+}
+
 

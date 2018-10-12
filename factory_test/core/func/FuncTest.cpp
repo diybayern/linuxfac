@@ -309,6 +309,10 @@ void StressTest::print_stress_test_result(StressRecord* record, int index, int n
 	control->update_screen_log("The last Stress test result is...\n");
 	control->update_screen_log("==================== Stress Test Result ====================\n");
 
+	if (access(STRESS_RECORD, F_OK) == 0) {
+		remove(STRESS_RECORD);
+	}
+
 	for (i = 0; i < num; i++) {
 
 		sprintf(line, "%s 运行时间:%d天%d小时%d分%d秒 编码状态:%s 解码状态:%s\n",
@@ -321,8 +325,10 @@ void StressTest::print_stress_test_result(StressRecord* record, int index, int n
 		index++;
 		index %= STRESS_RECORD_NUM;
 		control->update_screen_log(string(line));
-	}
 
+		LOG_STRESS(line);
+	}
+	LOG_STRESS("---------------------Detail test result-----------------------\n");
 	control->update_screen_log("==================================================\n");
 }
 

@@ -20,6 +20,8 @@ void _write_log(const char *file, const char *func, int line, int level, const c
 #define LOG_MES(format, args...) write_mes_log(format, ##args)
 void write_mes_log(const char *fmt, ...);
 
+#define LOG_STRESS(format, args...) write_stress_record(format, ##args)
+void write_stress_record(const char *fmt, ...);
 
 
 #endif /*__FAC_LOG_H__*/

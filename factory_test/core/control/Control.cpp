@@ -485,9 +485,8 @@ void Control::init_mes_log()
     if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
         LOG_MES("CAMERA:    NULL\n");
     }
-    LOG_MES("STRESS:    NULL\n");
-    LOG_MES("---------------------Detail test result-----------------------\n");
-
+	LOG_MES("STRESS:    NULL\n");
+	LOG_MES("---------------------Stress test result-----------------------\n");
     free(mac_capital);
     free(sn_capital);
 }
@@ -554,7 +553,7 @@ void Control::upload_mes_log() {
 		_uiHandle->confirm_test_result_warning("配置文件有误");
 		set_test_result(UPLOAD_LOG_NAME,"FAIL","配置文件有误");
 		return;
-	} else if (combine_fac_log_to_mes(MES_FILE)) {
+	} else if (combine_fac_log_to_mes(MES_FILE, STRESS_RECORD) && combine_fac_log_to_mes(MES_FILE, LOG_FILE)) {
 		string upload_log = "ftp ip:\t\t" + (string)_facArg->ftp_ip + "\n";
 		upload_log += "ftp user:\t\t" + (string)_facArg->ftp_user + "\n";
 		upload_log += "ftp passwd:\t\t" + (string)_facArg->ftp_passwd + "\n";

@@ -177,6 +177,11 @@ public:
         return _hwInfo;
     }
 
+    MesInfo*  get_mes_info()
+    {
+        return _mesInfo;
+    }
+
     void set_interfacetest_finish()
     {
         _funcFinishStatus->interface_finish = true;

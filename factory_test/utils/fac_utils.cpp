@@ -417,12 +417,12 @@ char* response_to_chinese(const char* response)
     }
 }
 
-bool combine_fac_log_to_mes(string sendLogPath) {
+bool combine_fac_log_to_mes(string sendLogPath, string path) {
     FILE* fp_mes;
     FILE* fp_fac;
     int c;
     fp_mes = fopen(sendLogPath.c_str(),"ab");
-    fp_fac = fopen("/var/log/qt.log","rb");
+    fp_fac = fopen(path.c_str(),"rb");
     if (fp_mes == NULL || fp_fac == NULL) {
         if (fp_mes) {
             fclose(fp_mes);
