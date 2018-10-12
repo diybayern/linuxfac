@@ -53,6 +53,8 @@ const string GET_BASEINFO_INI     = FACTORY_PATH + "hwcfg.ini";
 const string MEM_UI_LOG           = FACTORY_PATH + "mem_ui_log";
 const string FAC_CONFIG_FILE      = "/tmp/fac_config.conf";
 
+const string STRESS_STAT          = FACTORY_PATH + "stress";
+
 #define AGAIN           (3)
 #define SUCCESS         (0)
 #define FAIL            (1)
@@ -79,6 +81,8 @@ const string FAC_CONFIG_FILE      = "/tmp/fac_config.conf";
 #define PCBA_LOCK         ("PCBA")
 #define WHOLE_LOCK        ("whole")
 #define WHOLE_TEST_FILE   ("/tmp/whole_test")
+
+#define STRESS_RECORD_NUM (10)
 
 typedef unsigned long long int uint64;
 
@@ -180,6 +184,12 @@ struct CpuStatus {
 	uint64 cpu_guest_nice;
 };
 
+struct StressRecord {
+    int result;
+    int encode;
+    int decode;
+    TimeInfo date;
+};
 
 typedef struct tagUdevInfo {
 	char block[USB_BLOCK_LEN];
@@ -220,6 +230,8 @@ string get_mem_info();
 string get_cpu_info(CpuStatus* st_cpu);
 string change_float_to_string(float fla);
 void stop_gpu_stress_test(void);
+void write_stress_record(StressRecord* record, int index, int num);
+void read_stress_record(StressRecord* record, int* num);
 
 
 #endif

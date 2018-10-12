@@ -390,7 +390,20 @@ void Control::set_brightness_dialog_button_state(bool state)
 void Control::show_main_test_ui()
 {
     _uiHandle->to_show_main_test_ui();
+	show_stress_record();
 	auto_test_mac_sn();
+}
+
+void Control::show_stress_record(){
+	update_screen_log("---------------------------------------------------------------------------------------------\n");
+	update_screen_log("\t\tWelcome to Factory Test Software\n");
+	update_screen_log("---------------------------------------------------------------------------------------------\n");
+
+	read_stress_record(_record, &_record_num);
+	_record_index = _record_num % STRESS_RECORD_NUM;
+
+	StressTest* stress = (StressTest*) _funcBase[STRESS];
+	stress->print_stress_test_result(_record, 0, _record_num);
 }
 
 void Control::auto_test_mac_sn() {

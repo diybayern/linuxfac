@@ -549,10 +549,10 @@ string get_mem_info() {
 	if (-1 == ret) {
 		LOG_ERROR("get mem info failed\n");
 	}
-	string mem_used = to_string((si.totalram - si.freeram) >> 10);
-	string mem_free = to_string(si.freeram >> 10);
+	string mem_used = to_string((si.totalram - si.freeram) >> 20);
+	string mem_free = to_string(si.freeram >> 20);
 	
-    mem_info += mem_used + "K used  " + mem_free + "K free";
+    mem_info += mem_used + "M used\t" + mem_free + "M free";
 
 	return mem_info;
 }
@@ -643,3 +643,59 @@ void stop_gpu_stress_test(void) {
         LOG_ERROR("system cmd run error\n");
     }
 }
+
+void write_stress_record(StressRecord* record, int index, int num) {
+
+	int i = 0;
+	FILE* fp = NULL;
+	char line[8192] = { 0, };
+
+	if ((fp = fopen(STRESS_STAT.c_str(), "wb+")) == NULL) {
+		LOG_ERROR("open %s failed\n", STRESS_STAT);
+		return;
+	}
+
+	for (i = 0; i < num; i++) {
+
+		sprintf(line, "%d %d %d %d %d %d %d\n",  record[index].date.day, record[index].date.hour,
+				record[index].date.minute, record[index].date.second,
+				record[index].encode, record[index].decode, record[index].result);
+
+		index++;
+		index %= STRESS_RECORD_NUM;
+		fwrite(line, strlen(line), 1, fp);
+	}
+
+    fflush(fp);
+    fsync(fileno(fp));
+	fclose(fp);
+}
+
+void read_stress_record(StressRecord* record, int* num) {
+
+	int i = 0;
+	FILE* fp = NULL;
+	char line[8192] = { 0, };
+
+	*num = 0;
+
+	if ((fp = fopen(STRESS_STAT.c_str(), "r")) == NULL) {
+		LOG_ERROR("open %s failed\n", STRESS_STAT);
+		return;
+	}
+
+	while (fgets(line, sizeof(line), fp) != NULL) {
+		memset(&record[i], 0, sizeof(StressRecord));
+
+		sscanf(line, "%d %d %d %d %d %d %d\n", &record[i].date.day,
+				&record[i].date.hour, &record[i].date.minute, &record[i].date.second,
+				&record[i].encode, &record[i].decode, &record[i].result);
+
+		i++;
+	}
+
+	*num = i;
+
+	fclose(fp);
+}
+

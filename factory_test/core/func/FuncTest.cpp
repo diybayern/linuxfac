@@ -144,7 +144,6 @@ void StressTest::stop_cpuburn_stress()
 	}
 }
 
-
 void* StressTest::test_all(void* arg)
 {
 	BaseInfo* baseInfo = (BaseInfo*)arg;
@@ -200,7 +199,6 @@ void* StressTest::test_all(void* arg)
     }
 
     uihandle->update_stress_label_value("编码状态","PASS");
-    uihandle->update_stress_label_value("解码状态","PASS");
     uihandle->update_stress_label_value("产品型号",(control->get_hw_info())->product_name);
     uihandle->update_stress_label_value("硬件版本",(control->get_hw_info())->product_hw_version);
     uihandle->update_stress_label_value("SN序列号",(control->get_hw_info())->sn);
@@ -230,6 +228,37 @@ void* StressTest::test_all(void* arg)
 			if (check_file_exit(STRESS_LOCK_FILE.c_str())) {
 				remove_local_file(STRESS_LOCK_FILE.c_str());
 			}
+
+			int start = 0, total = 0, date_index = 0;
+			StressRecord* record = NULL;
+			int* num = control->get_stress_record_num();
+			int* index = control->get_stress_record_index();
+			
+			if (STRESS_RECORD_NUM == *num) {
+				start = (*index + 1) % STRESS_RECORD_NUM;
+			} else {
+				start = 0;
+			}
+			
+			(*num)++;
+			if ((*num) >= STRESS_RECORD_NUM) {
+				(*num) = STRESS_RECORD_NUM;
+			}
+			
+			total = *num;
+			date_index = *index;
+			record = &(control->get_stress_record()[date_index]);
+
+			record->date = tmp_dst;
+			record->encode = 0;
+			record->decode = control->get_decode_status();
+			record->result = record->encode | record->decode;
+			
+			write_stress_record(control->get_stress_record(), start, total);
+			(*index)++;
+			(*index) %= STRESS_RECORD_NUM;
+			print_stress_test_result(control->get_stress_record(),start,total);
+			
             break;
         }
 		
@@ -245,9 +274,11 @@ void* StressTest::test_all(void* arg)
 		}
 
         if (control->get_decode_status()) {
+			uihandle->update_stress_label_value("解码状态","FAIL");
             uihandle->set_stress_test_pass_or_fail("FAIL");
-        }
-
+        } else {
+			uihandle->update_stress_label_value("解码状态","PASS");
+        }		
         snprintf(datebuf, CMD_BUF_SIZE, "%d天%d时%d分%d秒", tmp_dst.day, tmp_dst.hour, tmp_dst.minute, tmp_dst.second);
         uihandle->update_stress_label_value("运行时间", datebuf);
 		
@@ -266,6 +297,33 @@ void StressTest::start_test(BaseInfo* baseInfo)
 {
     pthread_t tid;
     pthread_create(&tid,NULL,test_all,baseInfo);
+}
+
+void StressTest::print_stress_test_result(StressRecord* record, int index, int num) 
+{
+	Control *control = Control::get_control();
+
+	int i = 0;
+	char line[8192] = { 0, };
+
+	control->update_screen_log("The last Stress test result is...\n");
+	control->update_screen_log("==================== Stress Test Result ====================\n");
+
+	for (i = 0; i < num; i++) {
+
+		sprintf(line, "%s 运行时间:%d天%d小时%d分%d秒 编码状态:%s 解码状态:%s\n",
+				PRINT_RESULT1(record[index].result),
+				record[index].date.day, record[index].date.hour,
+				record[index].date.minute, record[index].date.second,
+				PRINT_RESULT1(record[index].encode),
+				PRINT_RESULT1(record[index].decode));
+
+		index++;
+		index %= STRESS_RECORD_NUM;
+		control->update_screen_log(string(line));
+	}
+
+	control->update_screen_log("==================================================\n");
 }
 
 

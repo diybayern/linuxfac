@@ -258,7 +258,19 @@ public:
     FacArg* get_fac_arg() {
         return _facArg;
     }
+
     
+    StressRecord* get_stress_record() {
+        return _record;
+    }
+
+    int* get_stress_record_num() {
+        return &_record_num;
+    }
+    
+    int* get_stress_record_index() {
+        return &_record_index;
+    }
 private:
     void init_base_info();
     void init_hw_info();
@@ -295,6 +307,9 @@ private:
     bool _stress_test_window_quit_status;
     bool _pcba_whole_lock_state;
     bool _lock_file_status;
+    StressRecord _record[20];
+    int _record_num;
+    int _record_index;
 
 signals:
 
@@ -315,6 +330,7 @@ public slots:
     void confirm_shut_down_or_next_process(string process);
     void retry_sn_mac_test();
     void slot_factory_delete_event();
+    void show_stress_record();
 };
 
 #endif // CONTROL_H
