@@ -63,6 +63,7 @@ public:
 private:
     static VideoTestThread* _video_test_thread;
     bool _m_stopped;
+    QMutex  mutext;
 
 signals:
     void sig_send_one_frame(QPixmap img);

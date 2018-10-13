@@ -202,31 +202,35 @@ void StressTestWindow::finish_stress_window()
 
 void StressTestWindow::update_stress_test_pass_or_fail(QString result)
 {
-    if (result.compare("PASS") == 0) {
-        LOG_INFO("update_stress_test_pass_or_fail PASS");
-        _pm_pass_fail = _text2Pixmap(result, QColor(0, 255, 0));
-    } else {
-        LOG_INFO("update_stress_test_pass_or_fail FAIL");
-        _pm_pass_fail = _text2Pixmap(result, QColor(255, 0, 0));
+    if (NULL != _stress_test_window) {
+
+        if (result.compare("PASS") == 0) {
+            LOG_INFO("update_stress_test_pass_or_fail PASS");
+            _pm_pass_fail = _text2Pixmap(result, QColor(0, 255, 0));
+        } else {
+            LOG_INFO("update_stress_test_pass_or_fail FAIL");
+            _pm_pass_fail = _text2Pixmap(result, QColor(255, 0, 0));
+        }
+        _pm_pass_fail = _pm_pass_fail.scaled(st_w/2/2/2, (st_h - st_h/3)/2, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        _lb_pass_fail->setPixmap(_pm_pass_fail);
     }
-    _pm_pass_fail = _pm_pass_fail.scaled(st_w/2/2/2, (st_h - st_h/3)/2, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    _lb_pass_fail->setPixmap(_pm_pass_fail);
 }
 
 void StressTestWindow::update_stress_label_value(QString item, QString result)
 {
-    if (stress_test_info_list.isEmpty()) {
+    if ((stress_test_info_list.isEmpty()) || (NULL == _stress_test_window)) {
         return ;
     }
 
     foreach (Stress_Test_Info item_info, stress_test_info_list) {
-
+        qApp->processEvents();
         if (item.compare(item_info.name) == 0) {
-
-            LOG_INFO("update_stress_label_value item =  %s, result = %s",item.toStdString().c_str(),result.toStdString().c_str());
-            QLabel* label = item_info.label;
-            label->setText(result);
-            label->update();
+            if ((NULL != _stress_test_window)) {
+                LOG_INFO("update_stress_label_value item =  %s, result = %s",item.toStdString().c_str(),result.toStdString().c_str());
+                QLabel* label = item_info.label;
+                label->setText(result);
+                label->update();
+            }
         }
     }
 }
@@ -263,20 +267,23 @@ void StressTestWindow::start_exec()
 {
     show();
 }
-#if 1
+
 void StressTestWindow::slot_get_one_frame(QPixmap img)
 {
-    if (NULL != _lb_video) {
-        _lb_video->setPixmap(img);
-        _lb_video->update();
+    if (NULL != _stress_test_window) {
+        if (NULL != _lb_video) {
+            _lb_video->setPixmap(img);
+            _lb_video->update();
+        }
     }
 }
-#endif
 
 void StressTestWindow::slot_get_one_pixmap(QPixmap pix)
 {
-    QPixmap fixtmp = pix.scaled(_lb_image_frame->width()/4, _lb_image_frame->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    _set_picture(fixtmp);
+    if (NULL != _stress_test_window) {
+        QPixmap fixtmp = pix.scaled(_lb_image_frame->width()/4, _lb_image_frame->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        _set_picture(fixtmp);
+    }
 }
 
 void StressTestWindow::mousePressEvent(QMouseEvent* event)
@@ -297,10 +304,11 @@ void StressTestWindow::_set_picture(QPixmap& pix)
     }
 
     foreach (image_layout_attr item, _image_label_list) {
-        LOG_INFO("_set_picture");
-        QLabel* lb = item.lb_image;
-        lb->setPixmap(pix);
-        lb->update();
+        if (NULL != _stress_test_window) {
+            QLabel* lb = item.lb_image;
+            lb->setPixmap(pix);
+            lb->update();
+        }
     }
 }
 

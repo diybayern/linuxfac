@@ -99,28 +99,34 @@ int VideoTestThread::ffmpeg_video_change_format(AVFrame* frame, int dst_w, int d
     AVFrame* pFrameRGB = NULL;
     unsigned char* buffer = NULL;
 
+    mutext.lock();
     pFrameRGB = avcodec_alloc_frame();
     if (NULL == pFrameRGB) {
+        mutext.unlock();
+        LOG_ERROR("avcodec_alloc_frame error.");
         return _FAIL;
     }
+
+    numBytes = avpicture_get_size(AV_PIX_FMT_RGBA, dst_w, dst_h);
+
+    buffer = (unsigned char *) av_malloc(numBytes * sizeof(unsigned char));
+    if (NULL == buffer) {
+        mutext.unlock();
+        LOG_ERROR("av_malloc error.");
+        return _FAIL;
+    }
+
+    avpicture_fill((AVPicture *) pFrameRGB, buffer, AV_PIX_FMT_RGBA, dst_w, dst_h);
 
     img_convert_ctx = sws_getCachedContext(img_convert_ctx, frame->width,
                 frame->height, AV_PIX_FMT_YUV420P, dst_w, dst_h, AV_PIX_FMT_RGBA,
                 SWS_BILINEAR, NULL, NULL, NULL);
 
     if (NULL == img_convert_ctx) {
+        mutext.unlock();
+        LOG_ERROR("sws_getCachedContext error.");
         return _FAIL;
     }
-
-    numBytes = avpicture_get_size(AV_PIX_FMT_RGBA, dst_w, dst_h);
-
-
-    buffer = (unsigned char *) av_malloc(numBytes * sizeof(unsigned char));
-    if (NULL == buffer) {
-        return _FAIL;
-    }
-
-    avpicture_fill((AVPicture *) pFrameRGB, buffer, AV_PIX_FMT_RGBA, dst_w, dst_h);
 
     sws_scale(img_convert_ctx, (const unsigned char* const *) frame->data,
                         frame->linesize, 0, frame->height, pFrameRGB->data,
@@ -132,11 +138,13 @@ int VideoTestThread::ffmpeg_video_change_format(AVFrame* frame, int dst_w, int d
     if (NULL != StressTestWindow::g_get_stress_test_window()) {
         StressTestWindow::g_get_stress_test_window()->_lb_video->setPixmap(pixmap2);
     }*/
+
     emit sig_send_one_frame(pixmap2);
 
     av_free(buffer);
     av_frame_unref(pFrameRGB);
     av_free(pFrameRGB);
+    mutext.unlock();
 
     return _SUCCESS;
 }
@@ -239,8 +247,9 @@ void VideoTestThread::run()
         av_init_packet(&pkt);
         err = av_read_frame(pFormatCtx, &pkt);
         if (err < 0) {
+            LOG_ERROR("read data end. status = %d", err);
             if (err == AVERROR_EOF) {
-                LOG_ERROR("read data end.");
+                LOG_ERROR("read data end. AVERROR_EOF = %d", AVERROR_EOF);
                 video_type = VIDEO_INIT;
                 continue;
             }
@@ -252,6 +261,7 @@ void VideoTestThread::run()
                 emit sig_g_decode_status(ret);
             }
             if (_OUT == ret) {
+                LOG_ERROR("exit video test.");
                 break;
             }
             usleep(40000);
@@ -265,14 +275,17 @@ void VideoTestThread::run()
 void VideoTestThread::uninit()
 {
     if (NULL != img_convert_ctx) {
+        LOG_INFO("img_convert_ctx free.");
         sws_freeContext(img_convert_ctx);
     }
 
     if (NULL != pCodecCtx) {
+        LOG_INFO("pCodecCtx free.");
         avcodec_close(pCodecCtx);
     }
 
     if (NULL != pFormatCtx) {
+        LOG_INFO("pFormatCtx free.");
         avformat_close_input(&pFormatCtx);
     }
 }
