@@ -177,11 +177,6 @@ public:
         return _hwInfo;
     }
 
-    MesInfo*  get_mes_info()
-    {
-        return _mesInfo;
-    }
-
     void set_interfacetest_finish()
     {
         _funcFinishStatus->interface_finish = true;
@@ -265,17 +260,10 @@ public:
     }
 
     
-    StressRecord* get_stress_record() {
-        return _record;
-    }
-
-    int* get_stress_record_num() {
-        return &_record_num;
+    vector<string>* get_stress_record() {
+        return &_record;
     }
     
-    int* get_stress_record_index() {
-        return &_record_index;
-    }
 private:
     void init_base_info();
     void init_hw_info();
@@ -312,9 +300,7 @@ private:
     bool _stress_test_window_quit_status;
     bool _pcba_whole_lock_state;
     bool _lock_file_status;
-    StressRecord _record[20];
-    int _record_num;
-    int _record_index;
+    vector<string> _record;
 
 signals:
 

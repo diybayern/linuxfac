@@ -149,6 +149,7 @@ void* StressTest::test_all(void* arg)
 	BaseInfo* baseInfo = (BaseInfo*)arg;
 	Control *control = Control::get_control();
 	UiHandle* uihandle = UiHandle::get_uihandle();
+	vector<string>* record = control->get_stress_record();
     TimeInfo init_time = {0,0,0,0};
     TimeInfo tmp_dst = {0,0,0,0};
     char datebuf[CMD_BUF_SIZE] = {0};
@@ -229,35 +230,20 @@ void* StressTest::test_all(void* arg)
 				remove_local_file(STRESS_LOCK_FILE.c_str());
 			}
 
-			int start = 0, total = 0, date_index = 0;
-			StressRecord* record = NULL;
-			int* num = control->get_stress_record_num();
-			int* index = control->get_stress_record_index();
-			
-			if (STRESS_RECORD_NUM == *num) {
-				start = (*index + 1) % STRESS_RECORD_NUM;
-			} else {
-				start = 0;
-			}
-			
-			(*num)++;
-			if ((*num) >= STRESS_RECORD_NUM) {
-				(*num) = STRESS_RECORD_NUM;
-			}
-			
-			total = *num;
-			date_index = *index;
-			record = &(control->get_stress_record()[date_index]);
+			int encode = 0;
+			int decode = control->get_decode_status();
+			int result = encode | decode;
 
-			record->date = tmp_dst;
-			record->encode = 0;
-			record->decode = control->get_decode_status();
-			record->result = record->encode | record->decode;
-			
-			write_stress_record(control->get_stress_record(), start, total);
-			(*index)++;
-			(*index) %= STRESS_RECORD_NUM;
-			print_stress_test_result(control->get_stress_record(),start,total);
+			string line = (string)PRINT_RESULT1(result) + "  运行时间:" + to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour) + 
+							"小时" + to_string(tmp_dst.minute) + "分" + to_string(tmp_dst.second) + "秒  编码状态:" + 
+							(string)PRINT_RESULT1(encode) + "  解码状态:" + (string)PRINT_RESULT1(decode) + "\n";
+
+			while (record->size() > STRESS_RECORD_NUM) {
+				record->erase(record->begin());
+			}
+			record->push_back(line);
+			write_stress_record(*record);
+			print_stress_test_result(*record);
 			
             break;
         }
@@ -299,36 +285,16 @@ void StressTest::start_test(BaseInfo* baseInfo)
     pthread_create(&tid,NULL,test_all,baseInfo);
 }
 
-void StressTest::print_stress_test_result(StressRecord* record, int index, int num) 
+void StressTest::print_stress_test_result(vector<string> record) 
 {
 	Control *control = Control::get_control();
-
-	int i = 0;
-	char line[8192] = { 0, };
 
 	control->update_screen_log("The last Stress test result is...\n");
 	control->update_screen_log("==================== Stress Test Result ====================\n");
 
-	if (access(STRESS_RECORD, F_OK) == 0) {
-		remove(STRESS_RECORD);
+	for (size_t i = 0; i < record.size(); i++) {
+		control->update_screen_log(record[i]);
 	}
-
-	for (i = 0; i < num; i++) {
-
-		sprintf(line, "%s 运行时间:%d天%d小时%d分%d秒 编码状态:%s 解码状态:%s\n",
-				PRINT_RESULT1(record[index].result),
-				record[index].date.day, record[index].date.hour,
-				record[index].date.minute, record[index].date.second,
-				PRINT_RESULT1(record[index].encode),
-				PRINT_RESULT1(record[index].decode));
-
-		index++;
-		index %= STRESS_RECORD_NUM;
-		control->update_screen_log(string(line));
-
-		LOG_STRESS(line);
-	}
-	LOG_STRESS("---------------------Detail test result-----------------------\n");
 	control->update_screen_log("==================================================\n");
 }
 

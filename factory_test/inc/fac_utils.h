@@ -15,9 +15,10 @@
 #include <stdarg.h>
 #include <time.h>
 #include <sys/sysinfo.h>
+#include <vector>
 
 using std::string;
-
+using namespace std;
 
 const string MEM_TEST_NAME  = "内存测试";
 const string USB_TEST_NAME  = "USB测试";
@@ -53,8 +54,6 @@ const string GET_BASEINFO_INI     = FACTORY_PATH + "hwcfg.ini";
 const string MEM_UI_LOG           = FACTORY_PATH + "mem_ui_log";
 const string FAC_CONFIG_FILE      = "/tmp/fac_config.conf";
 
-const string STRESS_STAT          = FACTORY_PATH + "stress";
-
 #define AGAIN           (3)
 #define SUCCESS         (0)
 #define FAIL            (1)
@@ -76,7 +75,7 @@ const string STRESS_STAT          = FACTORY_PATH + "stress";
 #define CMD_BUF_SIZE      (256)
 
 #define MES_FILE          ("/var/log/mes.txt")
-#define STRESS_RECORD     ("/tmp/stress.txt")
+#define STRESS_RECORD     ("/var/log/stress.log")
 #define LOG_FILE          ("/var/log/qt.log")
 #define LOG_FILE_BAK      ("/var/log/qt_bak.log")
 
@@ -187,13 +186,6 @@ struct CpuStatus {
 	uint64 cpu_guest_nice;
 };
 
-struct StressRecord {
-    int result;
-    int encode;
-    int decode;
-    TimeInfo date;
-};
-
 typedef struct tagUdevInfo {
 	char block[USB_BLOCK_LEN];
 	char vendor[USB_VENDOR_LEN];
@@ -233,8 +225,8 @@ string get_mem_info();
 string get_cpu_info(CpuStatus* st_cpu);
 string change_float_to_string(float fla);
 void stop_gpu_stress_test(void);
-void write_stress_record(StressRecord* record, int index, int num);
-void read_stress_record(StressRecord* record, int* num);
+void write_stress_record(vector<string> record);
+void read_stress_record(vector<string> *record);
 
 
 #endif

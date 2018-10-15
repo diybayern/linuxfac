@@ -4,8 +4,6 @@
 #include <ftplib.h>
 #include <map>
 
-using namespace std;
-
 netbuf* ftp_handle;
 
 #define DEFAULT_FTP_IP       "172.21.5.48"
@@ -644,58 +642,38 @@ void stop_gpu_stress_test(void) {
     }
 }
 
-void write_stress_record(StressRecord* record, int index, int num) {
+void write_stress_record(vector<string> record) {
 
-	int i = 0;
-	FILE* fp = NULL;
-	char line[8192] = { 0, };
-
-	if ((fp = fopen(STRESS_STAT.c_str(), "wb+")) == NULL) {
-		LOG_ERROR("open %s failed\n", STRESS_STAT);
-		return;
+	if (access(STRESS_RECORD, F_OK) == 0) {
+		remove(STRESS_RECORD);
 	}
 
-	for (i = 0; i < num; i++) {
-
-		sprintf(line, "%d %d %d %d %d %d %d\n",  record[index].date.day, record[index].date.hour,
-				record[index].date.minute, record[index].date.second,
-				record[index].encode, record[index].decode, record[index].result);
-
-		index++;
-		index %= STRESS_RECORD_NUM;
-		fwrite(line, strlen(line), 1, fp);
+	for (size_t i = 0; i < record.size(); i++) {
+		LOG_STRESS(record[i].c_str());
 	}
 
-    fflush(fp);
-    fsync(fileno(fp));
-	fclose(fp);
 }
 
-void read_stress_record(StressRecord* record, int* num) {
+void read_stress_record(vector<string> *record) {
 
-	int i = 0;
 	FILE* fp = NULL;
 	char line[8192] = { 0, };
 
-	*num = 0;
-
-	if ((fp = fopen(STRESS_STAT.c_str(), "r")) == NULL) {
-		LOG_ERROR("open %s failed\n", STRESS_STAT);
+	if ((fp = fopen(STRESS_RECORD, "r")) == NULL) {
+		LOG_ERROR("open %s failed\n", STRESS_RECORD);
 		return;
 	}
 
 	while (fgets(line, sizeof(line), fp) != NULL) {
-		memset(&record[i], 0, sizeof(StressRecord));
-
-		sscanf(line, "%d %d %d %d %d %d %d\n", &record[i].date.day,
-				&record[i].date.hour, &record[i].date.minute, &record[i].date.second,
-				&record[i].encode, &record[i].decode, &record[i].result);
-
-		i++;
+		record->push_back(string(line));
 	}
-
-	*num = i;
+	while (record->size() > STRESS_RECORD_NUM) {
+		LOG_INFO("stress record is too much\n");
+		record->erase(record->begin());
+	}
 
 	fclose(fp);
 }
+
+
 

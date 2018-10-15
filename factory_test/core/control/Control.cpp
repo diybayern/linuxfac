@@ -399,11 +399,10 @@ void Control::show_stress_record(){
 	update_screen_log("\t\tWelcome to Factory Test Software\n");
 	update_screen_log("---------------------------------------------------------------------------------------------\n");
 
-	read_stress_record(_record, &_record_num);
-	_record_index = _record_num % STRESS_RECORD_NUM;
+	read_stress_record(&_record);
 
 	StressTest* stress = (StressTest*) _funcBase[STRESS];
-	stress->print_stress_test_result(_record, 0, _record_num);
+	stress->print_stress_test_result(_record);
 }
 
 void Control::auto_test_mac_sn() {
