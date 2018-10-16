@@ -566,7 +566,7 @@ void MainTestWindow::draw_main_test_window()
 void MainTestWindow::show_main_test_window()
 {
     setupUI();
-    this->setWindowTitle("工程测试程序");
+    this->setWindowTitle("工厂测试程序");
     get_current_res_h = _desktopWidget->height();
     get_current_res_w = _desktopWidget->width();
     this->resize(_desktopWidget->width(), _desktopWidget->height());
