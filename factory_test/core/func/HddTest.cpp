@@ -10,7 +10,11 @@ HddTest::HddTest()
 
 string HddTest::hdd_test_all(string hdd_cap)
 {
-    execute_command("bash " + HDD_TEST_SCRIPT + " " + hdd_cap);
+    string result = execute_command("bash " + HDD_TEST_SCRIPT + " " + hdd_cap);
+	if(result == "error") {
+		LOG_ERROR("%s run error", HDD_TEST_SCRIPT.c_str());
+		hdd_screen_log += "ERROR:hdd_test.sh run error\n";
+	}
 	if(check_if_hdd_pass() == true)
 		return "SUCCESS";
 	return "FAIL";
@@ -24,11 +28,11 @@ bool HddTest::check_if_hdd_pass()
 	int size = 0;
 	if(!get_file_size("/tmp/hdd.status",&size)) {
 		LOG_ERROR("/tmp/hdd.status is null\n");
-		hdd_screen_log += "/tmp/hdd.status is null\n\n";
+		hdd_screen_log += "ERROR:get hdd status error\n\n";
 		return false;
 	}
 	if(!read_local_data("/tmp/hdd.status", hdd_status, size)) {
-		hdd_screen_log += "read /tmp/hdd.status fail\n\n";
+		hdd_screen_log += "ERROR:get hdd status error\n\n";
 		return false;
 	}
     if (!strcmp(delNL(hdd_status), "SUCCESS")) {
@@ -36,7 +40,7 @@ bool HddTest::check_if_hdd_pass()
         return true;
     } else {
         LOG_ERROR("HDD test failed: \t%s\n", hdd_status);
-		hdd_screen_log += "HDD test failed:\t\t" + (string)hdd_status + "\n\n";
+		hdd_screen_log += "HDD test failed:\t" + (string)hdd_status + "\n\n";
         return false;
     }
 }

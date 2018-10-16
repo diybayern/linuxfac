@@ -4,7 +4,6 @@
 #include "../../inc/libx86.h"
 
 #include <sys/types.h>
-//#include <libx86.h>
 #include <sys/io.h>
 
 #include <fcntl.h>
@@ -22,6 +21,7 @@ pthread_mutex_t g_reg_mutex = PTHREAD_MUTEX_INITIALIZER;
 string edid_screen_log = "";
 
 extern int edid_read_i2c_test(int edid_num);
+extern string get_edid_i2c_screen_log();
 
 EdidTest::EdidTest()
 {
@@ -151,6 +151,7 @@ int EdidTest::edid_test_all(unsigned int num) {
 
 i2c_test:
     ret = edid_read_i2c_test(edid_num);
+	edid_screen_log += get_edid_i2c_screen_log();
     if (ret == SUCCESS) {
         pthread_mutex_unlock(&g_reg_mutex);
         goto print;
@@ -213,19 +214,18 @@ print:
 	return ret;
 }
 
-int EdidTest::get_edid_num(BaseInfo* baseInfo){
+int EdidTest::get_edid_num(BaseInfo* baseInfo)
+{
 	int vga = 0, hdmi = 0;
-	if (baseInfo->vga_exist == "" || baseInfo->vga_exist == "0") {
-		vga = 0;
-	} else {
+	
+	if (baseInfo->vga_exist != "" && baseInfo->vga_exist != "0") {
 		vga = get_int_value(baseInfo->vga_exist);
 	}
 
-	if (baseInfo->hdmi_exist == "" || baseInfo->hdmi_exist == "0") {
-		hdmi = 0;
-	} else {
+	if (baseInfo->hdmi_exist != "" && baseInfo->hdmi_exist != "0") {
 		hdmi = get_int_value(baseInfo->hdmi_exist);
 	}
+	
 	return vga + hdmi;
 }
 void* EdidTest::test_all(void *arg)
@@ -238,7 +238,7 @@ void* EdidTest::test_all(void *arg)
 	int edid_num = get_edid_num(baseInfo);
 	LOG_INFO("edid num: %d", edid_num);
 	int is_pass = edid_test_all(edid_num);
-	edid_screen_log += "edid test result:\t\t\t";
+	edid_screen_log += "\nedid test result:\t\t\t";
 	if (is_pass == SUCCESS) {
 		edid_screen_log += "SUCCESS\n\n";
         control->set_interface_test_result(EDID_TEST_NAME, true);

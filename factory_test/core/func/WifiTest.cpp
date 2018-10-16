@@ -354,23 +354,29 @@ bool WifiTest::check_if_wifi_connect_pass(void)
 	int size = 0;
 	
 	if(!get_file_size("/tmp/wifi_test_info.tmp", &size)) {
-		LOG_ERROR("/tmp/wifi_test_info.tmp is null\n");
+		LOG_ERROR("/tmp/wifi_test_info.tmp is null");
+		wifi_screen_log += "\tERROR:get wifi info error\n";
 		return false;
 	}
 	memset(wifi_info, 0, CMD_BUF_SIZE);
 	if(!read_local_data("/tmp/wifi_test_info.tmp",wifi_info,size)) {
+		LOG_ERROR("read /tmp/wifi_test_info.tmp error");
+		wifi_screen_log += "\tERROR:get wifi info error\n";
 		return false;
 	}
 	LOG_INFO("WIFI INFO:%s\n",wifi_info);
-	wifi_screen_log += "WIFI INFO:" + (string)wifi_info + "\n";;
+	wifi_screen_log += "WIFI INFO:" + (string)wifi_info + "\n";
 
 
 	if(!get_file_size("/tmp/wifi.status", &size)) {
 		LOG_ERROR("/tmp/wifi.status is null\n");
+		wifi_screen_log += "\tERROR:get wifi status error\n";
 		return false;
 	}
 	memset(wifi_status, 0, CMD_BUF_SIZE);
 	if(!read_local_data("/tmp/wifi.status", wifi_status, size)) {
+		LOG_ERROR("read /tmp/wifi.status error");
+		wifi_screen_log += "\tERROR:get wifi status error\n";
 		return false;
 	}
 
@@ -381,13 +387,13 @@ bool WifiTest::check_if_wifi_connect_pass(void)
 
 		if(!get_file_size("/tmp/ssid.mac", &size)) {
 			LOG_ERROR("/tmp/ssid.mac is null\n");
-			wifi_screen_log += "/tmp/ssid.mac is null\n";
+			wifi_screen_log += "\tERROR:get ssid mac error\n";
 			return false;
 		}
 		memset(wifi_ssid_mac, 0, CMD_BUF_SIZE);
 		if(!read_local_data("/tmp/ssid.mac",wifi_ssid_mac,size)) {
 			LOG_ERROR("/tmp/ssid.mac read error\n");
-			wifi_screen_log += "/tmp/ssid.mac read error\n";
+			wifi_screen_log += "\tERROR:get ssid mac error\n";
 			return false;
 		}
         LOG_INFO("WIFI SSID mac:\t%s\n",wifi_ssid_mac);
@@ -410,14 +416,14 @@ bool WifiTest::check_if_wifi_connect_pass(void)
 void* WifiTest::test_all(void*)
 {
 	Control *control = Control::get_control();
+	control->set_interface_test_status(WIFI_TEST_NAME, false);
     while (1) {
 		//starting wifi test after net test over
-		sleep(1);
         if (control->get_interface_test_status()->net_test_over) {
             break;
 		}
+		sleep(1);
 	}
-	control->set_interface_test_status(WIFI_TEST_NAME, false);
 	wifi_screen_log += "==================== wifi test ====================\n";
 	bool is_pass = false;
 	FacArg* _facArg = control->get_fac_arg();
@@ -425,7 +431,8 @@ void* WifiTest::test_all(void*)
 											+ " " + _facArg->wifi_passwd + " " + _facArg->wifi_enp;
 	string str = execute_command(cmd);
     if (str == "error"){
-    	LOG_ERROR("wifi init error!\n");                        
+    	LOG_ERROR("ERROR:wifi init error!\n");
+		wifi_screen_log += "wifi init error!\n";
     }else {
 		if (check_if_wifi_connect_pass()) {
 			is_pass = wifi_test_send_msg();		 
@@ -433,15 +440,15 @@ void* WifiTest::test_all(void*)
     }
 
 	if (is_pass) {
-		wifi_screen_log += "wifi test result:\t\t\tSUCCESS\n\n";
+		wifi_screen_log += "\nwifi test result:\t\t\tSUCCESS\n\n";
 		control->set_interface_test_result(WIFI_TEST_NAME, true); 
 	} else {
-		wifi_screen_log += "wifi test result:\t\t\tFAIL\n\n";
+		wifi_screen_log += "\nwifi test result:\t\t\tFAIL\n\n";
 		control->set_interface_test_result(WIFI_TEST_NAME, false); 
 	}
 	control->update_screen_log(wifi_screen_log);
-	control->set_interface_test_status(WIFI_TEST_NAME, true);
 	wifi_screen_log = "";
+	control->set_interface_test_status(WIFI_TEST_NAME, true);
 	return NULL;
 }
 

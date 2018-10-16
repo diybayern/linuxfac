@@ -28,7 +28,6 @@ WIFI_SSID_MAC=/tmp/ssid.mac
 SSID=$1
 PASSWD=$2
 ENP=$3
-# WIFI_CONFIG_FILE=/tmp/wifi_config.ini
 FACTORY_SHELL_LOG=/var/log/factory_test_bash.log
 WPA_CONFIG=/tmp/wpa.conf
 WPA_SUPPLICANT_EXIST=0

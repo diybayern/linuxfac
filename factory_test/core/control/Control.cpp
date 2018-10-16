@@ -334,6 +334,7 @@ void Control::start_sound_test()
 void Control::start_display_test()
 {
 	LOG_INFO("******************** start display test ********************");
+	update_screen_log("==================== display test ====================\n");
     _uiHandle->show_display_ui();
 }
 
@@ -377,7 +378,7 @@ void Control::set_test_result(string func,string result,string ui_log)
 
 void Control::confirm_test_result(string func)
 {
-    LOG_INFO("confirm_test_result");
+    LOG_INFO("confirm %s result",func.c_str());
     _uiHandle->confirm_test_result_dialog(func);
 }
 
@@ -791,25 +792,27 @@ void Control::start_update_mes_log(MesInfo* info)
 
 void Control::set_test_result_pass_or_fail(string func, string result)
 {
-
     if (result == "PASS") {
         if (func == SOUND_TEST_NAME) {
             _funcFinishStatus->sound_finish= true;
             _mesInfo->func = "AUDIO";
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
+			update_screen_log("sound test result\t\t\tSUCCESS\n");
         }
         if (func == DISPLAY_TEST_NAME) {
             _funcFinishStatus->display_finish= true;
             _mesInfo->func = "DISPLAY";
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
+			update_screen_log("display test result\t\t\tSUCCESS\n");
         }
         if (func == BRIGHT_TEST_NAME) {
             _funcFinishStatus->bright_finish= true;
             _mesInfo->func = "BRIGHTNESS";
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
+			update_screen_log("bright test result\t\t\tSUCCESS\n");
         }
         if (func == CAMERA_TEST_NAME) {
             _funcFinishStatus->camera_finish= true;
@@ -818,6 +821,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->func = "CAMERA";
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
+			update_screen_log("camera test result\t\t\tSUCCESS\n");
         }
         if (func == STRESS_TEST_NAME) {
             _funcFinishStatus->stress_finish= true;
@@ -832,18 +836,21 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->func = "AUDIO";
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
+			update_screen_log("sound test result\t\t\tFAIL\n");
         }
         if (func == DISPLAY_TEST_NAME) {
             _funcFinishStatus->display_finish= false;
             _mesInfo->func = "DISPLAY";
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
+			update_screen_log("display test result\t\t\tFAIL\n");
         }
         if (func == BRIGHT_TEST_NAME) {
             _funcFinishStatus->bright_finish= false;
             _mesInfo->func = "BRIGHTNESS";
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
+			update_screen_log("bright test result\t\t\tFAIL\n");
         }
         if (func == CAMERA_TEST_NAME) {
             _funcFinishStatus->camera_finish= false;
@@ -852,6 +859,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->func = "CAMERA";
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
+			update_screen_log("camera test result\t\t\tFAIL\n");
         }
         if (func == STRESS_TEST_NAME) {
             _funcFinishStatus->stress_finish= false;

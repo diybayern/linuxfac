@@ -14,14 +14,15 @@ bool UsbTest::usb_num_test(string total_num, string num_3)
     string real_num_3 = execute_command("lsusb -t | grep \"Mass Storage\" | grep \"5000M\" | wc -l");
     if (real_total_num == total_num) {
         if (real_num_3 == num_3) {
+			usb_screen_log += "usb3.0 num is " + real_num_3 + ",total usb num is " + real_total_num + "\n";
             return true;
         } else {
-            usb_screen_log += "usb3.0 num is " + real_num_3 + ",which need " + num_3 + "\n";
+            usb_screen_log += "usb3.0 num is " + real_num_3 + ", which need " + num_3 + "\n";
             LOG_INFO("usb3.0 num is %s,which need %s!",real_num_3.c_str(),num_3.c_str());
             return false;
         }
     } else {
-    	usb_screen_log += "usb num is " + real_total_num + ",which need " + total_num + "\n";
+    	usb_screen_log += "current usb num is " + real_num_3+ "/" + real_total_num + ", which need " + num_3 + "/" + total_num + "\n";
         LOG_INFO("usb num is %s,which need %s!",real_total_num.c_str(),total_num.c_str());
         return false;
     }
@@ -150,6 +151,7 @@ bool UsbTest::usb_test_mount(char* block, const char* dir) {
 	sprintf(cmd, "mount %s %s", block, dir);
 	if (system(cmd) < 0) {
 		LOG_INFO("run %s failed\n", cmd);
+		usb_screen_log += "ERROR: " + (string)cmd + "failed\n";
 		return false;
 	}
 
@@ -172,6 +174,7 @@ bool UsbTest::usb_test_write(const char* dir, const char* file_name) {
 			USB_WRITE_LEN * sizeof(int));
 	if (ret == false) {
 		LOG_INFO("write data to usb failed\n");
+		usb_screen_log += "ERROR: write data to usb failed\n";
 	}
 
 	return ret;
@@ -188,6 +191,7 @@ bool UsbTest::usb_test_read(const char* dir, const char* file_name) {
 	ret = read_local_data(name, (char*) buf, USB_WRITE_LEN * sizeof(int));
 	if (ret == false) {
 		LOG_INFO("read data from usb failed\n");
+		usb_screen_log += "ERROR: read data from usb failed\n";
 		return false;
 	}
 
@@ -195,6 +199,7 @@ bool UsbTest::usb_test_read(const char* dir, const char* file_name) {
 		if (buf[i] != i) {
 			ret = false;
 			LOG_INFO("read data failed\n");
+			usb_screen_log += "ERROR: read data is not equal to write data\n";
 			break;
 		}
 
@@ -210,13 +215,14 @@ bool UsbTest::usb_test_umount(const char* dir) {
 	char cmd[64] = { 0, };
 
 	if (NULL == dir) {
-		LOG_INFO("unmount dir=%s failed\n", dir);
+		LOG_INFO("dir=%s doesn't exist\n", dir);
 		return false;
 	}
 	sprintf(cmd, "umount %s", dir);
 	ret = system(cmd);
 	if (ret < 0) {
 		LOG_INFO("run %s failed\n", cmd);
+		usb_screen_log += "ERROR: " + (string)cmd + " failed\n";
 		return false;
 	}
 
@@ -281,19 +287,19 @@ void* UsbTest::test_all(void *arg)
 	usb_screen_log += "==================== usb test ====================\n";
     int num = get_int_value(baseInfo->usb_total_num);
 	bool result_num_test = false;
-    result_num_test = usb_num_test(baseInfo->usb_total_num,baseInfo->usb_3_num);
+    result_num_test = usb_num_test(baseInfo->usb_total_num, baseInfo->usb_3_num);
     
     if (result_num_test) {
         bool result_write_read = usb_test_all(num);
         if (result_write_read) {
-			usb_screen_log += "usb test result:\t\t\tSUCCESS\n\n";
+			usb_screen_log += "\nusb test result:\t\t\tSUCCESS\n\n";
 	   		control->set_interface_test_result(USB_TEST_NAME, true); 
         } else {
-        	usb_screen_log += "usb test result:\t\t\tFAIL\n\n";
+        	usb_screen_log += "\nusb test result:\t\t\tFAIL\n\n";
 			control->set_interface_test_result(USB_TEST_NAME, false);
         }
     } else {
-		usb_screen_log += "usb test result:\t\t\tFAIL\n\n";
+		usb_screen_log += "\nusb test result:\t\t\tFAIL\n\n";
 		control->set_interface_test_result(USB_TEST_NAME, false); 
     }	
 	control->update_screen_log(usb_screen_log);

@@ -25,6 +25,8 @@
 #define I2C_DEV_PATH_LEN    256
 #define I2C_DEV_NAME_LEN    256
 
+static string i2c_screen_log = "";
+
 static int open_i2c_dev(int i2cbus)
 {
 	int i2cfile;
@@ -115,6 +117,7 @@ static char *edid_i2c_dev_name(int i2cbus)
 
 int edid_read_i2c_test(int edid_num)
 {
+	i2c_screen_log = "";
 	int i, j, ret, len, numbusses=0, i2cfile, i2cbus=0;
 	int goodbus[128];
 	unsigned char block[256];
@@ -147,12 +150,11 @@ endloop:
 		LOG_ERROR("Looks like no buses have an EDID. Sorry!\n");
 		return AGAIN;
 	}
-#if 0
-	SCREEN_SIMPLE("\t%i potential buses found: [", numbusses);
+
+	i2c_screen_log += to_string(numbusses) + " potential buses found: [";
 	for (i=0; i<numbusses; i++)
-		SCREEN_SIMPLE(" %i ", goodbus[i]);
-	SCREEN_SIMPLE("]\n\n");
-#endif
+		i2c_screen_log += " " + to_string(goodbus[i]) + " ";
+	i2c_screen_log += "]\n\n";
 
     ret = 0;
 	for (i=0; i < numbusses; i++) {
@@ -172,23 +174,24 @@ endloop:
                 len = 128;
             else
                 len = 256;
-            LOG_INFO("%i-byte EDID successfully retrieved from i2c bus [%i]:\n", len, i2cbus);
-            LOG_INFO("\tEDID I2C device name: %s\n", edid_i2c_dev_name(i2cbus));
+            i2c_screen_log += to_string(len) + "-byte EDID successfully retrieved from i2c bus [" +
+								to_string(i2cbus) + "]:\n";
+            i2c_screen_log += "\tEDID I2C device name: " + (string)edid_i2c_dev_name(i2cbus) + "\n";
             if (parse_i2c_edid((char *)block, len) == FAIL) {
                 ret = FAIL;
-                LOG_ERROR("ERROR: Failed to parse the EDID information from i2c bus %i!\n",
-                    i2cbus);
+                i2c_screen_log += "ERROR: Failed to parse the EDID information from i2c bus " +
+								to_string(i2cbus) + "\n";
             }
 		} else {
-			LOG_ERROR("ERROR: Bus %i doesn't really have an EDID...\n", i2cbus);
+			i2c_screen_log += "ERROR: Bus " + to_string(i2cbus) + " doesn't really have an EDID...\n";
             ret = FAIL;
 		}
 	}
 
     if (numbusses < edid_num) {
         /* Detected bus less than the real num, FAIL */
-        LOG_ERROR("ERROR: This product contains %d DDC interfaces, but only %d detected.\n",
-            edid_num, numbusses);
+        i2c_screen_log += "ERROR: This product contains " + to_string(edid_num) + " DDC interfaces, but only " + 
+        					to_string(numbusses) +" detected.\n";
         ret = FAIL;
     }
     return ret;
@@ -213,4 +216,9 @@ endloop:
 	return 0;
 #endif
 }
+
+string get_edid_i2c_screen_log(){
+	return i2c_screen_log;
+}
+
 

@@ -230,7 +230,7 @@ bool NetTest::init()
 
     info = (NetInfo *)malloc(sizeof(NetInfo));
     if (!info) {
-		LOG_ERROR("malloc NetInfo failed \n");
+		LOG_ERROR("malloc NetInfo failed\n");
         return false;
     }
 
@@ -325,7 +325,6 @@ bool NetTest::net_get_eth_info(NetInfo *info)
         return false;
     }
     if (strncmp("br", (char *)info->eth_name, 2) == 0) {
-        /* ethN is bridged to brN */
         snprintf(eth_name, ETH_NAME_LEN, "eth%d", net_eth_no((char *)info->eth_name));
     } else {
         strcpy(eth_name, (char *)info->eth_name);
@@ -337,13 +336,12 @@ bool NetTest::net_get_eth_info(NetInfo *info)
         return false;
     }
 
-    /* Get eth status */
     bool flag = net_get_eth_status(fd, (char *)eth_name, &info->eth_status);
     if (flag == false) {
         close(fd);
         return false;
     }
-    /* Get eth link */
+
     edata.cmd = ETHTOOL_GLINK;
     ret = net_test_ioctl(fd, (char *)eth_name, &edata);
     if (ret < 0) {
@@ -451,6 +449,7 @@ bool NetTest::net_test_all() {
     ret = net_get_eth_info(info);
     if (ret == false) {
         LOG_ERROR("get eth status failed!\n");
+		net_screen_log += "ERROR: get eth status failed!\n";
         goto error;
     }
 
@@ -485,17 +484,17 @@ bool NetTest::net_test_all() {
         LOG_INFO("Network card speed: \t\t%uMbps\n", info->eth_speed);
 		net_screen_log += "Network card speed: \t\t" + to_string(info->eth_speed) + "Mbps\n";
         if (info->eth_speed != ETH_LINK_SPEED) {
-            LOG_ERROR("ERROR: Network speed must be %uMbps but current is %uMbps\n",
+            LOG_ERROR("ERROR: Network speed must be %uMbps, but current is %uMbps\n",
                                         ETH_LINK_SPEED, info->eth_speed);
-			net_screen_log += "ERROR: Network speed must be " + to_string(ETH_LINK_SPEED)
-						+ "Mbps but current is " + to_string(info->eth_speed) + "Mbps\n";
+			net_screen_log += "\tERROR: Network speed must be " + to_string(ETH_LINK_SPEED)
+						+ "Mbps, but current is " + to_string(info->eth_speed) + "Mbps\n";
             ret = false;
         }
     }
 
     net_screen_log += "Network card duplex: \t\t" + net_get_duplex_desc(info->eth_duplex) + "\n";
     if (info->eth_duplex != DUPLEX_FULL) {
-        net_screen_log += "\nERROR: Network duplex must be full but current is "
+        net_screen_log += "\tERROR: Network duplex must be Full, but current is "
 					+ net_get_duplex_desc(info->eth_duplex) + "\n";
         ret = false;
     }
