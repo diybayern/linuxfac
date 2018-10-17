@@ -20,9 +20,11 @@ bool CpuTest::is_cpu_test_pass(BaseInfo* baseInfo)
 	idx = hw_cpu_type.find(base_cpu_type);
     if (idx != string::npos && base_cpu_type != "") {
 		cpu_screen_log += "current cpu type is " + hw_cpu_type + "\n\n";
+		LOG_INFO("current cpu type is %s\n", hw_cpu_type.c_str());
         return true;
     } else {    
 		cpu_screen_log += "cpu type should be\t\t" + base_cpu_type + "\nbut current is\t\t" + hw_cpu_type + "\n\n";
+		LOG_ERROR("cpu type should be %s\tbut current is %s\n",base_cpu_type.c_str(),hw_cpu_type.c_str());
         return false;
     }
 }
@@ -33,9 +35,11 @@ void CpuTest::start_test(BaseInfo* baseInfo)
 	control->set_interface_test_status(CPU_TEST_NAME, false);
     cpu_screen_log += "==================== cpu test ====================\n";
     if (is_cpu_test_pass(baseInfo)) {
+		LOG_INFO("cpu test result:\tPASS\n");
         cpu_screen_log += "cpu test result:\t\t\tSUCCESS\n\n";
-		control->set_interface_test_result(CPU_TEST_NAME, true); 
-    } else {    
+		control->set_interface_test_result(CPU_TEST_NAME, true);
+    } else {
+    	LOG_INFO("cpu test result:\tFAIL\n");
         cpu_screen_log += "cpu test result:\t\t\tFAIL\n\n";
 		control->set_interface_test_result(CPU_TEST_NAME, false); 
     }
@@ -64,10 +68,13 @@ void* FanTest::test_all(void *arg)
     BaseInfo* baseInfo = (BaseInfo *)arg;
     string result = fan_speed_test(baseInfo->fan_speed);
     if (result == "SUCCESS") {
+		LOG_INFO("fan test result:\tPASS\n");
         fan_screen_log += "fan test result:\t\t\t" + result + "\n\n";
         control->set_interface_test_result(FAN_TEST_NAME, true);    
     } else {
-        fan_screen_log += "fan speed should be " + baseInfo->fan_speed + "\tbut current is " + result + "\n\n";        
+        fan_screen_log += "fan speed should be " + baseInfo->fan_speed + "\tbut current is " + result + "\n\n";
+		LOG_ERROR("fan speed should be %s\tbut current is %s\n",(baseInfo->fan_speed).c_str(),result.c_str());
+		LOG_INFO("fan test result:\tFAIL\n");
         fan_screen_log += "fan test result:\t\t\tFAIL\n\n";
         control->set_interface_test_result(FAN_TEST_NAME, false);
     }
@@ -144,6 +151,27 @@ void StressTest::stop_cpuburn_stress()
 	}
 }
 
+void* StressTest::mem_stress_test(void* arg)
+{
+	pthread_detach(pthread_self());
+	bool *flag = (bool*)arg;
+	stop_mem_stress_test();
+	string result = execute_command("bash " + MEM_TEST_SCRIPT + " 10M");
+	if (result == "SUCCESS") {
+		*flag = true;
+	} else {
+		*flag = false;
+	}
+	return NULL;
+}
+
+void StressTest::stop_mem_stress_test()
+{
+	if (system("killall -s 9 memtester") < 0) {
+		LOG_ERROR("kill memtester error");
+	}
+}
+
 void* StressTest::test_all(void* arg)
 {
 	BaseInfo* baseInfo = (BaseInfo*)arg;
@@ -155,6 +183,7 @@ void* StressTest::test_all(void* arg)
     char datebuf[CMD_BUF_SIZE] = {0};
 	CpuStatus st_cpu = {0,0,0,0,0,0,0,0,0,0,0};
     pthread_t pid_t1, pid_t2;
+    int encode = 0, decode = 0, result = 0;
 	
 	FuncBase** _funcBase = control->get_funcbase();
 	CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
@@ -204,16 +233,15 @@ void* StressTest::test_all(void* arg)
     uihandle->update_stress_label_value("硬件版本",(control->get_hw_info())->product_hw_version);
     uihandle->update_stress_label_value("SN序列号",(control->get_hw_info())->sn);
     uihandle->update_stress_label_value("MAC地址",(control->get_hw_info())->mac);
+	uihandle->update_stress_label_value("解码状态","PASS");
+	uihandle->update_stress_label_value("Mem压力测试","PASS");
 
     if (baseInfo->platform == "IDV") {
         pthread_create(&pid_t2, NULL, gpu_stress_test, NULL);
     }
 	start_cpuburn_stress();
-
-    if (control->get_pcba_whole_lock_state()) {
-        sleep(1);
-        uihandle->confirm_test_result_warning("上次拷机退出异常");
-    }
+	bool mem_status = true;
+	pthread_create(&pid_t1, NULL, mem_stress_test, &mem_status);
 	
     get_current_open_time(&init_time);
     while(true)
@@ -223,6 +251,7 @@ void* StressTest::test_all(void* arg)
 				stop_gpu_stress_test();
             }
 			stop_cpuburn_stress();
+			stop_mem_stress_test();
 			if (get_int_value(baseInfo->camera_exist) == 1) {
 				camera->close_xawtv_window();
 			}
@@ -230,9 +259,8 @@ void* StressTest::test_all(void* arg)
 				remove_local_file(STRESS_LOCK_FILE.c_str());
 			}
 
-			int encode = 0;
-			int decode = control->get_decode_status();
-			int result = encode | decode;
+			encode = 0;
+			result = encode | decode | (mem_status ? 0 : 1);
 
 			string line = (string)PRINT_RESULT1(result) + "  运行时间:" + to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour) + 
 							"小时" + to_string(tmp_dst.minute) + "分" + to_string(tmp_dst.second) + "秒  编码状态:" + 
@@ -247,24 +275,32 @@ void* StressTest::test_all(void* arg)
 			
             break;
         }
-		
+        
+		decode = control->get_decode_status();
+
         get_current_open_time(&tmp_dst);
         diff_running_time(&tmp_dst, &init_time);
 		if (tmp_dst.day == 0 && tmp_dst.hour == 0 && tmp_dst.minute == 2 && tmp_dst.second >= 0 && tmp_dst.second <= 2) {
 			remove_local_file(STRESS_LOCK_FILE.c_str());
-            if (control->get_decode_status()) {
+            if (decode || !mem_status) {
                 uihandle->set_stress_test_pass_or_fail("FAIL");
             } else {
                 uihandle->set_stress_test_pass_or_fail("PASS");
             }
 		}
+		
+		if (control->get_pcba_whole_lock_state() && tmp_dst.day == 0 && tmp_dst.hour == 0 && 
+						tmp_dst.minute == 0 && tmp_dst.second >= 3 && tmp_dst.second <= 4) {
+			uihandle->confirm_test_result_warning("上次拷机退出异常");
+		}
 
-        if (control->get_decode_status()) {
+        if (decode) {
 			uihandle->update_stress_label_value("解码状态","FAIL");
             uihandle->set_stress_test_pass_or_fail("FAIL");
-        } else {
-			uihandle->update_stress_label_value("解码状态","PASS");
-        }		
+        } else if (!mem_status) {
+            uihandle->update_stress_label_value("Mem压力测试","FAIL");
+            uihandle->set_stress_test_pass_or_fail("FAIL");
+        }
         snprintf(datebuf, CMD_BUF_SIZE, "%d天%d时%d分%d秒", tmp_dst.day, tmp_dst.hour, tmp_dst.minute, tmp_dst.second);
         uihandle->update_stress_label_value("运行时间", datebuf);
 		

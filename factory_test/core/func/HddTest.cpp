@@ -32,11 +32,12 @@ bool HddTest::check_if_hdd_pass()
 		return false;
 	}
 	if(!read_local_data("/tmp/hdd.status", hdd_status, size)) {
+		LOG_ERROR("/tmp/hdd.status read failed\n");
 		hdd_screen_log += "ERROR:get hdd status error\n\n";
 		return false;
 	}
     if (!strcmp(delNL(hdd_status), "SUCCESS")) {
-        LOG_INFO("HDD Test result: \t%s\n", "PASS");
+        LOG_INFO("HDD Test result: \tPASS\n");
         return true;
     } else {
         LOG_ERROR("HDD test failed: \t%s\n", hdd_status);

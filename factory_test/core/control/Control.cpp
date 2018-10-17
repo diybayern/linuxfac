@@ -190,6 +190,7 @@ void Control::ui_init()
     _uiHandle->add_stress_test_label("CPU温度");
     _uiHandle->add_stress_test_label("编码状态");
     _uiHandle->add_stress_test_label("解码状态");
+    _uiHandle->add_stress_test_label("Mem压力测试");
     _uiHandle->add_stress_test_label("Mem");
     _uiHandle->add_stress_test_label("Cpu");
     _uiHandle->add_stress_test_label("CPU频率");
@@ -227,8 +228,10 @@ void Control::ui_init()
 void Control::retry_sn_mac_test()
 {
 	if (_sn_mac == "MAC") {
+		LOG_INFO("retry test mac");
 		_uiHandle->show_sn_mac_message_box("MAC");
 	} else if (_sn_mac == "SN") {
+		LOG_INFO("retry test sn");
 		_uiHandle->show_sn_mac_message_box("SN");
 	}
 }
@@ -251,12 +254,12 @@ void Control::check_sn_mac_compare_result(string message)
 		string mac = _hwInfo->mac;
 		mac.erase(remove(mac.begin(), mac.end(), ':'), mac.end());
 		if (message.size() != mac.size() || message != mac) {
-			LOG_INFO("mac test failed");
+			LOG_INFO("mac test result:\tFAIL\n");
 			_uiHandle->update_sn_mac_test_result("MAC", "FAIL");
 			_uiHandle->show_sn_mac_comparison_result("MAC", "FAIL");
 			return ;
 		} else {
-			LOG_INFO("mac test success");
+			LOG_INFO("mac test result:\tPASS\n");
 			_uiHandle->update_sn_mac_test_result("MAC", "PASS");
 			_uiHandle->show_sn_mac_comparison_result("MAC", "PASS");
 			return ;
@@ -266,12 +269,12 @@ void Control::check_sn_mac_compare_result(string message)
 	if (_sn_mac == "SN") {
 		string sn = _hwInfo->sn;
 		if (message.size() != sn.size() || message != sn) {
-			LOG_INFO("sn test failed");
+			LOG_INFO("sn test result:\tFAIL\n");
 			_uiHandle->update_sn_mac_test_result("SN", "FAIL");
 			_uiHandle->show_sn_mac_comparison_result("SN", "FAIL");
 			return ;
 		} else {
-			LOG_INFO("sn test success");
+			LOG_INFO("sn test result:\tPASS\n");
 			_uiHandle->update_sn_mac_test_result("SN", "PASS");
 			_uiHandle->show_sn_mac_comparison_result("SN", "PASS");
 			return ;
@@ -468,6 +471,7 @@ void Control::init_mes_log()
     LOG_MES("USB:       NULL\n");
     LOG_MES("NET:       NULL\n");
     LOG_MES("EDID:      NULL\n");
+	LOG_MES("CPU:       NULL\n");
     if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
         LOG_MES("HDD:       NULL\n");
     }
@@ -485,7 +489,6 @@ void Control::init_mes_log()
     if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
         LOG_MES("CAMERA:    NULL\n");
     }
-	LOG_MES("STRESS:    NULL\n");
 	LOG_MES("---------------------Stress test result-----------------------\n");
     free(mac_capital);
     free(sn_capital);
@@ -553,7 +556,12 @@ void Control::upload_mes_log() {
 		_uiHandle->confirm_test_result_warning("配置文件有误");
 		set_test_result(UPLOAD_LOG_NAME,"FAIL","配置文件有误");
 		return;
-	} else if (combine_fac_log_to_mes(MES_FILE, STRESS_RECORD) && combine_fac_log_to_mes(MES_FILE, LOG_FILE)) {
+	} else if (combine_fac_log_to_mes(MES_FILE, STRESS_RECORD)) {
+		LOG_MES("---------------------Detail test result-----------------------\n");
+		if (!combine_fac_log_to_mes(MES_FILE, LOG_FILE)) {
+			LOG_ERROR("combine log failed");
+			return;
+		}
 		string upload_log = "ftp ip:\t\t" + (string)_facArg->ftp_ip + "\n";
 		upload_log += "ftp user:\t\t" + (string)_facArg->ftp_user + "\n";
 		upload_log += "ftp passwd:\t\t" + (string)_facArg->ftp_passwd + "\n";
@@ -799,6 +807,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
 			update_screen_log("sound test result\t\t\tSUCCESS\n");
+			LOG_INFO("sound test result:\tPASS\n");
         }
         if (func == DISPLAY_TEST_NAME) {
             _funcFinishStatus->display_finish= true;
@@ -806,6 +815,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
 			update_screen_log("display test result\t\t\tSUCCESS\n");
+			LOG_INFO("display test result:\tPASS\n");
         }
         if (func == BRIGHT_TEST_NAME) {
             _funcFinishStatus->bright_finish= true;
@@ -813,6 +823,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
 			update_screen_log("bright test result\t\t\tSUCCESS\n");
+			LOG_INFO("bright test result:\tPASS\n");
         }
         if (func == CAMERA_TEST_NAME) {
             _funcFinishStatus->camera_finish= true;
@@ -822,12 +833,11 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
 			update_screen_log("camera test result\t\t\tSUCCESS\n");
+			LOG_INFO("camera test result:\tPASS\n");
         }
         if (func == STRESS_TEST_NAME) {
             _funcFinishStatus->stress_finish= true;
-            _mesInfo->func = "STRESS";
-            _mesInfo->status = "PASS";
-            start_update_mes_log(_mesInfo);
+			LOG_INFO("stress test result:\tPASS\n");
         }
     } else {
 
@@ -837,6 +847,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
 			update_screen_log("sound test result\t\t\tFAIL\n");
+			LOG_INFO("sound test result:\tFAIL\n");
         }
         if (func == DISPLAY_TEST_NAME) {
             _funcFinishStatus->display_finish= false;
@@ -844,6 +855,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
 			update_screen_log("display test result\t\t\tFAIL\n");
+			LOG_INFO("display test result:\tFAIL\n");
         }
         if (func == BRIGHT_TEST_NAME) {
             _funcFinishStatus->bright_finish= false;
@@ -851,6 +863,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
 			update_screen_log("bright test result\t\t\tFAIL\n");
+			LOG_INFO("bright test result:\tFAIL\n");
         }
         if (func == CAMERA_TEST_NAME) {
             _funcFinishStatus->camera_finish= false;
@@ -860,12 +873,11 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
 			update_screen_log("camera test result\t\t\tFAIL\n");
+			LOG_INFO("camera test result:\tFAIL\n");
         }
         if (func == STRESS_TEST_NAME) {
             _funcFinishStatus->stress_finish= false;
-            _mesInfo->func = "STRESS";
-            _mesInfo->status = "FAIL";
-            start_update_mes_log(_mesInfo);
+			LOG_INFO("stress test result:\tFAIL\n");
         }
     }
     _uiHandle->set_test_result(func, result);

@@ -15,10 +15,12 @@ bool MemTest::compare_men_cap(int mem_cap)
 	float mem_cap_max = mem_cap * 1024;
     string real_mem_cap = execute_command("free -m | awk '/Mem/ {print $2}'");
     if (get_int_value(real_mem_cap) > mem_cap_min  && get_int_value(real_mem_cap) < mem_cap_max){
-		mem_screen_log += "current mem cap is " + real_mem_cap + "K\n\n";
+		mem_screen_log += "current mem cap is " + real_mem_cap + "M\n\n";
+		LOG_INFO("current mem cap is %sM\n",real_mem_cap.c_str());
 		return true;
     } else {
-    	mem_screen_log += "ERROR: mem cap should be " + to_string(mem_cap) + "G but current is " + real_mem_cap + "K\n\n";
+    	mem_screen_log += "ERROR: mem cap should be " + to_string(mem_cap) + "G but current is " + real_mem_cap + "M\n\n";
+		LOG_ERROR("ERROR: mem cap should be %dG but current is %sM\n\n", mem_cap, real_mem_cap.c_str());
         return false;
     }
 }
@@ -26,7 +28,7 @@ bool MemTest::compare_men_cap(int mem_cap)
 bool MemTest::mem_stability_test()
 {
 	string stable_result;
-	stable_result = execute_command("sh " + MEM_TEST_SCRIPT);
+	stable_result = execute_command("sh " + MEM_TEST_SCRIPT + " 10M");
 	LOG_INFO("stable_result is:%s",stable_result.c_str());
 	if (stable_result == "SUCCESS") {
 		return true;
@@ -44,11 +46,15 @@ void* MemTest::test_all(void *arg)
 	mem_screen_log += "==================== mem test ====================\n";
 	is_pass    = compare_men_cap(get_int_value(baseInfo->mem_cap));
 	is_pass   &= mem_stability_test();
-	mem_screen_log += execute_command("cat " + MEM_UI_LOG) + "\n\nmem test result:\t\t\t";
+	string stability_result = execute_command("cat " + MEM_UI_LOG);
+	mem_screen_log += stability_result + "\n\nmem test result:\t\t\t";
+	LOG_INFO("mem stability test result:%s\n",stability_result.c_str());
 	if (is_pass) {
+		LOG_INFO("mem test result:\tPASS\n");
 		mem_screen_log += "SUCCESS\n\n";
         control->set_interface_test_result(MEM_TEST_NAME, true); 
 	} else {
+		LOG_INFO("mem test result:\tFAIL\n");
 		mem_screen_log += "FAIL\n\n";
         control->set_interface_test_result(MEM_TEST_NAME, false); 
 	}

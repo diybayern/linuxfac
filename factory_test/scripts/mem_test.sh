@@ -2,10 +2,11 @@
 #
 mem_result_file=/usr/local/bin/factory/mem_result_file
 mem_ui_log=/usr/local/bin/factory/mem_ui_log
+mem_test_cap=$1
 
 rm -f $mem_ui_log
 
-result=`memtester 10M 1 | grep -v "Loop" | grep ":" > $mem_result_file`
+result=`memtester $mem_test_cap 1 | grep -v "Loop" | grep ":" > $mem_result_file`
 
 resultStuckAddress=`cat $mem_result_file | grep "ok" | awk '/Stuck Address/ {print $1}'`
 resultRandomValue=`cat $mem_result_file | grep "ok" | awk '/Random Value/ {print $1}'`

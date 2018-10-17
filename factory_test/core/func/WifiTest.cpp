@@ -440,9 +440,11 @@ void* WifiTest::test_all(void*)
     }
 
 	if (is_pass) {
+		LOG_INFO("wifi test result:\tPASS\n");
 		wifi_screen_log += "\nwifi test result:\t\t\tSUCCESS\n\n";
 		control->set_interface_test_result(WIFI_TEST_NAME, true); 
 	} else {
+		LOG_INFO("wifi test result:\tFAIL\n");
 		wifi_screen_log += "\nwifi test result:\t\t\tFAIL\n\n";
 		control->set_interface_test_result(WIFI_TEST_NAME, false); 
 	}

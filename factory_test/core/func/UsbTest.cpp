@@ -15,15 +15,16 @@ bool UsbTest::usb_num_test(string total_num, string num_3)
     if (real_total_num == total_num) {
         if (real_num_3 == num_3) {
 			usb_screen_log += "usb3.0 num is " + real_num_3 + ",total usb num is " + real_total_num + "\n";
+			LOG_INFO("usb3.0 num is %s, total usb num is %s\n",real_num_3.c_str(),real_total_num.c_str());
             return true;
         } else {
             usb_screen_log += "usb3.0 num is " + real_num_3 + ", which need " + num_3 + "\n";
-            LOG_INFO("usb3.0 num is %s,which need %s!",real_num_3.c_str(),num_3.c_str());
+            LOG_ERROR("usb3.0 num is %s, which need %s!",real_num_3.c_str(),num_3.c_str());
             return false;
         }
     } else {
     	usb_screen_log += "current usb num is " + real_num_3+ "/" + real_total_num + ", which need " + num_3 + "/" + total_num + "\n";
-        LOG_INFO("usb num is %s,which need %s!",real_total_num.c_str(),total_num.c_str());
+        LOG_ERROR("usb num is %s/%s,which need %s/%s\n!",real_num_3.c_str(),real_total_num.c_str(),num_3.c_str(),total_num.c_str());
         return false;
     }
 }
@@ -292,13 +293,16 @@ void* UsbTest::test_all(void *arg)
     if (result_num_test) {
         bool result_write_read = usb_test_all(num);
         if (result_write_read) {
+			LOG_INFO("usb test result:\tPASS\n");
 			usb_screen_log += "\nusb test result:\t\t\tSUCCESS\n\n";
 	   		control->set_interface_test_result(USB_TEST_NAME, true); 
         } else {
+        	LOG_INFO("usb test result:\tFAIL\n");
         	usb_screen_log += "\nusb test result:\t\t\tFAIL\n\n";
 			control->set_interface_test_result(USB_TEST_NAME, false);
         }
     } else {
+    	LOG_INFO("usb test result:\tFAIL\n");
 		usb_screen_log += "\nusb test result:\t\t\tFAIL\n\n";
 		control->set_interface_test_result(USB_TEST_NAME, false); 
     }	

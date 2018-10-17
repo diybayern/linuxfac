@@ -62,7 +62,6 @@ bool NetTest::net_get_eth_name(char* eth_name, int size)
     ifreq = (struct ifreq*) buf;
     num = ifconf.ifc_len / sizeof(struct ifreq);
 
-    //TODO:eth_name 
     for (i = 0; i < num; i++) {
     	LOG_INFO("net card name %s\n", ifreq->ifr_name);
     	if (strncmp("eth", ifreq->ifr_name, 3) == 0 || strncmp("br", ifreq->ifr_name, 2) == 0) {
@@ -437,10 +436,11 @@ bool NetTest::net_test_all() {
     info = g_net_info;
     if (NULL == info){
         LOG_ERROR("net info is null");
+		net_screen_log += "ERROR:net init error! get net info failed\n";
         return false;    
     }
     
-    LOG_INFO("net test start: \n");
+    LOG_INFO("net test start:\n");
     LOG_INFO("Network card name: \t\t\t%s \n", info->eth_name);
 	net_screen_log += "Network card name: \t\t";
 	net_screen_log += (char*)info->eth_name;
@@ -454,20 +454,19 @@ bool NetTest::net_test_all() {
     }
 
     if (info->eth_status == ETH_STATUS_UP) {
-        LOG_INFO("Network card status: \t\tup\n");
+        LOG_INFO("Network card status: \tup\n");
 		net_screen_log += "Network card status: \t\tup\n";
     } else {
-        LOG_INFO("Network card status: \t\tdown\n");
+        LOG_ERROR("Network card status: \tdown\n");
 		net_screen_log += "Network card status: \t\tdown\n\tERROR: network is down!\n";
         ret = false;
         goto error;
     }
 
     if (info->eth_link) {
-        LOG_INFO("Network link detected: \t\tyes\n");
+        LOG_INFO("Network link detected: \tyes\n");
 		net_screen_log += "Network link detected: \t\tyes\n";
     } else {
-        LOG_INFO("Network link detected: \t\tno\n");
         LOG_ERROR("ERROR: network is not linked!\n");
 		net_screen_log += "Network link detected: \t\tno\n\tERROR: network is not linked!\n";
         ret = false;
@@ -477,11 +476,11 @@ bool NetTest::net_test_all() {
     if (info->eth_speed == 0
         || info->eth_speed == (unsigned short)(-1)
         || info->eth_speed == (unsigned int)(-1)) {
-        LOG_ERROR("Network card speed: \t\tUnknown!\n");
+        LOG_ERROR("Network card speed: \tUnknown!\n");
 		net_screen_log += "Network card speed: \t\tUnknown!\n";
         ret = false;
     } else {
-        LOG_INFO("Network card speed: \t\t%uMbps\n", info->eth_speed);
+        LOG_INFO("Network card speed: \t%uMbps\n", info->eth_speed);
 		net_screen_log += "Network card speed: \t\t" + to_string(info->eth_speed) + "Mbps\n";
         if (info->eth_speed != ETH_LINK_SPEED) {
             LOG_ERROR("ERROR: Network speed must be %uMbps, but current is %uMbps\n",
@@ -493,9 +492,11 @@ bool NetTest::net_test_all() {
     }
 
     net_screen_log += "Network card duplex: \t\t" + net_get_duplex_desc(info->eth_duplex) + "\n";
+	LOG_INFO("Network card duplex: \t\t%s\n",(net_get_duplex_desc(info->eth_duplex)).c_str());
     if (info->eth_duplex != DUPLEX_FULL) {
         net_screen_log += "\tERROR: Network duplex must be Full, but current is "
 					+ net_get_duplex_desc(info->eth_duplex) + "\n";
+		LOG_ERROR("ERROR: Network duplex must be Full, but current is %s\n",(net_get_duplex_desc(info->eth_duplex)).c_str());
         ret = false;
     }
 
@@ -515,7 +516,7 @@ bool NetTest::net_test_all() {
         ret = false;
     }
 
-    LOG_INFO("send package num: \t\t%d\n",  100);
+    LOG_INFO("send package num: \t\t100\n");
     LOG_INFO("recv package num: \t\t%d\n",  info->recv_num);
 	net_screen_log += "send package num: \t\t100\nrecv package num: \t\t" + to_string(info->recv_num) + "\n\n";
 
@@ -531,11 +532,11 @@ void* NetTest::test_all(void*)
 	net_screen_log += "==================== net test ====================\n";
 	bool is_pass = net_test_all();
 	if (is_pass) {
-		LOG_INFO("net test result: \tSUCCESS\n");
+		LOG_INFO("net test result:\tPASS\n");
     	net_screen_log += "net test result: \t\t\tSUCCESS\n\n";
         control->set_interface_test_result(NET_TEST_NAME, true);
 	} else {
-		LOG_INFO("net test result: \tFAIL\n");
+		LOG_INFO("net test result:\tFAIL\n");
     	net_screen_log += "net test result: \t\t\tFAIL\n\n";
         control->set_interface_test_result(NET_TEST_NAME, false);
 	}

@@ -206,11 +206,11 @@ error:
 	pthread_mutex_unlock(&g_reg_mutex);
 
     ret = read_ret & parse_ret;
-    LOG_INFO("\tread edid: \t\t\t\t%s\n", PRINT_RESULT(read_ret));
-    LOG_INFO("\tparse edid : \t\t\t\t%s\n", PRINT_RESULT(parse_ret));
+    LOG_INFO("read edid: \t%s\n", PRINT_RESULT(read_ret));
+    LOG_INFO("parse edid : \t%s\n", PRINT_RESULT(parse_ret));
 
 print:
-	LOG_INFO("edid test result: \t\t\t\t%s\n", PRINT_RESULT1(ret));
+	LOG_INFO("edid test result: \t%s\n", PRINT_RESULT1(ret));
 	return ret;
 }
 
