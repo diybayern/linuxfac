@@ -201,6 +201,7 @@ typedef struct tagUsbInfo {
 } USB_INFO_T;
 
 string execute_command(string cmd);
+string execute_command_err_log(string cmd);
 int get_random();
 int get_int_value(const string str);
 void get_current_time(char tmp_buf[]);

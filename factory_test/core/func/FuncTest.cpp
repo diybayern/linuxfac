@@ -120,7 +120,7 @@ bool StressTest::start_cpuburn_stress()
 
 	result = execute_command("cat /proc/cpuinfo| grep \"processor\"| wc -l");
 	if (result != "error") {
-		LOG_ERROR("cpuprocessor num is %s\n", result.c_str());
+		LOG_INFO("cpuprocessor num is %s\n", result.c_str());
 		processornum = strtoul(result.c_str(), NULL, 16);
 	}
 
@@ -131,7 +131,7 @@ bool StressTest::start_cpuburn_stress()
         char cmd_burn[CMD_BUF_SIZE];
         memset(cmd_burn, 0, CMD_BUF_SIZE);
         sprintf (cmd_burn,"taskset 0x%d burnP6 &",(1<<(processornum)));
-        LOG_ERROR("cmd:%s\n",cmd_burn);
+        LOG_INFO("cmd:%s\n",cmd_burn);
         ret = system(cmd_burn);
  
         if (ret < 0) {
@@ -154,12 +154,15 @@ void StressTest::stop_cpuburn_stress()
 void* StressTest::mem_stress_test(void* arg)
 {
 	pthread_detach(pthread_self());
+	LOG_INFO("start mem stress test\n");
 	bool *flag = (bool*)arg;
 	stop_mem_stress_test();
-	string result = execute_command("bash " + MEM_TEST_SCRIPT + " 10M");
+	string result = execute_command("bash " + MEM_TEST_SCRIPT + " 1G");
 	if (result == "SUCCESS") {
+		LOG_INFO("mem stress test result:\tPASS\n");
 		*flag = true;
 	} else {
+		LOG_ERROR("mem stress test result:\tfailed\n");
 		*flag = false;
 	}
 	return NULL;
@@ -241,7 +244,6 @@ void* StressTest::test_all(void* arg)
     }
 	start_cpuburn_stress();
 	bool mem_status = true;
-	pthread_create(&pid_t1, NULL, mem_stress_test, &mem_status);
 	
     get_current_open_time(&init_time);
     while(true)
@@ -290,8 +292,13 @@ void* StressTest::test_all(void* arg)
 		}
 		
 		if (control->get_pcba_whole_lock_state() && tmp_dst.day == 0 && tmp_dst.hour == 0 && 
-						tmp_dst.minute == 0 && tmp_dst.second >= 3 && tmp_dst.second <= 4) {
+								tmp_dst.minute == 0 && tmp_dst.second >= 3 && tmp_dst.second <= 4) {
 			uihandle->confirm_test_result_warning("上次拷机退出异常");
+		}
+
+		if (control->get_pcba_whole_lock_state() && tmp_dst.day == 0 && tmp_dst.hour == 0 && 
+								tmp_dst.minute == 30 && tmp_dst.second >= 0 && tmp_dst.second <= 1) {
+			pthread_create(&pid_t1, NULL, mem_stress_test, &mem_status);
 		}
 
         if (decode) {
@@ -304,7 +311,7 @@ void* StressTest::test_all(void* arg)
         snprintf(datebuf, CMD_BUF_SIZE, "%d天%d时%d分%d秒", tmp_dst.day, tmp_dst.hour, tmp_dst.minute, tmp_dst.second);
         uihandle->update_stress_label_value("运行时间", datebuf);
 		
-		uihandle->update_stress_label_value("CPU温度",execute_command("bash " + GET_CPU_TEMP_SCRIPT));
+		uihandle->update_stress_label_value("CPU温度",execute_command_err_log("bash " + GET_CPU_TEMP_SCRIPT));
         
         uihandle->update_stress_label_value("CPU频率",get_current_cpu_freq());		
         uihandle->update_stress_label_value("Mem",get_mem_info());		

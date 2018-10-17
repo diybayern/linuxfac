@@ -247,9 +247,9 @@ void VideoTestThread::run()
         av_init_packet(&pkt);
         err = av_read_frame(pFormatCtx, &pkt);
         if (err < 0) {
-            LOG_ERROR("read data end. status = %d", err);
+            LOG_INFO("read data end. status = %d", err);
             if (err == AVERROR_EOF) {
-                LOG_ERROR("read data end. AVERROR_EOF = %d", AVERROR_EOF);
+                LOG_INFO("read data end. AVERROR_EOF = %d", AVERROR_EOF);
                 video_type = VIDEO_INIT;
                 continue;
             }

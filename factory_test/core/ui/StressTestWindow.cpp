@@ -226,7 +226,6 @@ void StressTestWindow::update_stress_label_value(QString item, QString result)
         qApp->processEvents();
         if (item.compare(item_info.name) == 0) {
             if ((NULL != _stress_test_window)) {
-                LOG_INFO("update_stress_label_value item =  %s, result = %s",item.toStdString().c_str(),result.toStdString().c_str());
                 QLabel* label = item_info.label;
                 label->setText(result);
                 label->update();
