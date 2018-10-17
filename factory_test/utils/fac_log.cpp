@@ -23,10 +23,10 @@ void os_log(const char* msg, va_list list) {
     pthread_mutex_lock(&mutex);
     log_file_fp = fopen(LOG_FILE, "a+");
 
-	if (log_file_fp == NULL) {
-		pthread_mutex_unlock(&mutex);
-		return;
-	}
+    if (log_file_fp == NULL) {
+        pthread_mutex_unlock(&mutex);
+        return;
+    }
 
     snprintf(line, sizeof(line), "%s", msg);
     vfprintf(log_file_fp, line, list);
@@ -37,8 +37,8 @@ void os_log(const char* msg, va_list list) {
     
     get_file_size(LOG_FILE, &file_size);
     if (file_size >= LOG_MAX_SIZE) {
-		rename(LOG_FILE, LOG_FILE_BAK);
-	}
+        rename(LOG_FILE, LOG_FILE_BAK);
+    }
 }
 
 void __write_log(write_log_callback func, const char *fname, const char *function, \

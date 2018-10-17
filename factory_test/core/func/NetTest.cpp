@@ -63,12 +63,12 @@ bool NetTest::net_get_eth_name(char* eth_name, int size)
     num = ifconf.ifc_len / sizeof(struct ifreq);
 
     for (i = 0; i < num; i++) {
-    	LOG_INFO("net card name %s\n", ifreq->ifr_name);
-    	if (strncmp("eth", ifreq->ifr_name, 3) == 0 || strncmp("br", ifreq->ifr_name, 2) == 0) {
-     	   strncpy(eth_name, ifreq->ifr_name, size);
-   		}
+        LOG_INFO("net card name %s\n", ifreq->ifr_name);
+        if (strncmp("eth", ifreq->ifr_name, 3) == 0 || strncmp("br", ifreq->ifr_name, 2) == 0) {
+            strncpy(eth_name, ifreq->ifr_name, size);
+        }
 
-    	ifreq++;
+        ifreq++;
     }
 
     close(fd);
@@ -76,8 +76,8 @@ bool NetTest::net_get_eth_name(char* eth_name, int size)
     return true;
 }
 
-bool NetTest::net_get_eth_index(char* eth_name, unsigned int* index) {
-
+bool NetTest::net_get_eth_index(char* eth_name, unsigned int* index)
+{
     int fd = -1;
     struct ifreq ifr;
 
@@ -107,8 +107,8 @@ bool NetTest::net_get_eth_index(char* eth_name, unsigned int* index) {
     return true;
 }
 
-bool NetTest::net_sprintf_mac_addr(unsigned char* src, char* dst) {
-
+bool NetTest::net_sprintf_mac_addr(unsigned char* src, char* dst)
+{
     int ret = 0;
     ret = sprintf((char *)dst, "%02x:%02x:%02x:%02x:%02x:%02x", src[0], src[1], src[2],
                     src[3], src[4], src[5]);
@@ -119,8 +119,8 @@ bool NetTest::net_sprintf_mac_addr(unsigned char* src, char* dst) {
     return true;
 }
 
-bool NetTest::net_get_mac_addr0(unsigned char* eth_name, unsigned char* hw_buf) {
-
+bool NetTest::net_get_mac_addr0(unsigned char* eth_name, unsigned char* hw_buf)
+{
     int fd = -1;
     struct ifreq ifr;
     unsigned char buf[128] = { 0, };
@@ -153,15 +153,15 @@ bool NetTest::net_get_mac_addr0(unsigned char* eth_name, unsigned char* hw_buf) 
     return true;
 }
 
-void* NetTest::net_recv_loopback_msg(void *arg) {
-
+void* NetTest::net_recv_loopback_msg(void *arg)
+{
     int fd = -1;
     int ret = 0;
     int len = 0;
     MacPacket recv_packet;
-//	MacPacket send_packet;
+//    MacPacket send_packet;
     struct sockaddr_ll recv_sll;
-//	struct sockaddr_ll send_sll;
+//    struct sockaddr_ll send_sll;
     NetInfo* info = NULL;
     char buf[128] = { 0, };
     unsigned char bc_mac[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
@@ -188,7 +188,6 @@ void* NetTest::net_recv_loopback_msg(void *arg) {
     }
 
     while (1) {
-
         len = recvfrom(fd, &recv_packet, sizeof(recv_packet), 0, 0, 0);
         if (len != sizeof(recv_packet)) {
             LOG_ERROR("recv len failed %d\n", len);
@@ -203,12 +202,12 @@ void* NetTest::net_recv_loopback_msg(void *arg) {
             goto start;
         }
 
-		// exchange will transform message
+        // exchange will transform message
         if (0 != memcmp(recv_packet.dst_mac, bc_mac, MAC_ADDR_LEN)) {
             LOG_INFO("recv roll back msg index=%d\n", recv_packet.index);
             info->recv_num++;
         } else {
-			// send back
+            // send back
             net_send_msg((char *)info->mac, (char *)recv_packet.src_mac, info->eth_index,
                                 recv_packet.index);
 
@@ -229,7 +228,7 @@ bool NetTest::init()
 
     info = (NetInfo *)malloc(sizeof(NetInfo));
     if (!info) {
-		LOG_ERROR("malloc NetInfo failed\n");
+        LOG_ERROR("malloc NetInfo failed\n");
         return false;
     }
 
@@ -273,15 +272,15 @@ inline int NetTest::net_eth_no(char *eth_name)
     char *p = eth_name;
 
     while (*p) {
-    	if (is_digit(p))
-        	break;
+        if (is_digit(p))
+            break;
         p++;
     }
     return atoi(p);
 }
 
-bool NetTest::net_get_eth_status(int fd, char *eth_name, unsigned int *status) {
-
+bool NetTest::net_get_eth_status(int fd, char *eth_name, unsigned int *status)
+{
     struct ifreq ifr;
 
     memset(&ifr, 0, sizeof(struct ifreq));
@@ -291,7 +290,7 @@ bool NetTest::net_get_eth_status(int fd, char *eth_name, unsigned int *status) {
         return false;
     }
 
-	// ifr.ifr_flags & IFF_RUNNING  --->link
+    // ifr.ifr_flags & IFF_RUNNING  --->link
     if ((ifr.ifr_flags & IFF_UP)) {
         *status = ETH_STATUS_UP;
     } else {
@@ -378,8 +377,8 @@ string NetTest::net_get_duplex_desc(char duplex)
     }
 }
 
-bool NetTest::net_send_msg(char* src_mac, char* dst_mac, unsigned int index, unsigned int seq) {
-
+bool NetTest::net_send_msg(char* src_mac, char* dst_mac, unsigned int index, unsigned int seq)
+{
     int fd = -1;
     int ret = 0;
     MacPacket packet;
@@ -413,8 +412,8 @@ bool NetTest::net_send_msg(char* src_mac, char* dst_mac, unsigned int index, uns
     return true;
 }
 
-bool NetTest::net_send_broadcast_msg(NetInfo* info, int num) {
-
+bool NetTest::net_send_broadcast_msg(NetInfo* info, int num)
+{
     int i = 0;
     bool ret = 0;
     unsigned char dest_mac[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
@@ -427,8 +426,8 @@ bool NetTest::net_send_broadcast_msg(NetInfo* info, int num) {
     return ret;
 }
 
-bool NetTest::net_test_all() {
-
+bool NetTest::net_test_all()
+{
     int i = 0;
     bool ret = 0;
     NetInfo *info = NULL;
@@ -436,39 +435,39 @@ bool NetTest::net_test_all() {
     info = g_net_info;
     if (NULL == info){
         LOG_ERROR("net info is null");
-		net_screen_log += "ERROR:net init error! get net info failed\n";
+        net_screen_log += "ERROR:net init error! get net info failed\n";
         return false;    
     }
     
     LOG_INFO("net test start:\n");
     LOG_INFO("Network card name: \t\t\t%s \n", info->eth_name);
-	net_screen_log += "Network card name: \t\t";
-	net_screen_log += (char*)info->eth_name;
-	net_screen_log += "\n";
+    net_screen_log += "Network card name: \t\t";
+    net_screen_log += (char*)info->eth_name;
+    net_screen_log += "\n";
 
     ret = net_get_eth_info(info);
     if (ret == false) {
         LOG_ERROR("get eth status failed!\n");
-		net_screen_log += "ERROR: get eth status failed!\n";
+        net_screen_log += "ERROR: get eth status failed!\n";
         goto error;
     }
 
     if (info->eth_status == ETH_STATUS_UP) {
         LOG_INFO("Network card status: \tup\n");
-		net_screen_log += "Network card status: \t\tup\n";
+        net_screen_log += "Network card status: \t\tup\n";
     } else {
         LOG_ERROR("Network card status: \tdown\n");
-		net_screen_log += "Network card status: \t\tdown\n\tERROR: network is down!\n";
+        net_screen_log += "Network card status: \t\tdown\n\tERROR: network is down!\n";
         ret = false;
         goto error;
     }
 
     if (info->eth_link) {
         LOG_INFO("Network link detected: \tyes\n");
-		net_screen_log += "Network link detected: \t\tyes\n";
+        net_screen_log += "Network link detected: \t\tyes\n";
     } else {
         LOG_ERROR("ERROR: network is not linked!\n");
-		net_screen_log += "Network link detected: \t\tno\n\tERROR: network is not linked!\n";
+        net_screen_log += "Network link detected: \t\tno\n\tERROR: network is not linked!\n";
         ret = false;
         goto error;
     }
@@ -477,33 +476,33 @@ bool NetTest::net_test_all() {
         || info->eth_speed == (unsigned short)(-1)
         || info->eth_speed == (unsigned int)(-1)) {
         LOG_ERROR("Network card speed: \tUnknown!\n");
-		net_screen_log += "Network card speed: \t\tUnknown!\n";
+        net_screen_log += "Network card speed: \t\tUnknown!\n";
         ret = false;
     } else {
         LOG_INFO("Network card speed: \t%uMbps\n", info->eth_speed);
-		net_screen_log += "Network card speed: \t\t" + to_string(info->eth_speed) + "Mbps\n";
+        net_screen_log += "Network card speed: \t\t" + to_string(info->eth_speed) + "Mbps\n";
         if (info->eth_speed != ETH_LINK_SPEED) {
             LOG_ERROR("ERROR: Network speed must be %uMbps, but current is %uMbps\n",
                                         ETH_LINK_SPEED, info->eth_speed);
-			net_screen_log += "\tERROR: Network speed must be " + to_string(ETH_LINK_SPEED)
-						+ "Mbps, but current is " + to_string(info->eth_speed) + "Mbps\n";
+            net_screen_log += "\tERROR: Network speed must be " + to_string(ETH_LINK_SPEED)
+                        + "Mbps, but current is " + to_string(info->eth_speed) + "Mbps\n";
             ret = false;
         }
     }
 
     net_screen_log += "Network card duplex: \t\t" + net_get_duplex_desc(info->eth_duplex) + "\n";
-	LOG_INFO("Network card duplex: \t\t%s\n",(net_get_duplex_desc(info->eth_duplex)).c_str());
+    LOG_INFO("Network card duplex: \t\t%s\n",(net_get_duplex_desc(info->eth_duplex)).c_str());
     if (info->eth_duplex != DUPLEX_FULL) {
         net_screen_log += "\tERROR: Network duplex must be Full, but current is "
-					+ net_get_duplex_desc(info->eth_duplex) + "\n";
-		LOG_ERROR("ERROR: Network duplex must be Full, but current is %s\n",(net_get_duplex_desc(info->eth_duplex)).c_str());
+                    + net_get_duplex_desc(info->eth_duplex) + "\n";
+        LOG_ERROR("ERROR: Network duplex must be Full, but current is %s\n",(net_get_duplex_desc(info->eth_duplex)).c_str());
         ret = false;
     }
 
     info->recv_num = 0;
     net_send_broadcast_msg(info, 100);
 
-	// wait for 2 seconds
+    // wait for 2 seconds
     while (1) {
         i++;
         if (100 == info->recv_num || 100 == i){
@@ -518,7 +517,7 @@ bool NetTest::net_test_all() {
 
     LOG_INFO("send package num: \t\t100\n");
     LOG_INFO("recv package num: \t\t%d\n",  info->recv_num);
-	net_screen_log += "send package num: \t\t100\nrecv package num: \t\t" + to_string(info->recv_num) + "\n\n";
+    net_screen_log += "send package num: \t\t100\nrecv package num: \t\t" + to_string(info->recv_num) + "\n\n";
 
 error:
 
@@ -528,22 +527,22 @@ error:
 void* NetTest::test_all(void*)
 {
     Control *control = Control::get_control();
-	control->set_interface_test_status(NET_TEST_NAME, false);
-	net_screen_log += "==================== net test ====================\n";
-	bool is_pass = net_test_all();
-	if (is_pass) {
-		LOG_INFO("net test result:\tPASS\n");
-    	net_screen_log += "net test result: \t\t\tSUCCESS\n\n";
+    control->set_interface_test_status(NET_TEST_NAME, false);
+    net_screen_log += "==================== net test ====================\n";
+    bool is_pass = net_test_all();
+    if (is_pass) {
+        LOG_INFO("net test result:\tPASS\n");
+        net_screen_log += "net test result: \t\t\tSUCCESS\n\n";
         control->set_interface_test_result(NET_TEST_NAME, true);
-	} else {
-		LOG_INFO("net test result:\tFAIL\n");
-    	net_screen_log += "net test result: \t\t\tFAIL\n\n";
+    } else {
+        LOG_INFO("net test result:\tFAIL\n");
+        net_screen_log += "net test result: \t\t\tFAIL\n\n";
         control->set_interface_test_result(NET_TEST_NAME, false);
-	}
-	control->update_screen_log(net_screen_log);
-	control->set_interface_test_status(NET_TEST_NAME, true);
-	net_screen_log = "";
-	return NULL;
+    }
+    control->update_screen_log(net_screen_log);
+    control->set_interface_test_status(NET_TEST_NAME, true);
+    net_screen_log = "";
+    return NULL;
 }
 
 void NetTest::start_test(BaseInfo* baseInfo)

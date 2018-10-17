@@ -174,29 +174,29 @@ struct MacPacket {
 
 struct CpuStatus {
     uint64 cpu_total;
-	uint64 cpu_user;
-	uint64 cpu_nice;
-	uint64 cpu_sys;
-	uint64 cpu_idle;
-	uint64 cpu_iowait;
-	uint64 cpu_steal;
-	uint64 cpu_hardirq;
-	uint64 cpu_softirq;
-	uint64 cpu_guest;
-	uint64 cpu_guest_nice;
+    uint64 cpu_user;
+    uint64 cpu_nice;
+    uint64 cpu_sys;
+    uint64 cpu_idle;
+    uint64 cpu_iowait;
+    uint64 cpu_steal;
+    uint64 cpu_hardirq;
+    uint64 cpu_softirq;
+    uint64 cpu_guest;
+    uint64 cpu_guest_nice;
 };
 
 typedef struct tagUdevInfo {
-	char block[USB_BLOCK_LEN];
-	char vendor[USB_VENDOR_LEN];
+    char block[USB_BLOCK_LEN];
+    char vendor[USB_VENDOR_LEN];
     int speed; /* Mbps */
 } UDEV_INFO_T;
 
 typedef struct tagUsbInfo {
 
-	int dev_num;
-	struct udev* udev;
-	UDEV_INFO_T dev[USB_MAX_NUM];
+    int dev_num;
+    struct udev* udev;
+    UDEV_INFO_T dev[USB_MAX_NUM];
 
 } USB_INFO_T;
 

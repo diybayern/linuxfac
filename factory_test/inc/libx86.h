@@ -30,28 +30,28 @@ extern "C" {
 #define LRMI_PREFIX LRMI_
 
 struct LRMI_regs {
-	unsigned int edi;
-	unsigned int esi;
-	unsigned int ebp;
-	unsigned int reserved;
-	unsigned int ebx;
-	unsigned int edx;
-	unsigned int ecx;
-	unsigned int eax;
-	unsigned short int flags;
-	unsigned short int es;
-	unsigned short int ds;
-	unsigned short int fs;
-	unsigned short int gs;
-	unsigned short int ip;
-	unsigned short int cs;
-	unsigned short int sp;
-	unsigned short int ss;
+    unsigned int edi;
+    unsigned int esi;
+    unsigned int ebp;
+    unsigned int reserved;
+    unsigned int ebx;
+    unsigned int edx;
+    unsigned int ecx;
+    unsigned int eax;
+    unsigned short int flags;
+    unsigned short int es;
+    unsigned short int ds;
+    unsigned short int fs;
+    unsigned short int gs;
+    unsigned short int ip;
+    unsigned short int cs;
+    unsigned short int sp;
+    unsigned short int ss;
 };
 
-#define LRMI_CONCAT2(a, b) 	a ## b
-#define LRMI_CONCAT(a, b) 	LRMI_CONCAT2(a, b)
-#define LRMI_MAKENAME(a) 	LRMI_CONCAT(LRMI_PREFIX, a)
+#define LRMI_CONCAT2(a, b)     a ## b
+#define LRMI_CONCAT(a, b)      LRMI_CONCAT2(a, b)
+#define LRMI_MAKENAME(a)       LRMI_CONCAT(LRMI_PREFIX, a)
 
 /*
  Initialize

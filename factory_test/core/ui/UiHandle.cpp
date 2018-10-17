@@ -10,7 +10,7 @@ UiHandle::UiHandle()
     connect(this, SIGNAL(to_show_sn_mac_message_box(QString)), MainTestWindow::get_main_test_window(), SLOT(show_sn_mac_message_box(QString)));
     connect(this, SIGNAL(need_to_update_screen_log(QString)), MainTestWindow::get_main_test_window(), SLOT(update_screen_log(QString)));
     connect(this, SIGNAL(to_update_stress_label_value(QString,QString)), MainTestWindow::get_main_test_window(), SLOT(update_stress_label_value(QString,QString)));
-	connect(this, SIGNAL(to_confirm_test_result_dialog(QString)), MainTestWindow::get_main_test_window(), SLOT(confirm_test_result_dialog(QString)));  
+    connect(this, SIGNAL(to_confirm_test_result_dialog(QString)), MainTestWindow::get_main_test_window(), SLOT(confirm_test_result_dialog(QString)));  
     connect(this, SIGNAL(to_start_audio_progress_dialog()), MainTestWindow::get_main_test_window(), SLOT(start_audio_progress_dialog()));
     connect(this, SIGNAL(to_confirm_test_result_warning(QString)), MainTestWindow::get_main_test_window(), SLOT(confirm_test_result_warning(QString)));
     connect(this, SIGNAL(to_confirm_test_result_waiting(QString)), MainTestWindow::get_main_test_window(), SLOT(confirm_test_result_waiting(QString))/*, Qt::QueuedConnection*/);
@@ -76,7 +76,7 @@ void UiHandle::add_stress_test_label(string item)
 
 void UiHandle::confirm_test_result_dialog(string title)
 {
-	emit to_confirm_test_result_dialog(QString::fromStdString(title));
+    emit to_confirm_test_result_dialog(QString::fromStdString(title));
 }
 
 void UiHandle::confirm_test_result_warning(string title)

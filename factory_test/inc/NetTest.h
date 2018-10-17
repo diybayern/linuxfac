@@ -10,15 +10,15 @@
 #define ETH_STATUS_DOWN  (1)
 
 struct NetInfo {
-	unsigned char mac[MAC_ADDR_LEN];
-	unsigned char eth_name[ETH_NAME_LEN];
-	unsigned int eth_index;
-	unsigned int eth_status;
-	unsigned int eth_link;
+    unsigned char mac[MAC_ADDR_LEN];
+    unsigned char eth_name[ETH_NAME_LEN];
+    unsigned int eth_index;
+    unsigned int eth_status;
+    unsigned int eth_link;
     unsigned int eth_speed;
     unsigned char eth_duplex;
-	unsigned int seq;
-	unsigned int recv_num;
+    unsigned int seq;
+    unsigned int recv_num;
 };
 
 class NetTest : public FuncBase

@@ -27,14 +27,3 @@ void write_stress_record(const char *fmt, ...);
 #endif /*__FAC_LOG_H__*/
 
 
-
-
-
-
-
-
-
-
-
-
-

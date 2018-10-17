@@ -161,9 +161,9 @@ void* SoundTest::record_loop(void *arg)
             fflush(outfile);
             fclose(outfile);
 #endif
-			ret = write_local_data(SOUND_RECORD_FILE, "a+", buf, buffer_size);
-			if(ret == false)
-				break;
+            ret = write_local_data(SOUND_RECORD_FILE, "a+", buf, buffer_size);
+            if (ret == false)
+                break;
         } else {
             LOG_ERROR("read size not period_size:%ld", recv_len);
         }
@@ -183,7 +183,7 @@ err_record:
 void* SoundTest::playback_loop(void *arg)
 {
     bool flag = false;
-	int ret = 0;
+    int ret = 0;
     SndInfo *info = (SndInfo *)arg;
     FILE *infile = NULL;
     snd_pcm_sframes_t write_frame;
@@ -459,7 +459,7 @@ bool SoundTest::init(BaseInfo* baseInfo)
 {
     g_record_info = (SndInfo *) malloc(sizeof(SndInfo));
     if (!g_record_info) {
-		LOG_ERROR("malloc SndInfo failed \n");
+        LOG_ERROR("malloc SndInfo failed \n");
         return false;
     }
 
@@ -485,7 +485,7 @@ bool SoundTest::init(BaseInfo* baseInfo)
     g_playback_info->direction      = PLAYBACK;
     g_playback_info->pcm            = NULL;
     g_playback_info->card           = DEFAULT_CARD_NAME;
-	
+    
 
     if (baseInfo->platform == "IDV") {
         if (system("if pulseaudio --check; then pulseaudio -k; else touch /tmp/no_pulseaudio; fi") < 0) {
@@ -507,17 +507,17 @@ bool SoundTest::init(BaseInfo* baseInfo)
     gStatus = SOUND_UNKNOW;
 
     init_volume();
-	
+    
     return true;
 }
 
 void* SoundTest::test_all(void*)
 {
-	Control *control = Control::get_control();
-	UiHandle* uihandle = UiHandle::get_uihandle();
-	control->update_screen_log("==================== sound test ====================\n");
-	uihandle->start_audio_progress_dialog();
-	usleep(200000);
+    Control *control = Control::get_control();
+    UiHandle* uihandle = UiHandle::get_uihandle();
+    control->update_screen_log("==================== sound test ====================\n");
+    uihandle->start_audio_progress_dialog();
+    usleep(200000);
     start_record();
     sleep(3);
     stop_record();
@@ -525,14 +525,14 @@ void* SoundTest::test_all(void*)
     start_playback();
     sleep(3);
     stop_playback();
-    sleep(1);		
-	control->confirm_test_result(SOUND_TEST_NAME);
-	
-	return NULL;
+    sleep(1);        
+    control->confirm_test_result(SOUND_TEST_NAME);
+    
+    return NULL;
 }
 
 void SoundTest::start_test(BaseInfo* baseInfo)
-{	
+{
     pthread_t tid;
     pthread_create(&tid,NULL,test_all,baseInfo);
 }

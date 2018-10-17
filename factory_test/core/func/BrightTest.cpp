@@ -30,8 +30,8 @@ inline int BrightTest::brightness_is_set(const int* const array, int array_cout,
 
 void BrightTest::bright_test_all(string bright_level)
 {
-	Control* control = Control::get_control();
-	int bright_num = get_int_value(bright_level);
+    Control* control = Control::get_control();
+    int bright_num = get_int_value(bright_level);
     int actual_brightness_fd = 0;
     inotify_fd = inotify_init();
     char buf[4096];
@@ -41,7 +41,7 @@ void BrightTest::bright_test_all(string bright_level)
     int bright_value = 0;
     int bright_set = 0;
     int ret = 0;
-	
+    
     pthread_detach(pthread_self());
 
     
@@ -51,8 +51,8 @@ void BrightTest::bright_test_all(string bright_level)
     }
     bright_cnt = 0;
     LOG_INFO("begin inotify brightness trigger\n");
-	control->update_screen_log("begin inotify brightness trigger\n");
-	bright_set = 0;
+    control->update_screen_log("begin inotify brightness trigger\n");
+    bright_set = 0;
     for(bright_cnt = 0; bright_cnt < bright_num; bright_cnt++)
     {
         bright_value = 0;
@@ -76,26 +76,26 @@ void BrightTest::bright_test_all(string bright_level)
         ret = brightness_is_set(BRIGHTNESS_VALUE, bright_num, bright_value);
         if(ret != -1)
         {
-        	bright_set |= 1<<ret;
+            bright_set |= 1<<ret;
             LOG_INFO("PRESS %d:now the brightness is %d, brightness level %d\n", bright_cnt+1, bright_value, ret+1);
-			control->update_screen_log("PRESS " + to_string(bright_cnt+1) + ":now the brightness is "
-					+ to_string(bright_value) + ", brightness level " + to_string(ret+1));
+            control->update_screen_log("PRESS " + to_string(bright_cnt+1) + ":now the brightness is "
+                    + to_string(bright_value) + ", brightness level " + to_string(ret+1));
         } else {
             LOG_ERROR("PRESS %d: brightness value is not set, brightness is %d\n",bright_cnt+1, bright_value);
-			control->update_screen_log("PRESS " + to_string(bright_cnt+1) + ": brightness value is not set, brightness is "
-					+ to_string(bright_value) + "\n");
+            control->update_screen_log("PRESS " + to_string(bright_cnt+1) + ": brightness value is not set, brightness is "
+                    + to_string(bright_value) + "\n");
             goto error_return;
         }
 
         if (bright_cnt == (bright_num - 1)) {
             Control::get_control()->set_brightness_dialog_button_state(true);
         }
-	}
+    }
     bright_set &= bright_set_mask;
     if(bright_set != bright_set_mask)
     {
         LOG_ERROR("all the brightness value cannot be corvered within 6 presses\n");
-		control->update_screen_log("all the brightness value cannot be corvered within 6 presses\n");
+        control->update_screen_log("all the brightness value cannot be corvered within 6 presses\n");
         goto error_return;
     }
 error_return:
@@ -108,11 +108,11 @@ error_return:
 
 void* BrightTest::test_all(void *arg)
 {
-	Control::get_control()->update_screen_log("==================== bright test ====================\n");
-	BaseInfo* baseInfo = (BaseInfo *)arg;
+    Control::get_control()->update_screen_log("==================== bright test ====================\n");
+    BaseInfo* baseInfo = (BaseInfo *)arg;
     Control::get_control()->confirm_test_result(BRIGHT_TEST_NAME);
-	bright_test_all(baseInfo->bright_level);
-	return NULL;
+    bright_test_all(baseInfo->bright_level);
+    return NULL;
 }
 
 void BrightTest::start_test(BaseInfo* baseInfo)
