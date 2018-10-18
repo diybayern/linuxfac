@@ -270,6 +270,7 @@ void MainTestWindow::_string_to_htmlFilter(QString &str)
     str.replace("<","&lt;");
     str.replace("\"","&quot;");
     str.replace("\'","&#39;");
+    str.replace("\t","&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
     str.replace(" ","&nbsp;");
     str.replace("\n","<br>");
     str.replace("\r","<br>");
