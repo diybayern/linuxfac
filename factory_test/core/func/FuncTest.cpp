@@ -167,7 +167,16 @@ void* StressTest::mem_stress_test(void* arg)
     int *mem_status = (int*)arg;
     stop_mem_stress_test();
     *mem_status = 2;
-    string result = execute_command("bash " + MEM_TEST_SCRIPT + " 10M");
+    string free_mem_cap = execute_command("free -m | awk '/Mem/ {print $4}'");
+	if (free_mem_cap == "error") {
+		LOG_ERROR("get free mem cap error\n");
+	}
+	int test_mem_cap = (int)(get_int_value(free_mem_cap.c_str())* 0.7);
+
+	test_mem_cap = 10;//TODO:MEM TEST CAP
+	
+	LOG_INFO("stress test mem cap is %dM", test_mem_cap);
+    string result = execute_command("bash " + MEM_TEST_SCRIPT + " " + to_string(test_mem_cap) + "M");
     LOG_INFO("MEM STRESS TEST RESULT:%s",result.c_str());
     if (result == "SUCCESS") {
         LOG_INFO("mem stress test result:\tPASS\n");
