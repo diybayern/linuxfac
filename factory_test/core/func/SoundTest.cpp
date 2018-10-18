@@ -515,7 +515,7 @@ void* SoundTest::test_all(void*)
 {
     Control *control = Control::get_control();
     UiHandle* uihandle = UiHandle::get_uihandle();
-    control->update_screen_log("==================== sound test ====================\n");
+    control->update_screen_log("==================== " + SOUND_TEST_NAME + " ====================\n");
     uihandle->start_audio_progress_dialog();
     usleep(200000);
     start_record();

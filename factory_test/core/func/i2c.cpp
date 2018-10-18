@@ -26,6 +26,7 @@
 #define I2C_DEV_NAME_LEN    (256)
 
 static string i2c_screen_log = "";
+static string i2c_screen_red = "";
 
 static int open_i2c_dev(int i2cbus)
 {
@@ -118,6 +119,7 @@ static char *edid_i2c_dev_name(int i2cbus)
 int edid_read_i2c_test(int edid_num)
 {
     i2c_screen_log = "";
+    i2c_screen_red = "";
     int i, j, ret, len, numbusses=0, i2cfile, i2cbus=0;
     int goodbus[128];
     unsigned char block[256];
@@ -187,10 +189,12 @@ endloop:
                 ret = FAIL;
                 i2c_screen_log += "ERROR: Failed to parse the EDID information from i2c bus " +
                                 to_string(i2cbus) + "\n";
+                i2c_screen_red +="\t错误：无法从i2c总线" + to_string(i2cbus) + "获取EDID信息\n";
                 LOG_ERROR("ERROR: Failed to parse the EDID information from i2c bus %i!\n", i2cbus);
             }
         } else {
             i2c_screen_log += "ERROR: Bus " + to_string(i2cbus) + " doesn't really have an EDID...\n";
+            i2c_screen_red += "\t错误：总线" + to_string(i2cbus) + "没有EDID\n";
             LOG_ERROR("ERROR: Bus %i doesn't really have an EDID...\n", i2cbus);
             ret = FAIL;
         }
@@ -200,6 +204,9 @@ endloop:
         /* Detected bus less than the real num, FAIL */
         i2c_screen_log += "ERROR: This product contains " + to_string(edid_num) + " DDC interfaces, but only " + 
                             to_string(numbusses) +" detected.\n";
+        i2c_screen_red += "\t错误：本产品包含" + to_string(edid_num) + "个DDC接口，但只检测到" + 
+                            to_string(numbusses) +"台连接\n";
+
         LOG_ERROR("ERROR: This product contains %d DDC interfaces, but only %d detected.\n",edid_num, numbusses);
         ret = FAIL;
     }
@@ -230,4 +237,7 @@ string get_edid_i2c_screen_log(){
     return i2c_screen_log;
 }
 
+string get_edid_i2c_screen_red(){
+    return i2c_screen_red;
+}
 

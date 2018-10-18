@@ -2,7 +2,11 @@
 #include "../../inc/fac_log.h"
 
 string cpu_screen_log = "";
+string cpu_screen_red = "";
 string fan_screen_log = "";
+string fan_screen_red = "";
+
+static string stress_result = "";
 
 pthread_mutex_t g_next_process_lock;
 
@@ -21,8 +25,9 @@ bool CpuTest::is_cpu_test_pass(BaseInfo* baseInfo)
         cpu_screen_log += "current cpu type is " + hw_cpu_type + "\n\n";
         LOG_INFO("current cpu type is %s\n", hw_cpu_type.c_str());
         return true;
-    } else {    
-        cpu_screen_log += "cpu type should be\t\t" + base_cpu_type + "\nbut current is\t\t" + hw_cpu_type + "\n\n";
+    } else {
+        cpu_screen_red += "\t错误：CPU型号应为 " + base_cpu_type + ", 但检测到CPU型号为 " + hw_cpu_type + "\n";
+        cpu_screen_log += "cpu type should be\t\t" + base_cpu_type + "\nbut current is\t\t" + hw_cpu_type + "\n";
         LOG_ERROR("cpu type should be %s\tbut current is %s\n",base_cpu_type.c_str(),hw_cpu_type.c_str());
         return false;
     }
@@ -32,19 +37,23 @@ void CpuTest::start_test(BaseInfo* baseInfo)
 {
     Control *control = Control::get_control();
     control->set_interface_test_status(CPU_TEST_NAME, false);
-    cpu_screen_log += "==================== cpu test ====================\n";
+    cpu_screen_log += "==================== " + CPU_TEST_NAME + " ====================\n";
     if (is_cpu_test_pass(baseInfo)) {
         LOG_INFO("cpu test result:\tPASS\n");
-        cpu_screen_log += "cpu test result:\t\t\tSUCCESS\n\n";
+        cpu_screen_log += CPU_TEST_NAME + "结果:\t\t\t成功\n\n";
         control->set_interface_test_result(CPU_TEST_NAME, true);
     } else {
         LOG_INFO("cpu test result:\tFAIL\n");
-        cpu_screen_log += "cpu test result:\t\t\tFAIL\n\n";
+        cpu_screen_red = CPU_TEST_NAME + "结果:\t\t\t失败\n\n" + cpu_screen_red;
         control->set_interface_test_result(CPU_TEST_NAME, false); 
     }
     control->update_screen_log(cpu_screen_log);
-    control->set_interface_test_status(CPU_TEST_NAME, true);
     cpu_screen_log = "";
+    if (cpu_screen_red != "") {
+        control->update_color_screen_log(cpu_screen_red, "red");
+        cpu_screen_red = "";
+    }
+    control->set_interface_test_status(CPU_TEST_NAME, true);
 }
 
 
@@ -63,23 +72,24 @@ void* FanTest::test_all(void *arg)
 {
     Control *control = Control::get_control();
     control->set_interface_test_status(FAN_TEST_NAME, false);
-    fan_screen_log += "==================== fan test ====================\n";
+    fan_screen_log += "==================== " + FAN_TEST_NAME + " ====================\n";
     BaseInfo* baseInfo = (BaseInfo *)arg;
     string result = fan_speed_test(baseInfo->fan_speed);
     if (result == "SUCCESS") {
         LOG_INFO("fan test result:\tPASS\n");
-        fan_screen_log += "fan test result:\t\t\t" + result + "\n\n";
+        fan_screen_log += FAN_TEST_NAME + "结果:\t\t\t成功\n\n";
         control->set_interface_test_result(FAN_TEST_NAME, true);
     } else {
         fan_screen_log += "fan speed should be " + baseInfo->fan_speed + "\tbut current is " + result + "\n\n";
         LOG_ERROR("fan speed should be %s\tbut current is %s\n",(baseInfo->fan_speed).c_str(),result.c_str());
         LOG_INFO("fan test result:\tFAIL\n");
-        fan_screen_log += "fan test result:\t\t\tFAIL\n\n";
+        fan_screen_red += "\t错误：风扇转速应达到" + baseInfo->fan_speed + "，但测试只达到" + result + "\n";
+        fan_screen_red = FAN_TEST_NAME + "结果:\t\t\t失败\n\n" + fan_screen_red;
         control->set_interface_test_result(FAN_TEST_NAME, false);
     }
     control->update_screen_log(fan_screen_log);
-    control->set_interface_test_status(FAN_TEST_NAME, true);
     fan_screen_log = "";
+    control->set_interface_test_status(FAN_TEST_NAME, true);
     return NULL;
 }
 
@@ -156,9 +166,9 @@ void* StressTest::mem_stress_test(void* arg)
     LOG_INFO("start mem stress test\n");
     int *mem_status = (int*)arg;
     stop_mem_stress_test();
-	*mem_status = 2;
+    *mem_status = 2;
     string result = execute_command("bash " + MEM_TEST_SCRIPT + " 10M");
-	LOG_INFO("MEM STRESS TEST RESULT:%s",result.c_str());
+    LOG_INFO("MEM STRESS TEST RESULT:%s",result.c_str());
     if (result == "SUCCESS") {
         LOG_INFO("mem stress test result:\tPASS\n");
         *mem_status = SUCCESS;
@@ -178,17 +188,17 @@ void StressTest::stop_mem_stress_test()
 
 void* StressTest::test_all(void* arg)
 {
+    stress_result = "";
     BaseInfo* baseInfo = (BaseInfo*)arg;
     Control *control = Control::get_control();
     UiHandle* uihandle = UiHandle::get_uihandle();
-    vector<string>* record = control->get_stress_record();
     TimeInfo init_time = {0,0,0,0};
     TimeInfo tmp_dst = {0,0,0,0};
     char datebuf[CMD_BUF_SIZE] = {0};
     CpuStatus st_cpu = {0,0,0,0,0,0,0,0,0,0,0};
     pthread_t pid_t1, pid_t2;
     int encode = 0, decode = 0, mem_status = 3;
-	string mem_result = "NULL";
+    string mem_result = "NULL";
     
     FuncBase** _funcBase = control->get_funcbase();
     CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
@@ -250,16 +260,12 @@ void* StressTest::test_all(void* arg)
     while(true)
     {
         if (!control->is_stress_test_window_quit_safely()) {
-            string result = "运行时间:" + to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour) +
+            stress_result = "运行时间:" + to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour) +
                             "小时" + to_string(tmp_dst.minute) + "分" + to_string(tmp_dst.second) +
                             "秒  编码状态:" + (string)PRINT_RESULT1(encode) + "  解码状态:" +
                             (string)PRINT_RESULT1(decode) + "  Mem压力测试:" + mem_result + "\n";            
-			record->push_back(result);
-			while (record->size() > STRESS_RECORD_NUM) {
-                record->erase(record->begin());
-            }
 
-			if (baseInfo->platform == "IDV") {
+            if (baseInfo->platform == "IDV") {
                 stop_gpu_stress_test();
             }
             stop_cpuburn_stress();
@@ -271,10 +277,10 @@ void* StressTest::test_all(void* arg)
                 remove_local_file(STRESS_LOCK_FILE.c_str());
             }
 
-			break;
+            break;
         }
         
-		encode = 0;
+        encode = 0;
         decode = control->get_decode_status();
 
         get_current_open_time(&tmp_dst);
@@ -294,7 +300,7 @@ void* StressTest::test_all(void* arg)
         }
 
         if (mem_status == 3 && tmp_dst.day == 0 && tmp_dst.hour == 0 && tmp_dst.minute == 1 &&
-								tmp_dst.second >= 0 && tmp_dst.second <= 1) {
+                                tmp_dst.second >= 0 && tmp_dst.second <= 1) {
             pthread_create(&pid_t1, NULL, mem_stress_test, &mem_status);
         }
 
@@ -303,15 +309,15 @@ void* StressTest::test_all(void* arg)
             uihandle->set_stress_test_pass_or_fail("FAIL");
         }
 
-		if (mem_status == 0) {
-			mem_result = "PASS";
+        if (mem_status == 0) {
+            mem_result = "PASS";
             uihandle->update_stress_label_value("Mem压力测试", mem_result);
         } else if (mem_status == 1){
-        	mem_result = "FAIL";
-			uihandle->update_stress_label_value("Mem压力测试", mem_result);
+            mem_result = "FAIL";
+            uihandle->update_stress_label_value("Mem压力测试", mem_result);
             uihandle->set_stress_test_pass_or_fail("FAIL");
         }
-		
+        
         snprintf(datebuf, CMD_BUF_SIZE, "%d天%d时%d分%d秒", tmp_dst.day, tmp_dst.hour, tmp_dst.minute, tmp_dst.second);
         uihandle->update_stress_label_value("运行时间", datebuf);
         
@@ -332,19 +338,10 @@ void StressTest::start_test(BaseInfo* baseInfo)
     pthread_create(&tid,NULL,test_all,baseInfo);
 }
 
-void StressTest::print_stress_test_result(vector<string> record) 
+string StressTest::get_stress_result_record()
 {
-    Control *control = Control::get_control();
-
-    control->update_screen_log("The last Stress test result is...\n");
-    control->update_screen_log("==================== Stress Test Result ====================\n");
-
-    for (size_t i = 0; i < record.size(); i++) {
-        control->update_screen_log(record[i]);
-    }
-    control->update_screen_log("==================================================\n");
+    return stress_result;
 }
-
 
 NextProcess::NextProcess()
 {
@@ -583,7 +580,7 @@ void* InterfaceTest::test_all(void *arg)
         }
     }
 
-    control->update_screen_log("=============== Auto Test Result ===============");
+    control->update_screen_log("=============== " + INTERFACE_TEST_NAME + "结果 ===============");
     
     if (interfaceSelectStatus->mem_select) {
         string mem_total_result = "MEM\t";

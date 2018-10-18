@@ -108,7 +108,7 @@ error_return:
 
 void* BrightTest::test_all(void *arg)
 {
-    Control::get_control()->update_screen_log("==================== bright test ====================\n");
+    Control::get_control()->update_screen_log("==================== " + BRIGHT_TEST_NAME + " ====================\n");
     BaseInfo* baseInfo = (BaseInfo *)arg;
     Control::get_control()->confirm_test_result(BRIGHT_TEST_NAME);
     bright_test_all(baseInfo->bright_level);

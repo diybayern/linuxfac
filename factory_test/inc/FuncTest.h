@@ -65,9 +65,9 @@ public:
     static void* camera_stress_test(void*);
     static bool start_cpuburn_stress();
     static void stop_cpuburn_stress();
-    static void print_stress_test_result(vector<string> record);
     static void* mem_stress_test(void* arg);
     static void stop_mem_stress_test();
+    static string get_stress_result_record();
 };
 
 

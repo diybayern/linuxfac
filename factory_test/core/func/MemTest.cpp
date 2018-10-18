@@ -4,6 +4,7 @@
 #include <math.h>
 
 string mem_screen_log = "";
+string mem_screen_red = "";
 
 MemTest::MemTest()
 {
@@ -19,7 +20,8 @@ bool MemTest::compare_men_cap(int mem_cap)
         LOG_INFO("current mem cap is %sM\n",real_mem_cap.c_str());
         return true;
     } else {
-        mem_screen_log += "ERROR: mem cap should be " + to_string(mem_cap) + "G but current is " + real_mem_cap + "M\n\n";
+        mem_screen_red += "\t错误：内存大小应为" + to_string(mem_cap * 1024) + "M，但只检测到" + real_mem_cap + "M\n";
+        mem_screen_log += "ERROR: mem cap should be " + to_string(mem_cap * 1024) + "M but current is " + real_mem_cap + "M\n\n";
         LOG_ERROR("ERROR: mem cap should be %dG but current is %sM\n\n", mem_cap, real_mem_cap.c_str());
         return false;
     }
@@ -33,6 +35,7 @@ bool MemTest::mem_stability_test()
     if (stable_result == "SUCCESS") {
         return true;
     } else {
+        mem_screen_red += "\t错误：内存稳定性测试失败\n";
         return false;
     }
 }
@@ -43,25 +46,29 @@ void* MemTest::test_all(void *arg)
     control->set_interface_test_status(MEM_TEST_NAME, false);
     BaseInfo* baseInfo = (BaseInfo *)arg;
     bool is_pass;
-    mem_screen_log += "==================== mem test ====================\n";
+    mem_screen_log += "==================== " + MEM_TEST_NAME + " ====================\n";
     is_pass    = compare_men_cap(get_int_value(baseInfo->mem_cap));
     is_pass   &= mem_stability_test();
     string stability_result = execute_command("cat " + MEM_UI_LOG);
-    mem_screen_log += stability_result + "\n\nmem test result:\t\t\t";
+    mem_screen_log += stability_result + "\n";
     LOG_INFO("mem stability test result:%s\n",stability_result.c_str());
     if (is_pass) {
         LOG_INFO("mem test result:\tPASS\n");
-        mem_screen_log += "SUCCESS\n\n";
+        mem_screen_log = MEM_TEST_NAME + "结果：\t\t\t成功\n\n";
         control->set_interface_test_result(MEM_TEST_NAME, true); 
     } else {
         LOG_INFO("mem test result:\tFAIL\n");
-        mem_screen_log += "FAIL\n\n";
+        mem_screen_red = MEM_TEST_NAME + "结果：\t\t\t失败\n\n" + mem_screen_red;
         control->set_interface_test_result(MEM_TEST_NAME, false); 
     }
-    control->update_screen_log(mem_screen_log);
-    control->set_interface_test_status(MEM_TEST_NAME, true);
     remove_local_file(MEM_UI_LOG.c_str());
+    control->update_screen_log(mem_screen_log);
     mem_screen_log = "";
+    if (mem_screen_red != "") {
+        control->update_color_screen_log(mem_screen_red, "red");
+        mem_screen_red = "";
+    }
+    control->set_interface_test_status(MEM_TEST_NAME, true);
     return NULL;
 }
 

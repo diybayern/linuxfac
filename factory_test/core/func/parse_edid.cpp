@@ -413,7 +413,7 @@ int parse_edid_from_file(const char *edid_info) {
         goto _exit;
     }
     for (i = 0; i < 128; i++) {
-        LOG_ERROR("byte %i: %x\n", i, edid[i]);
+        LOG_INFO("byte %i: %x\n", i, edid[i]);
     }
     if (edid[126] == 0x01) {
         if (read(infd, &extb, 128) != 128) {
@@ -422,7 +422,7 @@ int parse_edid_from_file(const char *edid_info) {
             goto _exit;
         }
         for (i = 0; i < 128; i++) {
-            LOG_ERROR("byte %i: %02x\n", i+128, extb[i]);
+            LOG_INFO("byte %i: %02x\n", i+128, extb[i]);
         }
         extblock = 1;
     } else if (edid[126] > 0x01) {

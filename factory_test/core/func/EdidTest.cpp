@@ -19,9 +19,11 @@
 
 pthread_mutex_t g_reg_mutex = PTHREAD_MUTEX_INITIALIZER;
 string edid_screen_log = "";
+string edid_screen_red = "";
 
 extern int edid_read_i2c_test(int edid_num);
 extern string get_edid_i2c_screen_log();
+extern string get_edid_i2c_screen_red();
 
 EdidTest::EdidTest()
 {
@@ -152,18 +154,23 @@ int EdidTest::edid_test_all(unsigned int num) {
 i2c_test:
     ret = edid_read_i2c_test(edid_num);
     edid_screen_log += get_edid_i2c_screen_log();
+    edid_screen_red += get_edid_i2c_screen_red();
     if (ret == SUCCESS) {
         pthread_mutex_unlock(&g_reg_mutex);
         goto print;
     } else {
         if (ret == AGAIN && failed++ < 5) {
             LOG_ERROR("Failed to read EDID from I2C bus, try again.");
+            edid_screen_log += "Failed to read EDID from I2C bus, try again.";
+            edid_screen_log += "\t错误：无法从I2C总线读取EDID，请重试\n";
             goto i2c_test;
         }
         if (edid_num == 2) {           
             pthread_mutex_unlock(&g_reg_mutex);
             if (ret == AGAIN) {
                 LOG_ERROR("ERROR: Failed to read any EDID information on the buses.\n");
+                edid_screen_log += "ERROR: Failed to read any EDID information on the buses.\n";
+                edid_screen_log += "\t错误：无法读取总线上的任何EDID信息\n";
             }
             ret = FAIL;
             goto print;
@@ -234,21 +241,24 @@ void* EdidTest::test_all(void *arg)
     Control *control = Control::get_control();
     control->set_interface_test_status(EDID_TEST_NAME, false);
     BaseInfo* baseInfo = (BaseInfo *)arg;    
-    edid_screen_log += "==================== edid test ====================\n";
+    edid_screen_log += "==================== " + EDID_TEST_NAME + " ====================\n";
     int edid_num = get_edid_num(baseInfo);
     LOG_INFO("edid num: %d", edid_num);
     int is_pass = edid_test_all(edid_num);
-    edid_screen_log += "\nedid test result:\t\t\t";
     if (is_pass == SUCCESS) {
-        edid_screen_log += "SUCCESS\n\n";
+        edid_screen_log += EDID_TEST_NAME + "结果:\t\t\t成功\n\n";
         control->set_interface_test_result(EDID_TEST_NAME, true);
     } else {
-        edid_screen_log += "FAIL\n\n";
+        edid_screen_red = EDID_TEST_NAME + "结果:\t\t\t失败\n\n" + edid_screen_red;
         control->set_interface_test_result(EDID_TEST_NAME, false);
     }
     control->update_screen_log(edid_screen_log);
-    control->set_interface_test_status(EDID_TEST_NAME, true);
     edid_screen_log = "";
+    if (edid_screen_red != "") {
+        control->update_color_screen_log(edid_screen_red, "red");
+        edid_screen_red = "";
+    }
+    control->set_interface_test_status(EDID_TEST_NAME, true);
     return NULL;
 }
 

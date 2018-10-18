@@ -145,6 +145,7 @@ public:
     void show_main_test_ui();
     void auto_test_mac_sn();
     void update_screen_log(string uiLog);
+    void update_color_screen_log(string uiLog, string color);
     void set_func_test_result(string func,string result);
     void upload_mes_log();
     void init_mes_log();
@@ -157,6 +158,8 @@ public:
     static void* update_mes_log_thread(void* arg);
     void start_update_mes_log(MesInfo* info);
     int get_decode_status();
+    void show_stress_record();
+    void print_stress_test_result(vector<string> record);
 
     UiHandle* get_ui_handle() {
         return _uiHandle;
@@ -258,11 +261,6 @@ public:
     FacArg* get_fac_arg() {
         return _facArg;
     }
-
-    
-    vector<string>* get_stress_record() {
-        return &_record;
-    }
     
 private:
     void init_base_info();
@@ -321,7 +319,6 @@ public slots:
     void confirm_shut_down_or_next_process(string process);
     void retry_sn_mac_test();
     void slot_factory_delete_event();
-    void show_stress_record();
 };
 
 #endif // CONTROL_H

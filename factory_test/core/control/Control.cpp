@@ -337,7 +337,7 @@ void Control::start_sound_test()
 void Control::start_display_test()
 {
     LOG_INFO("******************** start display test ********************");
-    update_screen_log("==================== display test ====================\n");
+    update_screen_log("==================== " + DISPLAY_TEST_NAME + " ====================\n");
     _uiHandle->show_display_ui();
 }
 
@@ -404,9 +404,18 @@ void Control::show_stress_record(){
     update_screen_log("---------------------------------------------------------------------------------------------\n");
 
     read_stress_record(&_record);
+    print_stress_test_result(_record);
+}
 
-    StressTest* stress = (StressTest*) _funcBase[STRESS];
-    stress->print_stress_test_result(_record);
+void Control::print_stress_test_result(vector<string> record) 
+{
+    update_screen_log("The last Stress test result is...\n");
+    update_screen_log("==================== " + STRESS_TEST_NAME + "结果 ====================\n");
+
+    for (size_t i = 0; i < record.size(); i++) {
+        update_screen_log(record[i]);
+    }
+    update_screen_log("==================================================\n");
 }
 
 void Control::auto_test_mac_sn() {
@@ -550,7 +559,7 @@ void Control::update_mes_log(string tag,string value)
 
 
 void Control::upload_mes_log() {
-    update_screen_log("==================== upload log ====================\n");
+    update_screen_log("==================== " + UPLOAD_LOG_NAME + " ====================\n");
     if (_fac_config_status != 0) {
         LOG_INFO("fac config is wrong, do not upload");
         _uiHandle->confirm_test_result_warning("配置文件有误");
@@ -594,6 +603,11 @@ void Control::upload_mes_log() {
 void Control::update_screen_log(string uiLog)
 {
     _uiHandle->update_screen_log(uiLog);
+}
+
+void Control::update_color_screen_log(string uiLog, string color)
+{
+    _uiHandle->update_color_screen_log(uiLog, color);;
 }
 
 void Control::set_func_test_result(string func,string result)
@@ -805,7 +819,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->func = "AUDIO";
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
-            update_screen_log("sound test result\t\t\tSUCCESS\n");
+            update_screen_log(SOUND_TEST_NAME + "结果：\t\t\t成功\n");
             LOG_INFO("sound test result:\tPASS\n");
             _funcFinishStatus->sound_finish= true;
         }
@@ -813,7 +827,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->func = "DISPLAY";
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
-            update_screen_log("display test result\t\t\tSUCCESS\n");
+            update_screen_log(DISPLAY_TEST_NAME + "结果：\t\t\t成功\n");
             LOG_INFO("display test result:\tPASS\n");
             _funcFinishStatus->display_finish= true;
         }
@@ -821,7 +835,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->func = "BRIGHTNESS";
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
-            update_screen_log("bright test result\t\t\tSUCCESS\n");
+            update_screen_log(BRIGHT_TEST_NAME + "结果：\t\t\t成功\n");
             LOG_INFO("bright test result:\tPASS\n");
             _funcFinishStatus->bright_finish= true;
         }
@@ -831,18 +845,24 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->func = "CAMERA";
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
-            update_screen_log("camera test result\t\t\tSUCCESS\n");
+            update_screen_log(CAMERA_TEST_NAME + "结果：\t\t\t成功\n");
             LOG_INFO("camera test result:\tPASS\n");
             _funcFinishStatus->camera_finish= true;
         }
         if (func == STRESS_TEST_NAME) {
             LOG_INFO("stress test result:\tPASS\n");
             StressTest* stress = (StressTest*)_funcBase[STRESS];
-			string record = *_record.rbegin();
-			_record.pop_back();
-			_record.push_back("PASS  " + record);
+            string result = stress->get_stress_result_record();
+            while (result == "") {
+                usleep(500000);
+                result = stress->get_stress_result_record();
+            }
+            _record.push_back("PASS  " + result);
+            while (_record.size() > STRESS_RECORD_NUM) {
+                _record.erase(_record.begin());
+            }
             write_stress_record(_record);
-            stress->print_stress_test_result(_record);
+            print_stress_test_result(_record);
             _funcFinishStatus->stress_finish= true;
         }
     } else {
@@ -851,7 +871,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->func = "AUDIO";
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
-            update_screen_log("sound test result\t\t\tFAIL\n");
+            update_color_screen_log(SOUND_TEST_NAME + "结果：\t\t\t失败\n", "red");
             LOG_INFO("sound test result:\tFAIL\n");
             _funcFinishStatus->sound_finish= false;
         }
@@ -859,7 +879,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->func = "DISPLAY";
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
-            update_screen_log("display test result\t\t\tFAIL\n");
+            update_color_screen_log(DISPLAY_TEST_NAME + "结果：\t\t\t失败\n", "red");
             LOG_INFO("display test result:\tFAIL\n");
             _funcFinishStatus->display_finish= false;
         }
@@ -867,7 +887,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->func = "BRIGHTNESS";
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
-            update_screen_log("bright test result\t\t\tFAIL\n");
+            update_color_screen_log(BRIGHT_TEST_NAME + "结果：\t\t\t失败\n", "red");
             LOG_INFO("bright test result:\tFAIL\n");
             _funcFinishStatus->bright_finish= false;
         }
@@ -877,18 +897,24 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             _mesInfo->func = "CAMERA";
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
-            update_screen_log("camera test result\t\t\tFAIL\n");
+            update_color_screen_log(CAMERA_TEST_NAME + "结果：\t\t\t失败\n", "red");
             LOG_INFO("camera test result:\tFAIL\n");
             _funcFinishStatus->camera_finish= false;
         }
         if (func == STRESS_TEST_NAME) {
             LOG_INFO("stress test result:\tFAIL\n");
             StressTest* stress = (StressTest*)_funcBase[STRESS];
-			string record = *_record.rbegin();
-			_record.pop_back();
-			_record.push_back("FAIL  " + record);
+            string result = stress->get_stress_result_record();
+            while (result == "") {
+                usleep(500000);
+                result = stress->get_stress_result_record();
+            }
+            _record.push_back("FAIL  " + result);
+            while (_record.size() > STRESS_RECORD_NUM) {
+                _record.erase(_record.begin());
+            }
             write_stress_record(_record);
-            stress->print_stress_test_result(_record);
+            print_stress_test_result(_record);
             _funcFinishStatus->stress_finish= false;
         }
     }

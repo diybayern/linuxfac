@@ -148,7 +148,7 @@ bool CameraTest::camera_test_all()
 void* CameraTest::test_all(void*)
 {
     Control* control = Control::get_control();
-    control->update_screen_log("==================== camera test ====================\n");
+    control->update_screen_log("==================== " + CAMERA_TEST_NAME + " ====================\n");
     camera_test_all();    
     control->confirm_test_result(CAMERA_TEST_NAME);
     return NULL;

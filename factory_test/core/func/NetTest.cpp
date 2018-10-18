@@ -24,6 +24,7 @@
 
 NetInfo* g_net_info = NULL;
 string net_screen_log = "";
+string net_screen_red = "";
 
 NetTest::NetTest()
 {
@@ -435,6 +436,7 @@ bool NetTest::net_test_all()
     info = g_net_info;
     if (NULL == info){
         LOG_ERROR("net info is null");
+        net_screen_red += "\t错误：网口初始化错误，获取网口信息失败\n";
         net_screen_log += "ERROR:net init error! get net info failed\n";
         return false;    
     }
@@ -449,6 +451,7 @@ bool NetTest::net_test_all()
     if (ret == false) {
         LOG_ERROR("get eth status failed!\n");
         net_screen_log += "ERROR: get eth status failed!\n";
+        net_screen_red += "\t错误：网口状态获取失败\n";
         goto error;
     }
 
@@ -458,6 +461,7 @@ bool NetTest::net_test_all()
     } else {
         LOG_ERROR("Network card status: \tdown\n");
         net_screen_log += "Network card status: \t\tdown\n\tERROR: network is down!\n";
+        net_screen_red += "\t错误：网卡关闭\n";
         ret = false;
         goto error;
     }
@@ -468,6 +472,7 @@ bool NetTest::net_test_all()
     } else {
         LOG_ERROR("ERROR: network is not linked!\n");
         net_screen_log += "Network link detected: \t\tno\n\tERROR: network is not linked!\n";
+        net_screen_red += "\t错误：网口未连接\n";
         ret = false;
         goto error;
     }
@@ -477,6 +482,7 @@ bool NetTest::net_test_all()
         || info->eth_speed == (unsigned int)(-1)) {
         LOG_ERROR("Network card speed: \tUnknown!\n");
         net_screen_log += "Network card speed: \t\tUnknown!\n";
+        net_screen_red += "\t错误：网卡速率未知\n";
         ret = false;
     } else {
         LOG_INFO("Network card speed: \t%uMbps\n", info->eth_speed);
@@ -486,6 +492,8 @@ bool NetTest::net_test_all()
                                         ETH_LINK_SPEED, info->eth_speed);
             net_screen_log += "\tERROR: Network speed must be " + to_string(ETH_LINK_SPEED)
                         + "Mbps, but current is " + to_string(info->eth_speed) + "Mbps\n";
+            net_screen_red += "\t错误：网卡速率必须为"+ to_string(ETH_LINK_SPEED)
+                        + "Mbps,但检测到速率为" + to_string(info->eth_speed) + "Mbps\n";
             ret = false;
         }
     }
@@ -495,6 +503,7 @@ bool NetTest::net_test_all()
     if (info->eth_duplex != DUPLEX_FULL) {
         net_screen_log += "\tERROR: Network duplex must be Full, but current is "
                     + net_get_duplex_desc(info->eth_duplex) + "\n";
+        net_screen_red += "\t错误：网卡必须为Full全双工，但检测到网卡为" + net_get_duplex_desc(info->eth_duplex) + "\n";
         LOG_ERROR("ERROR: Network duplex must be Full, but current is %s\n",(net_get_duplex_desc(info->eth_duplex)).c_str());
         ret = false;
     }
@@ -512,6 +521,7 @@ bool NetTest::net_test_all()
     }
 
     if (info->recv_num < 90) {
+        net_screen_red += "\t错误：网口收报个数未达标\n";
         ret = false;
     }
 
@@ -528,20 +538,24 @@ void* NetTest::test_all(void*)
 {
     Control *control = Control::get_control();
     control->set_interface_test_status(NET_TEST_NAME, false);
-    net_screen_log += "==================== net test ====================\n";
+    net_screen_log += "==================== " + NET_TEST_NAME + " ====================\n";
     bool is_pass = net_test_all();
     if (is_pass) {
         LOG_INFO("net test result:\tPASS\n");
-        net_screen_log += "net test result: \t\t\tSUCCESS\n\n";
+        net_screen_log += NET_TEST_NAME + "结果：\t\t\t成功\n\n";
         control->set_interface_test_result(NET_TEST_NAME, true);
     } else {
         LOG_INFO("net test result:\tFAIL\n");
-        net_screen_log += "net test result: \t\t\tFAIL\n\n";
+        net_screen_red += NET_TEST_NAME + "结果：\t\t\t失败\n\n" + net_screen_red;
         control->set_interface_test_result(NET_TEST_NAME, false);
     }
     control->update_screen_log(net_screen_log);
-    control->set_interface_test_status(NET_TEST_NAME, true);
     net_screen_log = "";
+    if (net_screen_red != "") {
+        control->update_color_screen_log(net_screen_red, "red");
+        net_screen_red = "";
+    }
+    control->set_interface_test_status(NET_TEST_NAME, true);
     return NULL;
 }
 
