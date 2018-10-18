@@ -546,7 +546,7 @@ void* NetTest::test_all(void*)
         control->set_interface_test_result(NET_TEST_NAME, true);
     } else {
         LOG_INFO("net test result:\tFAIL\n");
-        net_screen_red += NET_TEST_NAME + "结果：\t\t\t失败\n\n" + net_screen_red;
+        net_screen_red = NET_TEST_NAME + "结果：\t\t\t失败\n\n" + net_screen_red;
         control->set_interface_test_result(NET_TEST_NAME, false);
     }
     control->update_screen_log(net_screen_log);

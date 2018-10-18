@@ -78,7 +78,7 @@ if [ -z "$mount_point" ]; then
     done
     if [ -z ${hdd_base} ];then
         echo 'no /dev/sd' >> $log_file
-        echo "hdd is not exist" > /tmp/hdd.status
+        echo "hdd不存在" > /tmp/hdd.status
         exit
     fi
 else
@@ -100,12 +100,12 @@ if [[ $mount_point_unit =~ $cap_unit ]];then
         hdd_cap_result=1
     else
         echo 'hdd cap is wrong' >> $log_file
-        echo "the capacity of hdd is wrong" > /tmp/hdd.status
+        echo "hdd容量错误" > /tmp/hdd.status
         exit
     fi
 else
     echo 'cap unit is wrong' >> $log_file
-    echo "the cap unit of hdd is wrong" > /tmp/hdd.status
+    echo "hdd容量上限错误" > /tmp/hdd.status
     exit
 fi
 
@@ -118,7 +118,7 @@ if [ -n "$smartctl_result" ];then
     health_result=1
 else
     echo 'hdd is not health' >> $log_file
-    echo "hdd is not health" > /tmp/hdd.status
+    echo "hdd有异常" > /tmp/hdd.status
     exit
 fi
 
@@ -133,7 +133,7 @@ else
     if [ $? -ne 0 ];then
         bcache_result=0
         echo 'bcache is not ready' >> $log_file
-        echo "bcache is not ready" > /tmp/hdd.status
+        echo "bcache未准备" > /tmp/hdd.status
         exit
     else
         bcache_result=1
@@ -172,7 +172,7 @@ else
             diff /tmp/.norm_file /opt/lessons/.tmp_factory_test_norm$i
             if [ $? -ne 0 ];then
                 echo "dd diff error at $i compare." >> $log_file
-                echo "hdd read and write error" > /tmp/hdd.status
+                echo "hdd读写失败" > /tmp/hdd.status
                 break
             fi
 

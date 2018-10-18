@@ -50,11 +50,11 @@ void* MemTest::test_all(void *arg)
     is_pass    = compare_men_cap(get_int_value(baseInfo->mem_cap));
     is_pass   &= mem_stability_test();
     string stability_result = execute_command("cat " + MEM_UI_LOG);
-    mem_screen_log += stability_result + "\n";
+    mem_screen_log += stability_result + "\n\n";
     LOG_INFO("mem stability test result:%s\n",stability_result.c_str());
     if (is_pass) {
         LOG_INFO("mem test result:\tPASS\n");
-        mem_screen_log = MEM_TEST_NAME + "结果：\t\t\t成功\n\n";
+        mem_screen_log += MEM_TEST_NAME + "结果：\t\t\t成功\n\n";
         control->set_interface_test_result(MEM_TEST_NAME, true); 
     } else {
         LOG_INFO("mem test result:\tFAIL\n");

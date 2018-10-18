@@ -447,10 +447,10 @@ void* WifiTest::test_all(void*)
     FacArg* _facArg = control->get_fac_arg();
     string cmd = "bash " + WIFI_TEST_SCRIPT + " " + _facArg->wifi_ssid
                                             + " " + _facArg->wifi_passwd + " " + _facArg->wifi_enp;
-    string str = execute_command(cmd);
-    if (str == "error"){
-        LOG_ERROR("ERROR:wifi init error!\n");
-        wifi_screen_log += "wifi init error!\n";
+    //string str = execute_command(cmd);
+    if (system(cmd.c_str()) < 0){
+        LOG_ERROR("ERROR:wifi_test.sh run error!\n");
+        wifi_screen_log += "wifi_test.sh run error!\n";
         wifi_screen_red += "\t错误：wifi脚本执行失败!\n";
     }else {
         if (check_if_wifi_connect_pass()) {

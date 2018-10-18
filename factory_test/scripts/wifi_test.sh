@@ -190,9 +190,9 @@ done
 # check wifi scan test pass or not
 if [ $SCAN_SUCCESS -eq 0 ]; then
     if [ $SCAN_SIGNAL -gt 0 ]; then
-        echo "wifi scan signal test failed ! signal too weak : - $SCAN_SIGNAL dbm" | tee $WIFI_TEST_RESULT
+        echo "wifi扫描失败! 信号强度太弱: - $SCAN_SIGNAL dbm" | tee $WIFI_TEST_RESULT
     else
-        echo "wifi scan signal test failed ! cannot scan the wifi : $TEST_WIFI" | tee $WIFI_TEST_RESULT
+        echo "wifi扫描失败! 无法扫描到wifi : $TEST_WIFI" | tee $WIFI_TEST_RESULT
     fi
     close_wifi
     exit 1
@@ -249,7 +249,7 @@ done
 
 # check wifi connected or not
 if [ $CONNECT_SUCCESS -ne 1 ];  then
-    echo "connect wifi test failed!" | tee $WIFI_TEST_RESULT
+    echo "wifi连接失败!" | tee $WIFI_TEST_RESULT
     rm $FACTORY_WIFI_TEST_LOCK
     close_wifi
     exit 1
