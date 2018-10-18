@@ -250,7 +250,6 @@ void* StressTest::test_all(void* arg)
     while(true)
     {
         if (!control->is_stress_test_window_quit_safely()) {
-            encode = 0;
             string result = "运行时间:" + to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour) +
                             "小时" + to_string(tmp_dst.minute) + "分" + to_string(tmp_dst.second) +
                             "秒  编码状态:" + (string)PRINT_RESULT1(encode) + "  解码状态:" +
@@ -275,13 +274,14 @@ void* StressTest::test_all(void* arg)
 			break;
         }
         
+		encode = 0;
         decode = control->get_decode_status();
 
         get_current_open_time(&tmp_dst);
         diff_running_time(&tmp_dst, &init_time);
         if (tmp_dst.day == 0 && tmp_dst.hour == 0 && tmp_dst.minute == 2 && tmp_dst.second >= 0 && tmp_dst.second <= 1) {
             remove_local_file(STRESS_LOCK_FILE.c_str());
-            if (decode || !mem_status) {
+            if (encode || decode || mem_status) {
                 uihandle->set_stress_test_pass_or_fail("FAIL");
             } else {
                 uihandle->set_stress_test_pass_or_fail("PASS");
@@ -293,7 +293,7 @@ void* StressTest::test_all(void* arg)
             uihandle->confirm_test_result_warning("上次拷机退出异常");
         }
 
-        if (mem_status == 3 && tmp_dst.day == 0 && tmp_dst.hour == 0 && tmp_dst.minute == 0 &&
+        if (mem_status == 3 && tmp_dst.day == 0 && tmp_dst.hour == 0 && tmp_dst.minute == 1 &&
 								tmp_dst.second >= 0 && tmp_dst.second <= 1) {
             pthread_create(&pid_t1, NULL, mem_stress_test, &mem_status);
         }
