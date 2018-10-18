@@ -802,31 +802,30 @@ void Control::set_test_result_pass_or_fail(string func, string result)
 {
     if (result == "PASS") {
         if (func == SOUND_TEST_NAME) {
-            _funcFinishStatus->sound_finish= true;
             _mesInfo->func = "AUDIO";
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
             update_screen_log("sound test result\t\t\tSUCCESS\n");
             LOG_INFO("sound test result:\tPASS\n");
+            _funcFinishStatus->sound_finish= true;
         }
         if (func == DISPLAY_TEST_NAME) {
-            _funcFinishStatus->display_finish= true;
             _mesInfo->func = "DISPLAY";
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
             update_screen_log("display test result\t\t\tSUCCESS\n");
             LOG_INFO("display test result:\tPASS\n");
+            _funcFinishStatus->display_finish= true;
         }
         if (func == BRIGHT_TEST_NAME) {
-            _funcFinishStatus->bright_finish= true;
             _mesInfo->func = "BRIGHTNESS";
             _mesInfo->status = "PASS";
             start_update_mes_log(_mesInfo);
             update_screen_log("bright test result\t\t\tSUCCESS\n");
             LOG_INFO("bright test result:\tPASS\n");
+            _funcFinishStatus->bright_finish= true;
         }
         if (func == CAMERA_TEST_NAME) {
-            _funcFinishStatus->camera_finish= true;
             CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
             camera->close_xawtv_window();
             _mesInfo->func = "CAMERA";
@@ -834,39 +833,45 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             start_update_mes_log(_mesInfo);
             update_screen_log("camera test result\t\t\tSUCCESS\n");
             LOG_INFO("camera test result:\tPASS\n");
+            _funcFinishStatus->camera_finish= true;
         }
         if (func == STRESS_TEST_NAME) {
-            _funcFinishStatus->stress_finish= true;
             LOG_INFO("stress test result:\tPASS\n");
+            StressTest* stress = (StressTest*)_funcBase[STRESS];
+			string record = *_record.rbegin();
+			_record.pop_back();
+			_record.push_back("PASS  " + record);
+            write_stress_record(_record);
+            stress->print_stress_test_result(_record);
+            _funcFinishStatus->stress_finish= true;
         }
     } else {
 
         if (func == SOUND_TEST_NAME) {
-            _funcFinishStatus->sound_finish= false;
             _mesInfo->func = "AUDIO";
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
             update_screen_log("sound test result\t\t\tFAIL\n");
             LOG_INFO("sound test result:\tFAIL\n");
+            _funcFinishStatus->sound_finish= false;
         }
         if (func == DISPLAY_TEST_NAME) {
-            _funcFinishStatus->display_finish= false;
             _mesInfo->func = "DISPLAY";
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
             update_screen_log("display test result\t\t\tFAIL\n");
             LOG_INFO("display test result:\tFAIL\n");
+            _funcFinishStatus->display_finish= false;
         }
         if (func == BRIGHT_TEST_NAME) {
-            _funcFinishStatus->bright_finish= false;
             _mesInfo->func = "BRIGHTNESS";
             _mesInfo->status = "FAIL";
             start_update_mes_log(_mesInfo);
             update_screen_log("bright test result\t\t\tFAIL\n");
             LOG_INFO("bright test result:\tFAIL\n");
+            _funcFinishStatus->bright_finish= false;
         }
         if (func == CAMERA_TEST_NAME) {
-            _funcFinishStatus->camera_finish= false;
             CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
             camera->close_xawtv_window();
             _mesInfo->func = "CAMERA";
@@ -874,10 +879,17 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             start_update_mes_log(_mesInfo);
             update_screen_log("camera test result\t\t\tFAIL\n");
             LOG_INFO("camera test result:\tFAIL\n");
+            _funcFinishStatus->camera_finish= false;
         }
         if (func == STRESS_TEST_NAME) {
-            _funcFinishStatus->stress_finish= false;
             LOG_INFO("stress test result:\tFAIL\n");
+            StressTest* stress = (StressTest*)_funcBase[STRESS];
+			string record = *_record.rbegin();
+			_record.pop_back();
+			_record.push_back("FAIL  " + record);
+            write_stress_record(_record);
+            stress->print_stress_test_result(_record);
+            _funcFinishStatus->stress_finish= false;
         }
     }
     _uiHandle->set_test_result(func, result);

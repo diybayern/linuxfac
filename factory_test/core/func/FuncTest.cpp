@@ -154,15 +154,17 @@ void* StressTest::mem_stress_test(void* arg)
 {
     pthread_detach(pthread_self());
     LOG_INFO("start mem stress test\n");
-    bool *flag = (bool*)arg;
+    int *mem_status = (int*)arg;
     stop_mem_stress_test();
-    string result = execute_command("bash " + MEM_TEST_SCRIPT + " 1G");
+	*mem_status = 2;
+    string result = execute_command("bash " + MEM_TEST_SCRIPT + " 10M");
+	LOG_INFO("MEM STRESS TEST RESULT:%s",result.c_str());
     if (result == "SUCCESS") {
         LOG_INFO("mem stress test result:\tPASS\n");
-        *flag = true;
+        *mem_status = SUCCESS;
     } else {
         LOG_ERROR("mem stress test result:\tfailed\n");
-        *flag = false;
+        *mem_status = FAIL;
     }
     return NULL;
 }
@@ -185,7 +187,8 @@ void* StressTest::test_all(void* arg)
     char datebuf[CMD_BUF_SIZE] = {0};
     CpuStatus st_cpu = {0,0,0,0,0,0,0,0,0,0,0};
     pthread_t pid_t1, pid_t2;
-    int encode = 0, decode = 0, result = 0;
+    int encode = 0, decode = 0, mem_status = 3;
+	string mem_result = "NULL";
     
     FuncBase** _funcBase = control->get_funcbase();
     CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
@@ -236,19 +239,28 @@ void* StressTest::test_all(void* arg)
     uihandle->update_stress_label_value("SN序列号",(control->get_hw_info())->sn);
     uihandle->update_stress_label_value("MAC地址",(control->get_hw_info())->mac);
     uihandle->update_stress_label_value("解码状态","PASS");
-    uihandle->update_stress_label_value("Mem压力测试","PASS");
+    uihandle->update_stress_label_value("Mem压力测试",mem_result);
 
     if (baseInfo->platform == "IDV") {
         pthread_create(&pid_t2, NULL, gpu_stress_test, NULL);
     }
     start_cpuburn_stress();
-    bool mem_status = true;
     
     get_current_open_time(&init_time);
     while(true)
     {
         if (!control->is_stress_test_window_quit_safely()) {
-            if (baseInfo->platform == "IDV") {
+            encode = 0;
+            string result = "运行时间:" + to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour) +
+                            "小时" + to_string(tmp_dst.minute) + "分" + to_string(tmp_dst.second) +
+                            "秒  编码状态:" + (string)PRINT_RESULT1(encode) + "  解码状态:" +
+                            (string)PRINT_RESULT1(decode) + "  Mem压力测试:" + mem_result + "\n";            
+			record->push_back(result);
+			while (record->size() > STRESS_RECORD_NUM) {
+                record->erase(record->begin());
+            }
+
+			if (baseInfo->platform == "IDV") {
                 stop_gpu_stress_test();
             }
             stop_cpuburn_stress();
@@ -260,21 +272,7 @@ void* StressTest::test_all(void* arg)
                 remove_local_file(STRESS_LOCK_FILE.c_str());
             }
 
-            encode = 0;
-            result = encode | decode | (mem_status ? 0 : 1);
-
-            string line = (string)PRINT_RESULT1(result) + "  运行时间:" + to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour) + 
-                            "小时" + to_string(tmp_dst.minute) + "分" + to_string(tmp_dst.second) + "秒  编码状态:" + 
-                            (string)PRINT_RESULT1(encode) + "  解码状态:" + (string)PRINT_RESULT1(decode) + "\n";
-
-            while (record->size() > STRESS_RECORD_NUM) {
-                record->erase(record->begin());
-            }
-            record->push_back(line);
-            write_stress_record(*record);
-            print_stress_test_result(*record);
-            
-            break;
+			break;
         }
         
         decode = control->get_decode_status();
@@ -295,18 +293,25 @@ void* StressTest::test_all(void* arg)
             uihandle->confirm_test_result_warning("上次拷机退出异常");
         }
 
-        if (control->get_pcba_whole_lock_state() && tmp_dst.day == 0 && tmp_dst.hour == 0 && 
-                                tmp_dst.minute == 30 && tmp_dst.second >= 0 && tmp_dst.second <= 1) {
+        if (mem_status == 3 && tmp_dst.day == 0 && tmp_dst.hour == 0 && tmp_dst.minute == 0 &&
+								tmp_dst.second >= 0 && tmp_dst.second <= 1) {
             pthread_create(&pid_t1, NULL, mem_stress_test, &mem_status);
         }
 
         if (decode) {
             uihandle->update_stress_label_value("解码状态","FAIL");
             uihandle->set_stress_test_pass_or_fail("FAIL");
-        } else if (!mem_status) {
-            uihandle->update_stress_label_value("Mem压力测试","FAIL");
+        }
+
+		if (mem_status == 0) {
+			mem_result = "PASS";
+            uihandle->update_stress_label_value("Mem压力测试", mem_result);
+        } else if (mem_status == 1){
+        	mem_result = "FAIL";
+			uihandle->update_stress_label_value("Mem压力测试", mem_result);
             uihandle->set_stress_test_pass_or_fail("FAIL");
         }
+		
         snprintf(datebuf, CMD_BUF_SIZE, "%d天%d时%d分%d秒", tmp_dst.day, tmp_dst.hour, tmp_dst.minute, tmp_dst.second);
         uihandle->update_stress_label_value("运行时间", datebuf);
         
