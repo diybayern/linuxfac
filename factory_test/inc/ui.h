@@ -86,26 +86,6 @@ class ItemCheck
         QObject *label;
 };
 
-class MyEventLoop : public QObject
-{
-    Q_OBJECT
-    public:
-        MyEventLoop(QObject *parent = 0);
-        virtual ~MyEventLoop();
-
-        int exec(QEventLoop::ProcessEventsFlags = QEventLoop::AllEvents,bool hassignal=false);
-        void exit();
-        bool isRunning() const;
-    signals:
-        void enterEventLoop();
-        void exitEventloop();
-    public slots:
-        void quit();
-    private:
-        bool    runflag;
-
-};
-
 class CustomProgressDialog: public QDialog
 {
     Q_OBJECT
@@ -215,8 +195,6 @@ class MainTestWindow : public QDialog
 
         CustomProgressDialog *_custom_progress_dialog;
         int _status;
-
-        MyEventLoop eventloop;
 
         bool _is_auto_upload_checked = true;
 
@@ -356,7 +334,6 @@ private:
 #if 0
     CustomData del_data;
 #endif
-    MyEventLoop eventloop;
 
 signals:
     void sig_finish_show_stress_window();

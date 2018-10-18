@@ -35,8 +35,7 @@ SOURCES += main.cpp\
     core/ui/messageform.cpp \
     core/control/Control.cpp \
     core/ui/VideoTestThread.cpp \
-    core/ui/ImageTestThread.cpp \
-    core/ui/myeventloop.cpp	
+    core/ui/ImageTestThread.cpp
 
 
 HEADERS  += \

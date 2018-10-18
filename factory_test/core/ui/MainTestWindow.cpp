@@ -665,16 +665,7 @@ void MainTestWindow::slot_finish_show_stress_window()
 {
     if (StressTestWindow::g_get_stress_test_window() != NULL) {
         StressTestWindow::g_get_stress_test_window()->finish_stress_window();
-        while(true) {
-            if (NULL != StressTestWindow::g_get_stress_test_window()) {
-                eventloop.exec();
-            } else {
-                if (eventloop.isRunning()) {
-                    eventloop.exit();
-                }
-                break;
-            }
-        }
+
         emit to_quit_test_window("拷机测试");
     }
 
@@ -684,16 +675,7 @@ void MainTestWindow::slot_finish_show_display_window(bool state)
 {
     if (NULL != DisplayTestWindow::g_get_display_test_window()) {
         DisplayTestWindow::g_get_display_test_window()->finish_display_window();
-        while(true) {
-            if (NULL != DisplayTestWindow::g_get_display_test_window()) {
-                eventloop.exec();
-            } else {
-                if (eventloop.isRunning()) {
-                    eventloop.exit();
-                }
-                break;
-            }
-        }
+
         if (state == true) {
             emit to_quit_test_window("显示测试");
         }
