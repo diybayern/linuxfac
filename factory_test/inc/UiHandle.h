@@ -27,6 +27,7 @@ class UiHandle: public QObject
         void show_display_ui();
         void show_stress_test_ui();
         void update_screen_log(string textInfo);
+        void update_color_screen_log(string textInfo, string color);
         void update_stress_label_value(string item, string result);
         void sync_main_test_ui();
         void to_show_main_test_ui();
@@ -58,6 +59,7 @@ class UiHandle: public QObject
         void to_show_display_test_window();
         void to_show_sn_mac_message_box(QString sn_mac);
         void need_to_update_screen_log(QString info);
+        void need_to_update_color_screen_log(QString info, QString color);
         void to_confirm_test_result_dialog(QString title);
         void to_start_audio_progress_dialog();
         void to_confirm_test_result_warning(QString title);

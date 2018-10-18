@@ -225,6 +225,66 @@ QPalette MainTestWindow::_get_label_color(QString result)
     return pa;
 }
 
+void MainTestWindow::update_color_screen_log(QString info, QString color)
+{
+    if (_editInfo == NULL)
+    {
+        return ;
+    }
+
+    QColor  rgb;
+    if (color.compare("red") == 0) {
+        rgb.setRgb(255, 0, 0);
+
+    } else if (color.compare("black") == 0) {
+        rgb.setRgb(0, 0, 0);
+
+    } else if (color.compare("green") == 0) {
+        rgb.setRgb(0, 255, 0);
+
+    } else if (color.compare("blue") == 0) {
+        rgb.setRgb(0, 0, 255);
+
+    } else if (color.compare("white") == 0) {
+        rgb.setRgb(255, 255, 255);
+
+    } else if (color.compare("yellow") == 0) {
+        rgb.setRgb(255, 255, 0);
+
+    } else {
+        rgb.setRgb(0, 0, 0);
+
+    }
+
+    _string_to_htmlFilter(info);
+    _string_to_html(info,rgb);
+    _editInfo->append("");
+    _editInfo->insertHtml(info);
+    _editInfo->append("");
+}
+
+void MainTestWindow::_string_to_htmlFilter(QString &str)
+{
+    str.replace("&","&amp;");
+    str.replace(">","&gt;");
+    str.replace("<","&lt;");
+    str.replace("\"","&quot;");
+    str.replace("\'","&#39;");
+    str.replace(" ","&nbsp;");
+    str.replace("\n","<br>");
+    str.replace("\r","<br>");
+}
+
+void MainTestWindow::_string_to_html(QString &str, QColor color)
+{
+    QByteArray array;
+    array.append(color.red());
+    array.append(color.green());
+    array.append(color.blue());
+    QString strC(array.toHex());
+    str = QString("<span style=\" color:#%1;\">%2</span>").arg(strC).arg(str);
+}
+
 void MainTestWindow::update_screen_log(QString textInfo)
 {
     if (_editInfo == NULL)
@@ -232,8 +292,11 @@ void MainTestWindow::update_screen_log(QString textInfo)
         return ;
     }
 
-    _editloglist.append(textInfo+"\n");
-    _editInfo->setText(_editloglist);
+    QColor  clrR(0,0,0);
+    _string_to_htmlFilter(textInfo);
+    _string_to_html(textInfo,clrR);
+    _editInfo->insertHtml(textInfo);
+    _editInfo->append("");
 }
 
 void MainTestWindow::setupUI()
@@ -355,7 +418,7 @@ CustomProgressDialog::CustomProgressDialog(QWidget *parent)
 
 CustomProgressDialog::~CustomProgressDialog()
 {
-    qDebug()<<"~CustomProgressDialog";
+    LOG_INFO("~CustomProgressDialog");
 }
 
 void CustomProgressDialog::startExec()

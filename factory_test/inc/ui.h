@@ -181,8 +181,9 @@ class MainTestWindow : public QDialog
 
         //screen log layout
         QTextEdit *_editInfo;
-        QString _editloglist;
         QVBoxLayout *_vbox_screenlog_layout;
+        void _string_to_htmlFilter(QString &str);
+        void _string_to_html(QString &str, QColor color);
 
         //function layout
         QVBoxLayout *_vbox_function_layout;
@@ -242,6 +243,7 @@ class MainTestWindow : public QDialog
         void slot_finish_show_stress_window();
         void slot_finish_show_display_window(bool state);
         void update_screen_log(QString info);
+        void update_color_screen_log(QString info, QString color);
         void update_stress_label_value(QString item, QString result);
         void confirm_test_result_dialog(QString title);
         void confirm_test_result_warning(QString title);
