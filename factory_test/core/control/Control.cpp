@@ -94,18 +94,29 @@ Control* Control::get_control()
 
 void Control::init_base_info()
 {
-    string dmi = execute_command("cat " + GET_BASEINFO_INI);
-    if (dmi != "error") {
-        get_baseinfo(_baseInfo,dmi);
-        LOG_INFO("product is %s", (_baseInfo->platform).c_str());
-        if (_baseInfo->platform == "IDV") {
-            _is_idv = true;
-        } else {
-            _is_idv = false;
-        }
-    } else {
-        LOG_ERROR("get hwcfg.ini information error");
-    }
+    //TODO:Fix Me
+    //string dmi = execute_command("cat " + GET_BASEINFO_INI);
+	
+    string dmi = execute_command("/usr/local/bin/system/getHWCfg");
+	int len = dmi.size();
+	if(dmi[0] == '{' && dmi[len-1] == '}')
+	{
+		LOG_INFO("dmi info is right");
+	}
+    dmi = dmi.substr(1, dmi.length() - 2);
+	
+	
+	if (dmi != "error") {
+		get_baseinfo(_baseInfo,dmi);
+		LOG_INFO("product is %s", (_baseInfo->platform).c_str());
+		if (_baseInfo->platform == "IDV") {
+			_is_idv = true;
+		} else {
+			_is_idv = false;
+		}
+	} else {
+		LOG_ERROR("get hwcfg.ini information error");
+	}
 }
 
 void Control::init_hw_info()
