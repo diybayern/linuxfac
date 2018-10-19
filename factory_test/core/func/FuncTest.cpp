@@ -388,23 +388,25 @@ void NextProcess::next_process_handle(BaseInfo* baseInfo)
         next_process_f = system("bash /etc/diskstatus_mgr.bash --product-detach");
         usleep(1000000);
         LOG_INFO("bache check result value is %d\n",WEXITSTATUS(next_process_f));
-    }
+
+		if (WEXITSTATUS(next_process_f) > 0) {
+        	LOG_ERROR("The disk is abnormal and cannot enter the next process.\n");
+        	uihandle->confirm_test_result_warning("磁盘异常，无法进入下道工序");
+        	control->update_screen_log("磁盘异常，无法进入下道工序");
+            pthread_mutex_unlock(&g_next_process_lock);
+			return;
+    	}
+    } 
     pthread_mutex_unlock(&g_next_process_lock);
     
-    if (WEXITSTATUS(next_process_f) == 0) {
-        if (!create_stress_test_lock()) {
-            LOG_ERROR("create stress test lock fail!\n");
-            uihandle->confirm_test_result_warning("EMMC异常，无法关机！");
-            control->update_screen_log("EMMC异常，无法关机！");
-        } else if (execute_command("shutdown -h now") == "error") {
-            LOG_ERROR("shutdown cmd run error\n");
-            uihandle->confirm_test_result_warning("终端异常，无法关机！");
-            control->update_screen_log("终端异常，无法关机！");
-        }
-    } else if (WEXITSTATUS(next_process_f) > 0) {
-        LOG_ERROR("The disk is abnormal and cannot enter the next process.\n");
-        uihandle->confirm_test_result_warning("磁盘异常，无法进入下道工序");
-        control->update_screen_log("磁盘异常，无法进入下道工序");
+    if (!create_stress_test_lock()) {
+        LOG_ERROR("create stress test lock fail!\n");
+        uihandle->confirm_test_result_warning("EMMC异常，无法关机！");
+        control->update_screen_log("EMMC异常，无法关机！");
+    } else if (execute_command("shutdown -h now") == "error") {
+        LOG_ERROR("shutdown cmd run error\n");
+        uihandle->confirm_test_result_warning("终端异常，无法关机！");
+        control->update_screen_log("终端异常，无法关机！");
     }
  
     return;
