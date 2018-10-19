@@ -132,12 +132,12 @@ StressTestWindow::StressTestWindow(QWidget *parent)
         font.setPointSize(12);
     } else if ((st_h <= 1050 && st_h > 1024) && (st_w <= 1680 && st_w > 1440)) {
        font.setPointSize(10);
-    } else if ((st_h <= 1024 && st_h >= 900) && (st_w <= 1440 && st_w >= 1280)) {
+    } else if ((st_h < 1024 && st_h >= 900) && (st_w <= 1440 && st_w > 1280)) {
        font.setPointSize(9);
-    } else if ((st_h < 900 && st_h >= 720) && (st_w <= 1280 && st_w > 1024)) {
+    } else if ((st_h < 900 && st_h >= 720) && (st_w <= 1370 && st_w > 1024)) {
        font.setPointSize(8);
     } else {
-       font.setPointSize(10);
+       font.setPointSize(8);
     }
     font.setWeight(QFont::Black);
 
