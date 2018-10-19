@@ -97,17 +97,18 @@ void Control::init_base_info()
     //TODO:Fix Me
     //string dmi = execute_command("cat " + GET_BASEINFO_INI);
 	
-    string dmi = execute_command("/usr/local/bin/system/getHWCfg");
-	int len = dmi.size();
-	if(dmi[0] == '{' && dmi[len-1] == '}')
-	{
-		LOG_INFO("dmi info is right");
-	}
-    dmi = dmi.substr(1, dmi.length() - 2);
-	
-	
-	if (dmi != "error") {
-		get_baseinfo(_baseInfo,dmi);
+    string baseinfo = execute_command("/usr/local/bin/system/getHWCfg");
+
+	if (baseinfo != "error") {
+		int len = baseinfo.size();
+		if(baseinfo[0] != '{' || baseinfo[len-1] != '}')
+		{
+			LOG_INFO("base info is not right");
+			return;
+		}
+
+		baseinfo = baseinfo.substr(1, baseinfo.length() - 2);
+		get_baseinfo(_baseInfo,baseinfo);
 		LOG_INFO("product is %s", (_baseInfo->platform).c_str());
 		if (_baseInfo->platform == "IDV") {
 			_is_idv = true;
@@ -576,10 +577,16 @@ void Control::upload_mes_log() {
         _uiHandle->confirm_test_result_warning("配置文件有误");
         set_test_result(UPLOAD_LOG_NAME,"FAIL","配置文件有误");
         return;
-    } else if (combine_fac_log_to_mes(MES_FILE, STRESS_RECORD)) {
+    } else {
+    	if (!combine_fac_log_to_mes(MES_FILE, STRESS_RECORD)) {
+			update_color_screen_log("拷机记录文件为空\n","red");
+            LOG_MES("no stress test record\n");
+			LOG_INFO("NO stress record\n");
+		}
         LOG_MES("---------------------Detail test result-----------------------\n");
         if (!combine_fac_log_to_mes(MES_FILE, LOG_FILE)) {
             LOG_ERROR("combine log failed");
+            _uiHandle->confirm_test_result_warning("log文件拼接失败");
             return;
         }
         string upload_log = "ftp ip:\t\t" + (string)_facArg->ftp_ip + "\n";
@@ -604,9 +611,6 @@ void Control::upload_mes_log() {
             _uiHandle->confirm_test_result_warning("上传失败");
             set_test_result(UPLOAD_LOG_NAME,"FAIL",response);
         }
-    } else {
-        LOG_INFO("combine mes fail");
-        
     }
     _testStep = STEP_IDLE;
 }

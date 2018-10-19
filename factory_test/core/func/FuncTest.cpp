@@ -173,7 +173,7 @@ void* StressTest::mem_stress_test(void* arg)
 	}
 	int test_mem_cap = (int)(get_int_value(free_mem_cap.c_str())* 0.7);
 
-	test_mem_cap = 10;//TODO:MEM TEST CAP
+	test_mem_cap = 10;//TODO:MEM TEST CAP£¨delete after£©
 	
 	LOG_INFO("stress test mem cap is %dM", test_mem_cap);
     string result = execute_command("bash " + MEM_TEST_SCRIPT + " " + to_string(test_mem_cap) + "M");
