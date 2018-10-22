@@ -76,8 +76,8 @@ const string FAC_CONFIG_FILE      = "/tmp/fac_config.conf";
 
 #define MES_FILE          ("/var/log/mes.txt")
 #define STRESS_RECORD     ("/var/log/stress.log")
-#define LOG_FILE          ("/var/log/qt.log")
-#define LOG_FILE_BAK      ("/var/log/qt_bak.log")
+#define LOG_FILE          ("/var/log/factory.log")
+#define LOG_FILE_BAK      ("/var/log/factory_bak.log")
 
 #define NEXT_LOCK         ("next")
 #define PCBA_LOCK         ("PCBA")

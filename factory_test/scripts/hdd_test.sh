@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-log_file=/var/log/qt.log
+log_file=/var/log/factory.log
 hdd_exist_result=0
 hdd_cap_result=0
 health_result=0

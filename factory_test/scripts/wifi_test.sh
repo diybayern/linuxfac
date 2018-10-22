@@ -8,7 +8,7 @@
 #  4. test wifi send/recv packet(not in this bash)
 #
 
-TEST_WIFI="sfc-test"
+TEST_WIFI="sfc-PCBA"
 
 SIGNAL_THRESHOLD=70
 VORBOSE_LOG=0
@@ -19,15 +19,18 @@ IP_SUCCESS=0
 IS_WEP_PASSWD=0
 IS_WPA_PASSWD=0
 
+WHOLE_TEST=$1
+SSID=$2
+PASSWD=$3
+ENP=$4
+
 FACOTORY_DIR=/usr/local/bin/factory
 WIFI_SCAN_AWK=$FACOTORY_DIR/wifi_scan.sh
 WIFI_SCAN_RESULT=/tmp/wifi_scan.tmp
 WIFI_TEST_CONFIG_INFO=/tmp/wifi_test_info.tmp
 WIFI_TEST_RESULT=/tmp/wifi.status
 WIFI_SSID_MAC=/tmp/ssid.mac
-SSID=$1
-PASSWD=$2
-ENP=$3
+
 FACTORY_SHELL_LOG=/var/log/factory_test_bash.log
 WPA_CONFIG=/tmp/wpa.conf
 WPA_SUPPLICANT_EXIST=0
@@ -121,6 +124,10 @@ done
 # try to find wifi config ini and parse ssid & passwd
 # write wifi test config info to tmp file for factory test could show them on screan
 
+if [[ $WHOLE_TEST = "1" ]]; then
+    TEST_WIFI="sfc-whole"
+fi
+    
 if [[ -z "$SSID" || -z "$ENP" || -z "$PASSWD" ]]; then
     echo "NOT FOUNT WIFI CONFIG FILE. USE THE DEFAULT CONFIG INFO. SSID : $TEST_WIFI ." | tee $WIFI_TEST_CONFIG_INFO
 else
