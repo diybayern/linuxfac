@@ -50,8 +50,8 @@ public:
     void start_test(BaseInfo* baseInfo);
 
     bool usb_test_read_status();
-    static bool usb_test_read_cfg(USB_INFO_T* info);
-    static bool usb_test_read_cfg(const char* dir);
+    bool usb_test_read_cfg(USB_INFO_T* info);
+    bool usb_test_read_cfg(const char* dir);
 };
 
 
@@ -61,13 +61,17 @@ public:
     StressTest();
     static void *test_all(void* arg);
     void start_test(BaseInfo* baseInfo);
-    static void* gpu_stress_test(void* arg);
-    static void* camera_stress_test(void*);
+    static void* gpu_stress_test(void*);
+    static void* camera_stress_test(void* arg);
     static bool start_cpuburn_stress();
     static void stop_cpuburn_stress();
-    static void* mem_stress_test(void* arg);
+    static void* mem_stress_test(void*);
     static void stop_mem_stress_test();
-    static string get_stress_result_record();
+    string get_stress_result_record();
+private:
+    static int  mem_stress_num;
+    static bool mem_stress_status;
+    static bool mem_stress_result;
 };
 
 
