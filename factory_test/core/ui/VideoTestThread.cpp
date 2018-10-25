@@ -255,7 +255,7 @@ void VideoTestThread::run()
         if (pkt.stream_index == videoindex) {
             ret = ffmpeg_video_decode(pkt.data, pkt.size);
             if (_FAIL == ret) {
-                emit sig_g_decode_status(ret);
+                emit sig_g_decode_status(false);
             }
             if (_OUT == ret) {
                 LOG_ERROR("exit video test.");
