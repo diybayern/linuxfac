@@ -59,10 +59,6 @@ const string FAC_CONFIG_FILE      = "/tmp/fac_config.conf";
 #define FAIL            (1)
 #define TIME_MAX_LEN    (50)
 
-#define NO_FTP_PATH          (1)
-#define NO_JOB_NUMBER        (2)
-
-
 #define USB_MAX_NUM       (10)
 #define USB_BLOCK_LEN     (16)
 #define USB_VENDOR_LEN    (64)
@@ -88,12 +84,19 @@ const string FAC_CONFIG_FILE      = "/tmp/fac_config.conf";
 #define STRESS_MEM_CAP_MAX      (100)
 #define STRESS_MEM_PERCENT      (0.7)
 
-#define STRESS_TIME_ENOUGH(x)   (x.day == 0 && x.hour == 4 && x.minute == 0 && x.second >= 0 && x.second <= 1)
-#define STRESS_ERROR_TIME(x)    (x.day == 0 && x.hour == 0 && x.minute == 0 && x.second >= 3 && x.second <= 4)
-#define STRESS_MEMTEST_START(x) (x.day == 0 && x.hour == 0 && x.minute == 30 && x.second >= 0 && x.second <= 1)
-#define STRESS_MEMTEST_ITV(x)   (x.day == 0 && x.hour == 0 && x.minute == 10 && x.second >= 0 && x.second <= 1)
+#define STRESS_TIME_ENOUGH(x)   ((x).day == 0 && (x).hour == 4 && (x).minute == 0 && (x).second >= 0 && (x).second <= 1)
+#define STRESS_ERROR_TIME(x)    ((x).day == 0 && (x).hour == 0 && (x).minute == 0 && (x).second >= 3 && (x).second <= 4)
+#define STRESS_MEMTEST_START(x) ((x).day == 0 && (x).hour == 0 && (x).minute == 30 && (x).second >= 0 && (x).second <= 1)
+#define STRESS_MEMTEST_ITV(x)   ((x).day == 0 && (x).hour == 0 && (x).minute == 10 && (x).second >= 0 && (x).second <= 1)
 
-#define PRINT_RESULT_STR(x)     (x ? "PASS" : "FAIL")
+#define PRINT_RESULT_STR(x)     ((x) ? "PASS" : "FAIL")
+
+enum {
+    FTP_NORM = 0,
+    NO_FTP_PATH,
+    NO_JOB_NUMBER,
+    NO_PATH_AND_NUM
+};
 
 typedef unsigned long long int uint64;
 

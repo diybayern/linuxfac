@@ -18,8 +18,7 @@
 
 #define   FUNC_TYPE_NUM     (15)
 
-enum FuncType
-{
+enum FuncType {
     INTERFACE = 0,
     MEM,
     USB,
@@ -37,8 +36,7 @@ enum FuncType
     UPLOAD_MES_LOG,
 };
 
-enum InterfaceRunStatus
-{
+enum InterfaceRunStatus {
     INF_RUNEND = 0,
     INF_BREAK,
     INF_RUNNING
@@ -57,6 +55,22 @@ enum TestStep {
 };
 
 struct FuncFinishStatus {
+    FuncFinishStatus() {
+        interface_finish = false;
+        mem_finish       = false;
+        usb_finish       = false;
+        cpu_finish       = false;
+        net_finish       = false;
+        edid_finish      = false;
+        hdd_finish       = false;
+        fan_finish       = false;
+        wifi_finish      = false;
+        sound_finish     = false;
+        display_finish   = false;
+        bright_finish    = false;
+        camera_finish    = false;
+        stress_finish    = false;
+    }
     bool interface_finish;
     bool mem_finish;
     bool usb_finish;
@@ -74,6 +88,16 @@ struct FuncFinishStatus {
 };
 
 struct InterfaceTestStatus {
+    InterfaceTestStatus() {
+        cpu_test_over  = false;
+        mem_test_over  = false;
+        usb_test_over  = false;
+        edid_test_over = false;
+        net_test_over  = false;
+        hdd_test_over  = false;
+        fan_test_over  = false;
+        wifi_test_over = false;
+    }
     bool mem_test_over;
     bool usb_test_over;
     bool cpu_test_over;
@@ -85,6 +109,16 @@ struct InterfaceTestStatus {
 };
 
 struct InterfaceTestResult {
+    InterfaceTestResult() {
+        mem_test_result  = false;
+        usb_test_result  = false;
+        cpu_test_result  = false;
+        net_test_result  = false;
+        edid_test_result = false;
+        hdd_test_result  = false;
+        fan_test_result  = false;
+        wifi_test_result = false;
+    }
     bool mem_test_result;
     bool usb_test_result;
     bool cpu_test_result;
@@ -106,10 +140,17 @@ struct InterfaceTestFailNum {
     int wifi_test_fail_num;
 };
 
-
-
-
 struct InterfaceSelectStatus {
+    InterfaceSelectStatus() {
+        mem_select  = true;
+        usb_select  = true;
+        cpu_select  = true;
+        net_select  = true;
+        edid_select = true;
+        hdd_select  = true;
+        fan_select  = true;
+        wifi_select = true;
+    }
     bool mem_select;
     bool usb_select;
     bool cpu_select;
@@ -125,7 +166,6 @@ struct MesInfo {
         status("")
     {
     }
-
     string func;
     string status;
 };
@@ -138,18 +178,18 @@ public:
     //explicit Control(QObject *parent = 0);
     Control();
     static Control* _control;
-    void set_test_result(string func,string result,string ui_log);
+    void set_test_result(string func, string result, string ui_log);
     void confirm_test_result(string func);
     void set_brightness_dialog_button_state(bool state);
     static Control* get_control();
     void show_main_test_ui();
-    void auto_test_mac_sn();
+    void auto_test_mac_or_stress();
     void update_screen_log(string uiLog);
     void update_color_screen_log(string uiLog, string color);
-    void set_func_test_result(string func,string result);
+    void set_func_test_result(string func, string result);
     void upload_mes_log();
     void init_mes_log();
-    void update_mes_log(string tag,string value);
+    void update_mes_log(string tag, string value);
     int get_screen_height();
     int get_screen_width();
     bool is_stress_test_window_quit_safely();
@@ -190,15 +230,6 @@ public:
     void set_interface_test_finish(string func);
     void set_interface_test_result(string func, bool status);
 
-
-    string get_stress_test_stage() {
-        return _stress_test_stage;
-    }
-
-    bool get_auto_upload_log_status() {
-        return _autoUploadLog;
-    }
-
     int get_interface_test_times() {
         string times = _uiHandle->get_test_count();
         return get_int_value(times);
@@ -238,14 +269,10 @@ public:
 
     void init_func_test();
 
-    int get_fac_config_status(){
+    int get_fac_config_status() {
         return _fac_config_status;
     }
-    
-    bool get_whole_test_state(){
-        return _whole_test_state;
-    }
-    
+        
     void set_stress_test_window_quit_status(bool status) {
         _stress_test_window_quit_status = status;
     }
@@ -265,10 +292,7 @@ public:
 private:
     void init_base_info();
     void init_hw_info();
-    
     void init_fac_config();
-    void auto_start_stress_test();
-
     void ui_init();
 
 private:
@@ -286,18 +310,11 @@ private:
     int _testStep;
     FuncBase* _funcBase[FUNC_TYPE_NUM];
     FacArg* _facArg;
-    string _stress_test_stage;
-    bool _autoUploadLog;
-    string _mes_log_file;
-    bool _auto_upload_mes;
     int _interfaceRunStatus;
-    string _sn_mac;
+    string _display_sn_or_mac;
     int _fac_config_status;
-    bool _whole_test_state;
-    bool _is_idv;
     bool _stress_test_window_quit_status;
     bool _pcba_whole_lock_state;
-    bool _lock_file_status;
     vector<string> _record;
 
 signals:

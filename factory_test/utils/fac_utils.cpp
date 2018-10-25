@@ -356,20 +356,28 @@ int get_fac_config_from_conf(const string conf_path, FacArg *fac)
     memset(dest_path, 0, 128);
     if (read_conf_line(conf_path, "ftp_dest_path",dest_path) == false) {
         LOG_ERROR("read dest_path failed\n");
-        ret += NO_FTP_PATH;
+        ret = NO_FTP_PATH;
     } else if (*dest_path != '\\'){
         LOG_ERROR("ftp dest_path is empty\n");
-        ret += NO_FTP_PATH;
+        ret = NO_FTP_PATH;
     }
     
     char* job_number = (char*)malloc(128);
     memset(job_number, 0, 128);
     if (read_conf_line(conf_path, "job_number", job_number) == false) {
         LOG_ERROR("read job_number faild\n");
-        ret += NO_JOB_NUMBER;
+		if (ret == NO_FTP_PATH) {
+			ret = NO_PATH_AND_NUM;
+		} else {
+			ret = NO_JOB_NUMBER;
+		}
     } else if (*job_number == 0){
         LOG_ERROR("job_number is empty\n");
-        ret += NO_JOB_NUMBER;
+		if (ret == NO_FTP_PATH) {
+			ret = NO_PATH_AND_NUM;
+		} else {
+			ret = NO_JOB_NUMBER;
+		}
     }
 
     char* IP = (char*)malloc(128);
@@ -688,7 +696,7 @@ void write_stress_record(vector<string> record)
         remove(STRESS_RECORD);
     }
 
-    for (size_t i = 0; i < record.size(); i++) {
+    for (unsigned int i = 0; i < record.size(); i++) {
         LOG_STRESS(record[i].c_str());
     }
 

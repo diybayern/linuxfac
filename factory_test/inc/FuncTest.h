@@ -13,9 +13,11 @@
 class CpuTest : public FuncBase
 {
 public:
-    CpuTest();
     bool is_cpu_test_pass(BaseInfo* baseInfo);
     void start_test(BaseInfo* baseInfo);
+private:
+    string screen_log_black;
+    string screen_log_red;
 };
 
 
@@ -58,7 +60,6 @@ public:
 class StressTest : public FuncBase
 {
 public:
-    StressTest();
     static void *test_all(void* arg);
     void start_test(BaseInfo* baseInfo);
     static void* gpu_stress_test(void*);
@@ -72,6 +73,7 @@ private:
     static int  mem_stress_num;
     static bool mem_stress_status;
     static bool mem_stress_result;
+    static string stress_result;
 };
 
 
@@ -97,7 +99,6 @@ public:
 class InterfaceTest : public FuncBase
 {
 public:
-    InterfaceTest();
     static void* test_all(void *arg);
     void start_test(BaseInfo* baseInfo);
 };

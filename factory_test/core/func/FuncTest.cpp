@@ -1,18 +1,14 @@
 #include "../../inc/FuncTest.h"
 #include "../../inc/fac_log.h"
 
-string cpu_screen_log = "";
-string cpu_screen_red = "";
+//string screen_log_black = "";
+//string screen_log_red = "";
 string fan_screen_log = "";
 string fan_screen_red = "";
 
 static string stress_result = "";
 
 pthread_mutex_t g_next_process_lock;
-
-CpuTest::CpuTest()
-{
-}
 
 bool CpuTest::is_cpu_test_pass(BaseInfo* baseInfo)
 {
@@ -22,12 +18,12 @@ bool CpuTest::is_cpu_test_pass(BaseInfo* baseInfo)
     string::size_type idx;
     idx = hw_cpu_type.find(base_cpu_type);
     if (idx != string::npos && base_cpu_type != "") {
-        cpu_screen_log += "current cpu type is " + hw_cpu_type + "\n\n";
+        screen_log_black += "current cpu type is " + hw_cpu_type + "\n\n";
         LOG_INFO("current cpu type is %s\n", hw_cpu_type.c_str());
         return true;
     } else {
-        cpu_screen_red += "\t错误：CPU型号应为 " + base_cpu_type + ", 但检测到CPU型号为 " + hw_cpu_type + "\n";
-        cpu_screen_log += "cpu type should be\t\t" + base_cpu_type + "\nbut current is\t\t" + hw_cpu_type + "\n";
+        screen_log_red += "\t错误：CPU型号应为 " + base_cpu_type + ", 但检测到CPU型号为 " + hw_cpu_type + "\n";
+        screen_log_black += "cpu type should be\t\t" + base_cpu_type + "\nbut current is\t\t" + hw_cpu_type + "\n";
         LOG_ERROR("cpu type should be %s\tbut current is %s\n",base_cpu_type.c_str(),hw_cpu_type.c_str());
         return false;
     }
@@ -37,21 +33,21 @@ void CpuTest::start_test(BaseInfo* baseInfo)
 {
     Control *control = Control::get_control();
     control->set_interface_test_status(CPU_TEST_NAME, false);
-    cpu_screen_log += "==================== " + CPU_TEST_NAME + " ====================\n";
+	screen_log_black = "";
+	screen_log_red = "";
+    screen_log_black += "==================== " + CPU_TEST_NAME + " ====================\n";
     if (is_cpu_test_pass(baseInfo)) {
         LOG_INFO("cpu test result:\tPASS\n");
-        cpu_screen_log += CPU_TEST_NAME + "结果:\t\t\t成功\n\n";
+        screen_log_black += CPU_TEST_NAME + "结果:\t\t\t成功\n\n";
         control->set_interface_test_result(CPU_TEST_NAME, true);
     } else {
         LOG_INFO("cpu test result:\tFAIL\n");
-        cpu_screen_red = CPU_TEST_NAME + "结果:\t\t\t失败\n\n" + cpu_screen_red;
+        screen_log_red = CPU_TEST_NAME + "结果:\t\t\t失败\n\n" + screen_log_red;
         control->set_interface_test_result(CPU_TEST_NAME, false); 
     }
-    control->update_screen_log(cpu_screen_log);
-    cpu_screen_log = "";
-    if (cpu_screen_red != "") {
-        control->update_color_screen_log(cpu_screen_red, "red");
-        cpu_screen_red = "";
+    control->update_screen_log(screen_log_black);
+    if (screen_log_red != "") {
+        control->update_color_screen_log(screen_log_red, "red");
     }
     control->set_interface_test_status(CPU_TEST_NAME, true);
 }
@@ -99,13 +95,11 @@ void FanTest::start_test(BaseInfo* baseInfo)
     pthread_create(&tid,NULL,test_all,baseInfo);
 }
 
-StressTest::StressTest()
-{
-}
 
 int	 StressTest::mem_stress_num = 0;
 bool StressTest::mem_stress_status = false;
 bool StressTest::mem_stress_result = true;
+string StressTest::stress_result = "";
 
 void* StressTest::gpu_stress_test(void*)
 {
@@ -230,12 +224,13 @@ void* StressTest::test_all(void* arg)
 
     control->set_pcba_whole_lock_state(false);
     if (check_file_exit(STRESS_LOCK_FILE.c_str())) {
-        string stress_stage = control->get_stress_test_stage();
+        string stress_lock_state = execute_command("cat " + STRESS_LOCK_FILE);
+		LOG_INFO("auto stress lock file is: %s", stress_lock_state.c_str());
         remove_local_file(STRESS_LOCK_FILE.c_str());
-        if (stress_stage == WHOLE_LOCK || stress_stage == PCBA_LOCK) {
+        if (stress_lock_state == WHOLE_LOCK || stress_lock_state == PCBA_LOCK) {
             control->set_pcba_whole_lock_state(true);
             LOG_INFO("last stress test exit error\n");            
-        } else if (stress_stage == NEXT_LOCK) {
+        } else if (stress_lock_state == NEXT_LOCK) {
             LOG_INFO("next process -> stress test\n");
         } else {
             uihandle->confirm_test_result_warning("lock文件异常");
@@ -244,7 +239,7 @@ void* StressTest::test_all(void* arg)
         }
     }
     
-    if (control->get_whole_test_state()) {
+    if (check_file_exit(WHOLE_TEST_FILE)) {
         write_local_data(STRESS_LOCK_FILE.c_str(),"w+",(char*)WHOLE_LOCK,sizeof(WHOLE_LOCK));
     } else {
         write_local_data(STRESS_LOCK_FILE.c_str(),"w+",(char*)PCBA_LOCK,sizeof(PCBA_LOCK));
@@ -273,9 +268,6 @@ void* StressTest::test_all(void* arg)
     uihandle->update_stress_label_value("SN序列号",(control->get_hw_info())->sn);
     uihandle->update_stress_label_value("MAC地址",(control->get_hw_info())->mac);
     uihandle->update_stress_label_value("Mem压力测试", mem_result_str);
-	
-	//encode = true;
-	//decode = (control->get_decode_status() == 1) ? false : true; TODO:encode/decode
     uihandle->update_stress_label_value("编码状态",PRINT_RESULT_STR(encode));
     uihandle->update_stress_label_value("解码状态",PRINT_RESULT_STR(decode));
 
@@ -288,11 +280,6 @@ void* StressTest::test_all(void* arg)
     while(true)
     {
         if (!control->is_stress_test_window_quit_safely()) {
-            stress_result = "运行时间:" + to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour) +
-                            "小时" + to_string(tmp_dst.minute) + "分" + to_string(tmp_dst.second) +
-                            "秒  编码状态:" + (string)PRINT_RESULT_STR(encode) + "  解码状态:" +
-                            (string)PRINT_RESULT_STR(decode) + "  Mem压力测试:" + mem_result_str + "\n";            
-
             if (baseInfo->platform == "IDV") {
                 stop_gpu_stress_test();
             }
@@ -308,9 +295,6 @@ void* StressTest::test_all(void* arg)
             break;
         }
         
-        encode = true;
-        decode = (control->get_decode_status() == 1) ? false : true;
-
         get_current_open_time(&tmp_dst);
 		mem_dst = tmp_dst;
         diff_running_time(&tmp_dst, &init_time);
@@ -327,22 +311,16 @@ void* StressTest::test_all(void* arg)
             uihandle->confirm_test_result_warning("上次拷机退出异常");
         }
 
-        if (!mem_stress_status && STRESS_MEMTEST_START(tmp_dst)) {
-            pthread_create(&pid_t1, NULL, mem_stress_test, NULL);
+        if (STRESS_MEMTEST_START(tmp_dst) && !mem_stress_status) {
 			get_current_open_time(&mem_src);
+            pthread_create(&pid_t1, NULL, mem_stress_test, NULL);
         }
 
         diff_running_time(&mem_dst, &mem_src);
-		if (!mem_stress_status && STRESS_MEMTEST_ITV(mem_dst)) {
-            pthread_create(&pid_t1, NULL, mem_stress_test, NULL);
+		if (STRESS_MEMTEST_ITV(mem_dst) && !mem_stress_status) {
 			get_current_open_time(&mem_src);
+            pthread_create(&pid_t1, NULL, mem_stress_test, NULL);
 		}
-
-
-        if (!decode) {
-            uihandle->update_stress_label_value("解码状态","FAIL");
-            uihandle->set_stress_test_pass_or_fail("FAIL");
-        }
 
         if (mem_stress_num == 1 && !mem_stress_status && mem_stress_result) {
             mem_result_str = "PASS";
@@ -352,7 +330,20 @@ void* StressTest::test_all(void* arg)
             uihandle->update_stress_label_value("Mem压力测试", mem_result_str);
             uihandle->set_stress_test_pass_or_fail("FAIL");
         }
-        
+		
+        encode = true;
+        decode = (control->get_decode_status() == 1) ? false : true;
+
+        if (!decode) {
+            uihandle->update_stress_label_value("解码状态","FAIL");
+            uihandle->set_stress_test_pass_or_fail("FAIL");
+        }
+
+		stress_result = "运行时间:" + to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour) +
+						"小时" + to_string(tmp_dst.minute) + "分" + to_string(tmp_dst.second) +
+						"秒  编码状态:" + (string)PRINT_RESULT_STR(encode) + "  解码状态:" +
+						(string)PRINT_RESULT_STR(decode) + "  Mem压力测试:" + mem_result_str + "\n";			
+
         snprintf(datebuf, CMD_BUF_SIZE, "%d天%d时%d分%d秒", tmp_dst.day, tmp_dst.hour, tmp_dst.minute, tmp_dst.second);
         uihandle->update_stress_label_value("运行时间", datebuf);
         
@@ -361,7 +352,7 @@ void* StressTest::test_all(void* arg)
         uihandle->update_stress_label_value("CPU频率",get_current_cpu_freq());
         uihandle->update_stress_label_value("Mem",get_mem_info());
         uihandle->update_stress_label_value("Cpu",get_cpu_info(&st_cpu));
-
+				
         sleep(1);
     }    
     return NULL;
@@ -472,10 +463,6 @@ void* UploadMesLog::test_all(void *)
     return NULL;
 }
 
-InterfaceTest::InterfaceTest()
-{
-}
-
 
 void* InterfaceTest::test_all(void *arg)
 {
@@ -512,14 +499,14 @@ void* InterfaceTest::test_all(void *arg)
     InterfaceTestResult* interfaceTestResult = control->get_interface_test_result();
 
     InterfaceTestFailNum* interfaceTestFailNum = new InterfaceTestFailNum;
-    interfaceTestFailNum->cpu_test_fail_num = 0;
-    interfaceTestFailNum->mem_test_fail_num = 0;
-    interfaceTestFailNum->usb_test_fail_num = 0;
-    interfaceTestFailNum->net_test_fail_num = 0;
-    interfaceTestFailNum->edid_test_fail_num = 0;
-    interfaceTestFailNum->hdd_test_fail_num = 0;
-    interfaceTestFailNum->fan_test_fail_num = 0;
-    interfaceTestFailNum->wifi_test_fail_num = 0;
+    interfaceTestFailNum->cpu_test_fail_num    = 0;
+    interfaceTestFailNum->mem_test_fail_num    = 0;
+    interfaceTestFailNum->usb_test_fail_num    = 0;
+    interfaceTestFailNum->net_test_fail_num    = 0;
+    interfaceTestFailNum->edid_test_fail_num   = 0;
+    interfaceTestFailNum->hdd_test_fail_num    = 0;
+    interfaceTestFailNum->fan_test_fail_num    = 0;
+    interfaceTestFailNum->wifi_test_fail_num   = 0;
     
     int test_num = control->get_interface_test_times();
     int real_test_num = 0;

@@ -445,10 +445,8 @@ void* WifiTest::test_all(void*)
     wifi_screen_log += "==================== " + WIFI_TEST_NAME + " ====================\n";
     bool is_pass = false;
     FacArg* _facArg = control->get_fac_arg();
-	int _is_whole_test = control->get_whole_test_state() ? 1 : 0;
-    string cmd = "bash " + WIFI_TEST_SCRIPT + " " + to_string(_is_whole_test) + " " + _facArg->wifi_ssid
+    string cmd = "bash " + WIFI_TEST_SCRIPT + " " + to_string(check_file_exit(WHOLE_TEST_FILE)) + " " + _facArg->wifi_ssid
                                             + " " + _facArg->wifi_passwd + " " + _facArg->wifi_enp;
-    //string str = execute_command(cmd);
     if (system(cmd.c_str()) < 0){
         LOG_ERROR("ERROR:wifi_test.sh run error!\n");
         wifi_screen_log += "wifi_test.sh run error!\n";
