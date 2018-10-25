@@ -21,7 +21,7 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const QString button, 
         this->setObjectName(QString::fromUtf8("MessageFormClass"));
     }
     QPalette pa;
-    pa.setColor(QPalette::Background,QColor(0xD6, 0xD6, 0xD6));
+    pa.setColor(QPalette::Background, QColor(0xD6, 0xD6, 0xD6));
     this->setPalette(pa);
 
     if (mode == Message) {
@@ -33,9 +33,11 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const QString button, 
         _dialog_w = 400;
         _dialog_h = 220;
         _lb_text_w = 200;
+
     } else if (mode == SNMAC) {
         _dialog_w = 500;
         _dialog_h = 170;
+
     }
 
     resize(_dialog_w, _dialog_h);
@@ -85,6 +87,7 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const QString button, 
     }
 
     if (mode != SNMAC) {
+
         lb_text = new QLabel(groupBox);
         lb_text->setObjectName(QString::fromUtf8("lb_text"));
         lb_text->setGeometry(QRect(100, 0, _lb_text_w, 80));
@@ -109,8 +112,8 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const QString button, 
         groupBox->setLayout(fl_snmac);
     }
 
-    if (mode == Message || mode == SNMAC_Error || mode == SNMAC_Success || mode == Warnning || mode == NOICON || mode == SNMAC || mode == Success || mode == DOING)
-    {
+    if (mode == Message || mode == SNMAC_Error || mode == SNMAC_Success || mode == Warnning || mode == NOICON || mode == SNMAC || mode == Success || mode == DOING) {
+
         if (mode == Warnning || mode == DOING) {
             lb_title->setStyleSheet("background-color: rgb(255, 255, 0);");
         } else if (mode == SNMAC_Error) {
@@ -217,17 +220,17 @@ MessageForm::~MessageForm()
 
 bool MessageForm::eventFilter(QObject *obj, QEvent *event)
 {
-    if (obj == le_snmac && event->type() == QEvent::KeyPress)
-    {
+    if (obj == le_snmac && event->type() == QEvent::KeyPress) {
+
         QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
-        if (keyEvent->key() == Qt::Key_Enter || keyEvent->key() == Qt::Key_Return)
-        {
+        if (keyEvent->key() == Qt::Key_Enter || keyEvent->key() == Qt::Key_Return) {
+
             QString str = le_snmac->text();
             g_sn_mac_message = str;
             if (str == "") {
                 return true;
             }
-            //QTimer::singleShot(1000, MainTestWindow::get_main_test_window(), SLOT(compute_result()));
+
             emit sig_send_result_from_scangun();
             return true;
         }
@@ -238,8 +241,8 @@ bool MessageForm::eventFilter(QObject *obj, QEvent *event)
 
 void MessageForm::timerEvent(QTimerEvent *evt)
 {
-    if (evt->timerId() == timerId)
-    {
+    if (evt->timerId() == timerId) {
+
         killTimer(timerId);
         accept();
 
@@ -287,8 +290,7 @@ void MessageForm::proButtonSNMACRetry()
 
 int MessageForm::startExec()
 {
-    if (timeout)
-    {
+    if (timeout) {
         timerId = startTimer(timeout);
     }
 
@@ -298,11 +300,9 @@ int MessageForm::startExec()
 
 bool MessageBox(const int mode, const QString &test_item, const QString &title, const QString &text, const QString &button, const int timeout)
 {
-
     int timeoutTemp = timeout;
 
-    if (g_form != NULL)
-    {
+    if (g_form != NULL) {
         delete g_form;
         g_form = NULL;
     }

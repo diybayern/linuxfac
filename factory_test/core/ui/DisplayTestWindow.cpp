@@ -26,7 +26,7 @@ DisplayTestWindow::DisplayTestWindow(QWidget *parent)
     this->setGeometry(0, 0, _st_w, _st_h);
     _frame = new QFrame(this);
     _frame->setObjectName(QString::fromUtf8("_frame"));
-    _frame->setGeometry(QRect(0,0,_st_w,_st_h));
+    _frame->setGeometry(QRect(0, 0, _st_w, _st_h));
 
     _lb_red = new QLabel(_frame);
     _lb_red->setObjectName(QString::fromUtf8("_lb_red"));

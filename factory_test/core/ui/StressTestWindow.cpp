@@ -14,55 +14,6 @@ StressTestWindow* StressTestWindow::g_get_stress_test_window()
     return _stress_test_window;
 }
 
-#if 0
-static void eos_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
-    g_print ("End-Of-Stream reached.\n");
-    int ret = 0;
-
-    gst_element_set_state (data->playbin, GST_STATE_READY);
-
-    ret = gst_element_set_state (data->playbin, GST_STATE_PLAYING);
-    if (ret == GST_STATE_CHANGE_FAILURE) {
-        g_printerr ("Unable to set the pipeline to the playing state.\n");
-        gst_object_unref (data->playbin);
-    }
-}
-
-
-
-void StressTestWindow::mediaPlay()
-{
-    char file_buf[512];
-    int ret = 0;
-    GstBus *bus;
-    static CustomData data;
-    memset(file_buf,0,sizeof(file_buf));
-    strncpy(file_buf,"file:",strlen("file:"));
-    strcat(file_buf,"/home/rcd/qtfac/movie.mp4");
-
-    gst_init (0, NULL);
-    GstElement *playbin = gst_element_factory_make ("playbin", "playbin");
-    if (!playbin) {
-        g_printerr ("Not all elements could be created.\n");
-    }
-    g_object_set (playbin, "uri", file_buf, NULL);
-    data.playbin = playbin;
-    data.window = _lb_video;
-    del_data = data;
-    WId xwinid = _lb_video->winId();
-    gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY (playbin),xwinid);
-    bus = gst_element_get_bus (playbin);
-    gst_bus_add_signal_watch (bus);
-    g_signal_connect (G_OBJECT (bus), "message::eos", (GCallback)eos_cb, &data);
-
-    ret = gst_element_set_state (playbin, GST_STATE_PLAYING);
-    if (ret == GST_STATE_CHANGE_FAILURE) {
-        g_printerr ("Unable to set the pipeline to the playing state.\n");
-        gst_object_unref (playbin);
-    }
-}
-#endif
-
 StressTestWindow::StressTestWindow(QWidget *parent)
     : QWidget(parent)
 {
@@ -82,8 +33,8 @@ StressTestWindow::StressTestWindow(QWidget *parent)
     _lb_video = new QLabel(_frame);
     _v_a.video_start_x = 0;
     _v_a.video_start_y = st_h/3;
-    _v_a.video_w = st_w/2;
-    _v_a.video_h = st_h - st_h/3;
+    _v_a.video_w       = st_w/2;
+    _v_a.video_h       = st_h - st_h/3;
     _lb_video->setObjectName(QString::fromUtf8("lb_video"));
     _lb_video->setGeometry(QRect(_v_a.video_start_x, _v_a.video_start_y, _v_a.video_w, _v_a.video_h));
     //_lb_video->installEventFilter(this);
@@ -92,8 +43,8 @@ StressTestWindow::StressTestWindow(QWidget *parent)
     _lb_image_frame = new QLabel(_frame);
     _im_a.image_start_x = 0;
     _im_a.image_start_y = 0;
-    _im_a.image_w = st_w;
-    _im_a.image_h = st_h/3;
+    _im_a.image_w       = st_w;
+    _im_a.image_h       = st_h/3;
     _lb_image_frame->setObjectName(QString::fromUtf8("lb_image"));
     _lb_image_frame->setGeometry(QRect(_im_a.image_start_x, _im_a.image_start_y, _im_a.image_w, _im_a.image_h));
 
@@ -110,14 +61,14 @@ StressTestWindow::StressTestWindow(QWidget *parent)
     _lb_info = new QFrame(_frame);
     _if_a.info_start_x = st_w/2;
     _if_a.info_start_y = st_h/3;
-    _if_a.info_w = st_w/2/2;
-    _if_a.info_h = st_h - st_h/3;
+    _if_a.info_w       = st_w/2/2;
+    _if_a.info_h       = st_h - st_h/3;
     _lb_info->setObjectName(QString::fromUtf8("lb_info"));
     _lb_info->setGeometry(QRect(_if_a.info_start_x, _if_a.info_start_y, _if_a.info_w, _if_a.info_h));
 
     _frame_check_pass_fail = new QFrame(_frame);
     _frame_check_pass_fail->setObjectName(QString::fromUtf8("_frame_check_pass_fail"));
-    _frame_check_pass_fail->setGeometry(QRect(st_w/2+st_w/2/2, st_h/3, st_w/2/2, st_h - st_h/3));
+    _frame_check_pass_fail->setGeometry(QRect(st_w/2 + st_w/2/2, st_h/3, st_w/2/2, st_h - st_h/3));
     _lb_pass_fail = new QLabel(_frame_check_pass_fail);
     _lb_pass_fail->setObjectName(QString::fromUtf8("_lb_pass_fail"));
     _lb_pass_fail->setGeometry(QRect(0, (st_h - st_h/3)/5, st_w/2/2/2, (st_h - st_h/3)/2));
@@ -143,7 +94,7 @@ StressTestWindow::StressTestWindow(QWidget *parent)
 
     for (int i = 0; i < MainTestWindow::get_main_test_window()->stress_test_item_list.count(); i++) {
         QString item = MainTestWindow::get_main_test_window()->stress_test_item_list.at(i).itemname;
-        QLabel* st_lab = new QLabel(item+" : ");
+        QLabel* st_lab = new QLabel(item + " : ");
         st_lab->setFont(font);
         QLabel* st_lab_value = new QLabel;
         st_lab_value->setFont(font);
@@ -159,9 +110,8 @@ StressTestWindow::StressTestWindow(QWidget *parent)
 
     //connect and start thread
     connect(ImageTestThread::get_image_test_thread(), SIGNAL(sig_send_one_pixmap(QPixmap)), this, SLOT(slot_get_one_pixmap(QPixmap)));
-#if 1
     connect(VideoTestThread::get_video_test_thread(), SIGNAL(sig_send_one_frame(QPixmap)), this, SLOT(slot_get_one_frame(QPixmap)));
-#endif
+
     ImageTestThread::get_image_test_thread()->start_run();
     VideoTestThread::get_video_test_thread()->start_play();
     connect(this, SIGNAL(sig_finish_video_test_thread()), VideoTestThread::get_video_test_thread(), SLOT(slot_finish_video_test_thread()), Qt::QueuedConnection);
@@ -172,8 +122,6 @@ StressTestWindow::StressTestWindow(QWidget *parent)
 StressTestWindow::~StressTestWindow()
 {
     LOG_INFO("~StressTestWindow.");
-    //gst_element_set_state (del_data.playbin, GST_STATE_NULL);
-    //gst_object_unref (del_data.playbin);
 }
 
 QPixmap StressTestWindow::_text2Pixmap(QString text, QColor color)
@@ -233,34 +181,6 @@ void StressTestWindow::update_stress_label_value(QString item, QString result)
         }
     }
 }
-#if 0
-bool StressTestWindow::eventFilter(QObject *obj, QEvent *event)
-{
-
-    if (obj == _lb_video && event->type() == QEvent::Paint) {
-
-        QPainter painter(_lb_video);
-        painter.setBrush(Qt::black);
-        painter.drawRect(0,0,_lb_video->width(),_lb_video->height()); //先画成黑色
-
-        if (mImage.size().width() <= 0)
-            return false;
-
-        //将图像按比例缩放成和窗口一样大小
-        QImage img = mImage.scaled(_lb_video->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        int x = _lb_video->width() - img.width();
-        int y = _lb_video->height() - img.height();
-
-        x /= 2;
-        y /= 2;
-
-        painter.drawImage(QPoint(x,y),img);
-
-    }
-
-    return QObject::eventFilter(obj,event);
-}
-#endif
 
 void StressTestWindow::start_exec()
 {
@@ -325,8 +245,5 @@ void StressTestWindow::keyPressEvent(QKeyEvent *event)
 bool start_stress_ui()
 {
     StressTestWindow::get_stress_test_window()->start_exec();
-    #if 0
-    StressTestWindow::get_stress_test_window()->mediaPlay();
-    #endif
     return true;
 }

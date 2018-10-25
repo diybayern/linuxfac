@@ -24,20 +24,6 @@
 #include "messageform.h"
 #include "UiHandle.h"
 #include "fac_log.h"
-#if 0
-extern "C" {
-    #include <glib.h>
-    #include <gst/video/videooverlay.h>
-    #include <gst/gst.h>
-    #include <string.h>
-}
-
-
-typedef struct _CustomData {
-        GstElement *playbin;
-        QWidget    *window;
-} CustomData;
-#endif
 
 enum
 {
@@ -242,8 +228,6 @@ class MainTestWindow : public QDialog
         void _auto_upload_state_changed(int state);
 };
 
-
-
 class video_attr {
 public:
     int video_start_x;
@@ -296,20 +280,13 @@ public:
     void update_stress_label_value(QString item, QString result);
     void update_stress_test_pass_or_fail(QString result);
     QLabel *_lb_video;
-#if 0
-    void mediaPlay();
-#endif
+
 protected:
     void mousePressEvent(QMouseEvent* event);
     void keyPressEvent(QKeyEvent *event);
-#if 0
-    bool eventFilter(QObject *obj, QEvent *event);
-#endif
 
 private slots:
-    #if 1
     void slot_get_one_frame(QPixmap img);
-    #endif
     void slot_get_one_pixmap(QPixmap pix);
 
 private:
@@ -331,9 +308,6 @@ private:
     QPixmap _text2Pixmap(QString text, QColor color);
     int st_w;
     int st_h;
-#if 0
-    CustomData del_data;
-#endif
 
 signals:
     void sig_finish_show_stress_window();
@@ -380,7 +354,6 @@ private:
 signals:
     void sig_finish_show_display_window(bool state);
 };
-
 
 extern void start_display_test_ui();
 extern bool start_stress_ui();

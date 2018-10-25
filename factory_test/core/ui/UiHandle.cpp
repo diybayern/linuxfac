@@ -29,8 +29,7 @@ UiHandle::UiHandle()
 
 UiHandle::~UiHandle()
 {
-    if (_ui_handle != NULL)
-    {
+    if (_ui_handle != NULL) {
         delete _ui_handle;
         _ui_handle = NULL;
     }
@@ -226,7 +225,7 @@ void UiHandle::slot_factory_delete_event()
     emit sig_ui_factory_delete_event();
 }
 
-void UiHandle::slot_g_decode_status(int status)
+void UiHandle::slot_g_decode_status(bool status)
 {
     set_g_decode_status(status);
 }
@@ -234,11 +233,10 @@ void UiHandle::slot_g_decode_status(int status)
 QObject* UiHandle::get_qobject(string name)
 {
     QObject *obj = new QObject;
-    for (int i = 0 ; i < MainTestWindow::get_main_test_window()->itemlist.count(); i++)
-    {
+    for (int i = 0 ; i < MainTestWindow::get_main_test_window()->itemlist.count(); i++) {
+
         string objname = (MainTestWindow::get_main_test_window()->itemlist.at(i).name).toStdString();
-        if (objname.compare(name) == 0)
-        {
+        if (objname.compare(name) == 0) {
             obj = MainTestWindow::get_main_test_window()->itemlist.at(i).button;
             QPushButton *p_b = qobject_cast<QPushButton*>(obj);
             return p_b;

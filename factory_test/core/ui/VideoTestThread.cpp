@@ -11,18 +11,17 @@ VideoTestThread* VideoTestThread::get_video_test_thread()
 
 VideoTestThread::VideoTestThread(QThread *parent) : QThread(parent)
 {
-    connect(this, SIGNAL(sig_g_decode_status(int)), UiHandle::get_uihandle(), SLOT(slot_g_decode_status(int)));
-    this->_m_stopped = false;
-    this->videoindex = -1;
-    this->filepath = "./res/movie.mp4";
+    connect(this, SIGNAL(sig_g_decode_status(bool)), UiHandle::get_uihandle(), SLOT(slot_g_decode_status(bool)));
+    this->_m_stopped        = false;
+    this->videoindex        = -1;
+    this->filepath          = "./res/movie.mp4";
     this->pFormatCtx        = NULL;
     this->pCodec            = NULL;
     this->pCodecCtx         = NULL;
     this->img_convert_ctx   = NULL;
-    this->sws_width    = MainTestWindow::get_main_test_window()->get_current_res_w/2;
-    this->sws_height   = MainTestWindow::get_main_test_window()->get_current_res_h/3*2;
-
-    this->video_type   = VIDEO_INIT;
+    this->sws_width         = MainTestWindow::get_main_test_window()->get_current_res_w/2;
+    this->sws_height        = MainTestWindow::get_main_test_window()->get_current_res_h/3*2;
+    this->video_type        = VIDEO_INIT;
     this->ffmpeg_init();
 }
 
@@ -41,8 +40,7 @@ int VideoTestThread::ffmpeg_read_stream()
     }
 
     //(1) open video file
-    if(avformat_open_input(&pFormatCtx,filepath,NULL,NULL)!=0)
-    {
+    if(avformat_open_input(&pFormatCtx, filepath, NULL, NULL) != 0) {
         LOG_ERROR("Couldn't open input stream.");
         return _FAIL;
     }
@@ -53,7 +51,7 @@ int VideoTestThread::ffmpeg_read_stream()
         LOG_ERROR("not video find");
         return _FAIL;
     }
-    /*		
+    /*
     if(avformat_find_stream_info(pFormatCtx,NULL)<0)
     {
         printf("Couldn't find stream information.\n");
@@ -82,8 +80,7 @@ int VideoTestThread::ffmpeg_read_stream()
     pCodecCtx->codec_id = pCodec->id;
 
     //(4) open the decoder
-    if(avcodec_open2(pCodecCtx, pCodec, NULL) < 0)
-    {
+    if(avcodec_open2(pCodecCtx, pCodec, NULL) < 0) {
         LOG_ERROR("Could not open codec.");
         return _FAIL;
     }
@@ -175,7 +172,7 @@ int VideoTestThread::ffmpeg_video_decode(unsigned char* buf, int size)
 
     ret = ffmpeg_video_change_format(&frame, sws_width, sws_height);
 
-    if (_OUT == ret){
+    if (_OUT == ret) {
         LOG_ERROR("exit video test.");
     }
     return ret;

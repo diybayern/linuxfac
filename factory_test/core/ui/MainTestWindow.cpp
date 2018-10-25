@@ -9,8 +9,7 @@ MainTestWindow::MainTestWindow(QWidget *parent)
 
 MainTestWindow::~MainTestWindow()
 {
-    if (_main_test_window)
-    {
+    if (_main_test_window) {
         delete _main_test_window;
         _main_test_window = NULL;
     }
@@ -165,7 +164,7 @@ void MainTestWindow::add_complete_or_single_test_label(QString config)
 }
 
 void MainTestWindow::confirm_test_result_dialog(QString title)
-{	
+{
     MessageBox(MessageForm::Message, title, title + "结果确认", "请确认"+title+"结果是PASS 还是 FAIL", "", 0);
 }
 
@@ -191,17 +190,15 @@ void MainTestWindow::confirm_test_result_waiting(QString title)
 
 void MainTestWindow::get_result_string(QString func, QString result)
 {
-    if (itemlist.isEmpty())
-    {
+    if (itemlist.isEmpty()) {
         return ;
     }
 
     QObject *obj;
-    for (int i = 0 ; i < itemlist.count(); i++)
-    {
+    for (int i = 0 ; i < itemlist.count(); i++) {
+
         QString objname = itemlist.at(i).name;
-        if (objname == func)
-        {
+        if (objname == func) {
             obj = itemlist.at(i).label;
             QLabel *b = qobject_cast<QLabel*>(obj);
             b->setPalette(_get_label_color(result));
@@ -214,12 +211,10 @@ void MainTestWindow::get_result_string(QString func, QString result)
 QPalette MainTestWindow::_get_label_color(QString result)
 {
     QPalette pa;
-    if (result.compare("PASS") == 0 || result.compare("pass") == 0)
-    {
+    if (result.compare("PASS") == 0 || result.compare("pass") == 0) {
         pa.setColor(QPalette::WindowText,Qt::green);
     }
-    else
-    {
+    else {
         pa.setColor(QPalette::WindowText,Qt::red);
     }
     return pa;
@@ -227,8 +222,7 @@ QPalette MainTestWindow::_get_label_color(QString result)
 
 void MainTestWindow::update_color_screen_log(QString info, QString color)
 {
-    if (_editInfo == NULL)
-    {
+    if (_editInfo == NULL) {
         return ;
     }
 
@@ -288,8 +282,7 @@ void MainTestWindow::_string_to_html(QString &str, QColor color)
 
 void MainTestWindow::update_screen_log(QString textInfo)
 {
-    if (_editInfo == NULL)
-    {
+    if (_editInfo == NULL) {
         return ;
     }
 
@@ -323,15 +316,14 @@ void MainTestWindow::_create_main_label_layout()
 {
     int i;
 
-    if (_main_label_item_list.isEmpty())
-    {
+    if (_main_label_item_list.isEmpty()) {
         return ;
     }
 
     _grid_main_label_layout = new QGridLayout;
     _hbox_main_label_layout = new QHBoxLayout;
-    for (i = 0 ; i < _main_label_item_list.count(); i++)
-    {
+    for (i = 0 ; i < _main_label_item_list.count(); i++) {
+
         QString label = _main_label_item_list.at(i).itemname;
         QString result = _main_label_item_list.at(i).result;
         _grid_main_label_layout->addWidget(new QLabel(label), i, 0);
@@ -343,8 +335,7 @@ void MainTestWindow::_create_main_label_layout()
         }
     }
 
-    if (_lab_complete_or_single_test != NULL)
-    {
+    if (_lab_complete_or_single_test != NULL) {
         _grid_main_label_layout->addWidget(_lab_complete_or_single_test, i , 1);
     }
 
@@ -372,12 +363,10 @@ void MainTestWindow::update_sn_mac_state(QString sn_mac, QString result)
 
 void MainTestWindow::on_state_changed(int state)
 {
-
     foreach (ItemCheck item, itemlist) {
 
         if (item.name == sender()->objectName()) {
-
-            emit sig_check_state_changed(item.name, state == Qt::Checked ? true:false);
+            emit sig_check_state_changed(item.name, state == Qt::Checked ? true : false);
         }
     }
 }
@@ -442,8 +431,8 @@ void MainTestWindow::_record_play_audio()
 {
     if (this->_status == RECORD) {
 
-        if (_custom_progress_dialog->progressbar->value()+1 <= _custom_progress_dialog->progressbar->maximum()) {
-            _custom_progress_dialog->progressbar->setValue(_custom_progress_dialog->progressbar->value()+1);
+        if (_custom_progress_dialog->progressbar->value() + 1 <= _custom_progress_dialog->progressbar->maximum()) {
+            _custom_progress_dialog->progressbar->setValue(_custom_progress_dialog->progressbar->value() + 1);
         } else {
             this->_status = PLAY;
             _custom_progress_dialog->lb_title->setText("正在播放中....");
@@ -451,8 +440,8 @@ void MainTestWindow::_record_play_audio()
             _custom_progress_dialog->lb_title->update();
         }
     } else if (this->_status == PLAY) {
-        if (_custom_progress_dialog->progressbar->value()+1 <= _custom_progress_dialog->progressbar->maximum()) {
-            _custom_progress_dialog->progressbar->setValue(_custom_progress_dialog->progressbar->value()+1);
+        if (_custom_progress_dialog->progressbar->value() + 1 <= _custom_progress_dialog->progressbar->maximum()) {
+            _custom_progress_dialog->progressbar->setValue(_custom_progress_dialog->progressbar->value() + 1);
         } else {
             this->_status = PLAY_END;
             if (NULL != _custom_progress_dialog) {
@@ -467,8 +456,7 @@ void MainTestWindow::_record_play_audio()
 
 void MainTestWindow::_create_main_test_layout()
 {
-    if (_main_test_item_list.isEmpty())
-    {
+    if (_main_test_item_list.isEmpty()) {
         return ;
     }
 
@@ -476,12 +464,10 @@ void MainTestWindow::_create_main_test_layout()
     _vbox_main_test_layout = new QVBoxLayout;
     _hbox_main_test_layout = new QHBoxLayout;
 
-    if (_interface_test_list.isEmpty())
-    {
-        for (int i = 0 ; i < _main_test_item_list.count(); i++)
-        {
-            QString name = _main_test_item_list.at(i).itemname;
+    if (_interface_test_list.isEmpty()) {
 
+        for (int i = 0 ; i < _main_test_item_list.count(); i++) {
+            QString name = _main_test_item_list.at(i).itemname;
             iteminfo.name = name;
 
             QPushButton *button = new QPushButton(name);
@@ -497,10 +483,9 @@ void MainTestWindow::_create_main_test_layout()
          QPushButton *button;
          QLabel *label;
 
-         for (int i = 0 ; i < _main_test_item_list.count(); i++)
-         {
-             if (i == 0)
-             {
+         for (int i = 0 ; i < _main_test_item_list.count(); i++) {
+ 
+             if (i == 0) { 
                 button = new QPushButton(_main_test_item_list.at(0).itemname);
                 label = new QLabel;
                 _grid_main_test_layout->addWidget(button, 0, 0);
@@ -510,8 +495,8 @@ void MainTestWindow::_create_main_test_layout()
                 iteminfo.label = label;
                 _insert_item_record(iteminfo);
 
-                for (int j = 0 ; j < _interface_test_list.count(); j++)
-                {
+                for (int j = 0 ; j < _interface_test_list.count(); j++) {
+
                     QCheckBox*checkbox = new QCheckBox(_interface_test_list.at(j).itemname);
                     checkbox->setChecked(true);
                     checkbox->setObjectName(_interface_test_list.at(j).itemname);
@@ -581,7 +566,6 @@ void MainTestWindow::_auto_upload_state_changed(int state)
 {
     if (state == Qt::Checked) {
         _is_auto_upload_checked = true;
-
     } else {
         _is_auto_upload_checked = false;
     }
@@ -666,7 +650,6 @@ void MainTestWindow::slot_finish_show_stress_window()
 {
     if (StressTestWindow::g_get_stress_test_window() != NULL) {
         StressTestWindow::g_get_stress_test_window()->finish_stress_window();
-
         emit to_quit_test_window("拷机测试");
     }
 
@@ -737,10 +720,8 @@ void MainTestWindow::slot_show_sn_mac_comparison_result(QString sn_mac, QString 
 {
     if (result.compare("PASS") == 0) {
         MessageBox(MessageForm::SNMAC_Success, sn_mac, "扫描成功", sn_mac + "比对成功", "", 1000);
-
     } else {
         MessageBox(MessageForm::SNMAC_Error, sn_mac, "错误", sn_mac + "比对失败,请重试！", "", 0);
-
     }
 }
 
