@@ -63,9 +63,6 @@ const int BRIGHTNESS_VALUE[6] =
 #define DEFAULT_FTP_USER        ("test")
 #define DEFAULT_FTP_PASSWD      ("test")
 
-#define AGAIN                   (3)
-#define SUCCESS                 (0)
-#define FAIL                    (1)
 #define TIME_MAX_LEN            (50)
 
 #define USB_MAX_NUM             (10)
@@ -112,6 +109,12 @@ const int BRIGHTNESS_VALUE[6] =
 #define STRESS_MEMTEST_ITV(x)   ((x).day == 0 && (x).hour == 0 && (x).minute == 10 && (x).second >= 0 && (x).second <= 1)
 
 #define PRINT_RESULT_STR(x)     ((x) ? "PASS" : "FAIL")
+
+enum {
+    SUCCESS = 0,
+    FAIL,
+    AGAIN
+};
 
 enum {
     FTP_NORM = 0,

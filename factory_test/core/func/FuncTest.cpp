@@ -514,38 +514,46 @@ void* InterfaceTest::test_all(void *arg)
         string loop = "\n******************** LOOP: " + to_string(i + 1) + " ********************";
         control->update_screen_log(loop);
         if (interfaceSelectStatus->mem_select) {
+			LOG_INFO("---------- start mem test ----------\n");
             FuncBase[MEM]->start_test(baseInfo);
         }
         
         if (interfaceSelectStatus->usb_select) {
+			LOG_INFO("---------- start usb test ----------\n");
             FuncBase[USB]->start_test(baseInfo);
         }
 
         if (interfaceSelectStatus->net_select) {
+			LOG_INFO("---------- start net test ----------\n");
             FuncBase[NET]->start_test(baseInfo);
         }
         
         if (interfaceSelectStatus->edid_select) {
+			LOG_INFO("---------- start edid test ----------\n");
             FuncBase[EDID]->start_test(baseInfo);
         }
         
         if (interfaceSelectStatus->cpu_select) {
+			LOG_INFO("---------- start cpu test ----------\n");
             FuncBase[CPU]->start_test(baseInfo);
         }
 
         if (baseInfo->hdd_cap != "0" && baseInfo->hdd_cap != "") {
             if (interfaceSelectStatus->hdd_select) {
+				LOG_INFO("---------- start hdd test ----------\n");
                 FuncBase[HDD]->start_test(baseInfo);
             }
         }
         if (baseInfo->fan_speed != "0" && baseInfo->fan_speed != "") {
             if (interfaceSelectStatus->fan_select) {
+				LOG_INFO("---------- start fan test ----------\n");
                 FuncBase[FAN]->start_test(baseInfo);
             }
         }
         
         if (baseInfo->wifi_exist != "0" && baseInfo->wifi_exist != "") {
             if (interfaceSelectStatus->wifi_select) {
+				LOG_INFO("---------- start wifi test ----------\n");
                 FuncBase[WIFI]->start_test(baseInfo);
             }
         }

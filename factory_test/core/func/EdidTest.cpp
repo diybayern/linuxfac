@@ -73,7 +73,7 @@ bool EdidTest::do_vbe_ddc_service(unsigned BX, reg_frame* regs)
     return do_vbe_service(AX, BX, regs);
 }
 
-int EdidTest::read_edid(unsigned int controller, char* output)
+bool EdidTest::read_edid(unsigned int controller, char* output)
 {
     int i = 0;
     reg_frame regs;
@@ -83,7 +83,7 @@ int EdidTest::read_edid(unsigned int controller, char* output)
 
     if (!block) {
         LOG_ERROR("can't allocate 0x%x bytes of DOS memory for output block\n", EDID_BLOCK_SIZE);
-        return FAIL;
+        return false;
     }
 
     memset(block, MAGIC, EDID_BLOCK_SIZE);
@@ -97,7 +97,7 @@ int EdidTest::read_edid(unsigned int controller, char* output)
     if (!do_vbe_ddc_service(SERVICE_READ_EDID, &regs)) {
         LRMI_free_real(block);
         LOG_ERROR("The EDID data  as the VBE call failed\n");
-        return FAIL;
+        return false;
     }
 
     for (i = 0; i < EDID_BLOCK_SIZE; i++) {
@@ -109,20 +109,20 @@ int EdidTest::read_edid(unsigned int controller, char* output)
     if (i == EDID_BLOCK_SIZE) {
         LRMI_free_real(block);
         LOG_ERROR("Error: output block unchanged\n");
-        return FAIL;
+        return false;
     }
 
     memcpy(output, block, EDID_BLOCK_SIZE);
 	if (output == 0) {
-		return FAIL;
+		return false;
 	}
 
     LRMI_free_real(block);
 
-    return SUCCESS;
+    return true;
 }
 
-int EdidTest::parse_edid(char* buf)
+bool EdidTest::parse_edid(char* buf)
 {
     int i = 0;
     char check_sum = 0;
@@ -133,18 +133,19 @@ int EdidTest::parse_edid(char* buf)
 
     if (0 != check_sum) {
         LOG_ERROR("check sum failed sum=%d\n", check_sum);
-        return FAIL;
+        return false;
     }
 
-    return SUCCESS;
+    return true;
 }
 
-int EdidTest::edid_test_all(unsigned int num) {
-
+bool EdidTest::edid_test_all(unsigned int num)
+{
     int ret = 0;
     int failed = 0;
     bool read_ret = true;
     bool parse_ret = true;
+	bool result = true;
     char edid_buf[EDID_BLOCK_SIZE] = {0, };
     int edid_num = num;
 
@@ -158,6 +159,7 @@ i2c_test:
     screen_log_red += get_edid_i2c_screen_red();
     if (ret == SUCCESS) {
         pthread_mutex_unlock(&g_reg_mutex);
+		result = true;
         goto print;
     } else {
         if (ret == AGAIN && failed++ < 5) {
@@ -173,7 +175,7 @@ i2c_test:
                 screen_log_black += "ERROR: Failed to read any EDID information on the buses.\n";
                 screen_log_black += "\t错误：无法读取总线上的任何EDID信息\n";
             }
-            ret = FAIL;
+            result = false;
             goto print;
         }
     }
@@ -191,14 +193,14 @@ lrmi_start:
     iopl(3);
 
     read_ret = read_edid(0, edid_buf);    
-    if (FAIL == read_ret) {
+    if (false == read_ret) {
         LOG_ERROR("read edid failed\n");
         failed++;
         goto error;
     }
 
     parse_ret = parse_edid(edid_buf);    
-    if (FAIL == parse_ret) {
+    if (false == parse_ret) {
         LOG_ERROR("parse edid failed\n");
         failed++;
         goto error;
@@ -213,13 +215,13 @@ error:
     
     pthread_mutex_unlock(&g_reg_mutex);
 
-    ret = read_ret & parse_ret;
-    LOG_INFO("read edid: \t%s\n", PRINT_RESULT(read_ret));
-    LOG_INFO("parse edid : \t%s\n", PRINT_RESULT(parse_ret));
+    result = read_ret && parse_ret;
+    LOG_INFO("read edid: \t%s\n", PRINT_RESULT_STR(read_ret));
+    LOG_INFO("parse edid : \t%s\n", PRINT_RESULT_STR(parse_ret));
 
 print:
-    LOG_INFO("edid test result: \t%s\n", PRINT_RESULT1(ret));
-    return ret;
+    LOG_INFO("edid test result: \t%s\n", PRINT_RESULT_STR(result));
+    return result;
 }
 
 int EdidTest::get_edid_num(BaseInfo* baseInfo)
@@ -250,8 +252,8 @@ void* EdidTest::test_all(void *arg)
     int edid_num = get_edid_num(baseInfo);
     LOG_INFO("edid num: %d", edid_num);
 	
-    int is_pass = edid_test_all(edid_num);
-    if (is_pass == SUCCESS) {
+    bool is_pass = edid_test_all(edid_num);
+    if (is_pass) {
         screen_log_black += EDID_TEST_NAME + "结果:\t\t\t成功\n\n";
         control->set_interface_test_result(EDID_TEST_NAME, true);
     } else {
