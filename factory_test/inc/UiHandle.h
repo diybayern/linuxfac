@@ -48,7 +48,7 @@ class UiHandle: public QObject
 
     private:
         static UiHandle* _ui_handle;
-        bool _g_decode_status;
+        bool _g_decode_status = true;
 
     signals:
         void to_draw_main_test_window();

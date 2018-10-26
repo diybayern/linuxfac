@@ -6,25 +6,24 @@
 #include "../../inc/fac_log.h"
 #include "../../inc/fac_utils.h"
 
-
 #define DEFAULT_SAMPLERATE     (44100)
 #define DEFAULT_CHANNEL        (2)
-#define DEFAULT_FORMAT         (SND_PCM_FORMAT_S16_LE)
 
+#define DEFAULT_FORMAT         (SND_PCM_FORMAT_S16_LE)
 #define PLAYBACK               (SND_PCM_STREAM_PLAYBACK)
 #define RECORD                 (SND_PCM_STREAM_CAPTURE)
 
 #define RECORD_FRAME_SIZE      (64)
 #define PLAYBACK_FRAME_SIZE    (1024)
-
 #define SOUND_RECORD_FILE      ("/tmp/sound.wav")
 #define DEFAULT_CARD_NAME      ("default")
 
-static SndInfo *g_record_info = NULL;
-static SndInfo *g_playback_info = NULL;
-static SndStatus gStatus =  SOUND_UNKNOW;
 static pthread_mutex_t gMutex;
 //SoundTest* SoundTest::_mInstance = NULL;
+
+SndInfo* SoundTest::g_record_info = NULL;
+SndInfo* SoundTest::g_playback_info = NULL;
+SndStatus SoundTest::gStatus = SOUND_UNKNOW;
 
 void SoundTest::init_volume()
 {
@@ -62,14 +61,12 @@ void SoundTest::init_volume()
         return;
     }
 
-    for (elem = snd_mixer_first_elem(mixer_fd); elem;
-            elem = snd_mixer_elem_next(elem)) {
+    for (elem = snd_mixer_first_elem(mixer_fd); elem; elem = snd_mixer_elem_next(elem)) {
         name = snd_mixer_selem_get_name(elem);
         LOG_INFO("name=%s \n", name);
 
-        if ((strcmp(name, "Master") == 0) || (strcmp(name, "Headphone") == 0)
-            || (strcmp(name, "Speaker") == 0) || (strcmp(name, "PCM") == 0)
-            || (strcmp(name, "Mic") == 0)) {
+        if ((strcmp(name, "Master") == 0) || (strcmp(name, "Headphone") == 0) || (strcmp(name, "Speaker") == 0)
+				|| (strcmp(name, "PCM") == 0) || (strcmp(name, "Mic") == 0)) {
             //set maxvolume
             ret = snd_mixer_selem_get_playback_volume_range(elem, &minVolume, &maxVolume);
             LOG_INFO("name=%s get_playback_volume_range min=%ld max=%ld\n", name, minVolume, maxVolume);
@@ -89,7 +86,7 @@ void SoundTest::init_volume()
             } else {
                 snd_mixer_selem_set_capture_volume_all(elem, 0);
             }
-        } else if(strcmp(name, "Capture") == 0) {
+        } else if (strcmp(name, "Capture") == 0) {
             ret = snd_mixer_selem_get_capture_volume_range(elem, &minVolume, &maxVolume);
             LOG_INFO("name=%s get_capture_volume_range min=%ld max=%ld\n", name, minVolume, maxVolume);
             snd_mixer_selem_set_capture_switch_all(elem, 1);
@@ -109,9 +106,8 @@ void SoundTest::init_volume()
 void* SoundTest::record_loop(void *arg)
 {
 //    FILE * outfile = NULL;
-
     bool ret = false;
-    SndInfo *info = (SndInfo *) arg;
+    SndInfo *info = (SndInfo *)arg;
 //    int retry_cnt = 80;
     char *buf = NULL;
     int buffer_size = 0;
@@ -199,8 +195,8 @@ void* SoundTest::playback_loop(void *arg)
     }
 
     if ((info->samplearate != g_record_info->samplearate)
-        || (info->channels != g_record_info->channels)
-        || (info->format != g_record_info->format)) {
+        	|| (info->channels != g_record_info->channels)
+        	|| (info->format != g_record_info->format)) {
         LOG_ERROR("playback params is different from record params! \n");
         goto err_playback;
     }
@@ -260,11 +256,6 @@ err_playback:
     return NULL;
 }
 
-
-SoundTest::SoundTest()
-{
-}
-
 bool SoundTest::open_sound_card(SndInfo *info)
 {
     int err = -1;
@@ -273,8 +264,8 @@ bool SoundTest::open_sound_card(SndInfo *info)
     int direction   = info->direction;
     int sample_rate = info->samplearate;
     int channels    = info->channels;
-    snd_pcm_format_t format       = info->format;;
-    snd_pcm_uframes_t period_size = info->period_size;
+    snd_pcm_format_t format        = info->format;;
+    snd_pcm_uframes_t period_size  = info->period_size;
     snd_pcm_hw_params_t *hw_params = NULL;
 
     LOG_INFO("open audio device %s\n", info->card);
@@ -287,15 +278,13 @@ bool SoundTest::open_sound_card(SndInfo *info)
 
     err = snd_pcm_hw_params_malloc(&hw_params);
     if (err < 0) {
-        LOG_ERROR("cannot allocate hardware parameter structure %s \n",
-                  snd_strerror(err));
+        LOG_ERROR("cannot allocate hardware parameter structure %s \n", snd_strerror(err));
         goto err;
     }
 
     err = snd_pcm_hw_params_any(info->pcm, hw_params);
     if (err < 0) {
-        LOG_ERROR("cannot initialize hardware parameter structure %s \n",
-                  snd_strerror(err));
+        LOG_ERROR("cannot initialize hardware parameter structure %s \n", snd_strerror(err));
         goto err;
     }
 
@@ -534,7 +523,7 @@ void* SoundTest::test_all(void*)
 void SoundTest::start_test(BaseInfo* baseInfo)
 {
     pthread_t tid;
-    pthread_create(&tid,NULL,test_all,baseInfo);
+    pthread_create(&tid, NULL, test_all, baseInfo);
 }
 
 bool SoundTest::sound_record_restore(BaseInfo* baseInfo)

@@ -197,7 +197,7 @@ public:
     void factory_delete_event();
     static void* update_mes_log_thread(void* arg);
     void start_update_mes_log(MesInfo* info);
-    int get_decode_status();
+    bool get_decode_status();
     void show_stress_record();
     void print_stress_test_result(vector<string> record);
 
@@ -293,7 +293,7 @@ private:
     void init_base_info();
     void init_hw_info();
     void init_fac_config();
-    void ui_init();
+    void init_ui();
 
 private:
 

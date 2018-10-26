@@ -7,15 +7,15 @@
 
 typedef void (*write_log_callback)(const char*, va_list);
 
-static const char *log_level[LEVEL_MAX] = { (char*)"DEBUG", (char*)"INFO ", \
-                                            (char*)"WARN ", (char*)"ERROR" };
+static const char *log_level[LEVEL_MAX] = {(char*)"DEBUG", (char*)"INFO ", \
+                                           (char*)"WARN ", (char*)"ERROR" };
 
 static const char *msg_log_warning = "log message is long\n";
 static const char *msg_log_nothing = "\n";
 static pthread_mutex_t mutex;
 
-
-void os_log(const char* msg, va_list list) {
+void os_log(const char* msg, va_list list)
+{
     char line[LINE_SZ] = {0};
     FILE* log_file_fp = NULL;
     int file_size = 0;
@@ -46,7 +46,7 @@ void __write_log(write_log_callback func, const char *fname, const char *functio
     char msg[LOG_MAX_LEN + 1];
     char *tmp = msg;
     const char *buf = fmt;
-    char tmp_buf[TIME_MAX_LEN] = {0,};
+    char tmp_buf[TIME_MAX_LEN] = {0, };
     
     size_t len_fmt  = strnlen(fmt, LOG_MAX_LEN);
     size_t file_len = (fname) ? (strnlen(fname, LOG_MAX_LEN)) : (0);
@@ -56,13 +56,11 @@ void __write_log(write_log_callback func, const char *fname, const char *functio
     size_t len_all  = len_fmt;
     size_t len = 0;
 
-    {
-        get_current_time(tmp_buf);
-        len = snprintf(tmp, buf_left, "%s", tmp_buf);
-        buf_left -= len;
-        tmp += len;
-        len_all += len;
-    }
+    get_current_time(tmp_buf);
+    len = snprintf(tmp, buf_left, "%s", tmp_buf);
+    buf_left -= len;
+    tmp += len;
+    len_all += len;
 
     if ((level >= 0) && (level < LEVEL_MAX)) {
         len = snprintf(tmp, buf_left, " <%s> ", log_level[level]);

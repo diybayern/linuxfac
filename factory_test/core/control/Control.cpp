@@ -38,7 +38,7 @@ Control::Control():QObject()
     
     init_base_info();
     init_hw_info();
-    ui_init();
+    init_ui();
     init_fac_config();
     init_mes_log();
 }
@@ -77,7 +77,7 @@ void Control::init_hw_info()
     get_hwinfo(_hwInfo);
 }
 
-void Control::ui_init()
+void Control::init_ui()
 {    
     _uiHandle->add_main_label("产品型号:", _hwInfo->product_name);
     _uiHandle->add_main_label("硬件版本:", _hwInfo->product_hw_version);
@@ -466,8 +466,9 @@ void Control::update_mes_log(string tag, string value)
  
     bzero(line,sizeof(line));
  
-    if ((fp = fopen(MES_FILE,"r")) == NULL) {
+    if ((fp = fopen(MES_FILE, "r")) == NULL) {
         LOG_ERROR("open %s failed", MES_FILE);
+        return;
     }
  
     fseek(fp, 0, SEEK_END);
@@ -476,7 +477,7 @@ void Control::update_mes_log(string tag, string value)
     char* buf = (char*)malloc(file_size + 128);
     if (NULL == buf) {
         fclose(fp);
-        return ;
+        return;
     }
     
     bzero(buf, file_size);
@@ -878,7 +879,7 @@ void Control::slot_factory_delete_event()
     factory_delete_event();
 }
 
-int Control::get_decode_status()
+bool Control::get_decode_status()
 {
     return _uiHandle->get_g_decode_status();
 }

@@ -29,56 +29,78 @@ const string HDD_TEST_NAME  = "HDD测试";
 const string FAN_TEST_NAME  = "FAN测试";
 const string WIFI_TEST_NAME = "WIFI测试";
 
-const string INTERFACE_TEST_NAME  = "接口测试";
-const string SOUND_TEST_NAME      = "音频测试";
-const string DISPLAY_TEST_NAME    = "显示测试";
-const string BRIGHT_TEST_NAME     = "亮度测试";
-const string CAMERA_TEST_NAME     = "摄像头测试";
-const string STRESS_TEST_NAME     = "拷机测试";
-const string UPLOAD_LOG_NAME      = "上传日志";
-const string NEXT_PROCESS_NAME    = "下道工序";
+const string INTERFACE_TEST_NAME = "接口测试";
+const string SOUND_TEST_NAME     = "音频测试";
+const string DISPLAY_TEST_NAME   = "显示测试";
+const string BRIGHT_TEST_NAME    = "亮度测试";
+const string CAMERA_TEST_NAME    = "摄像头测试";
+const string STRESS_TEST_NAME    = "拷机测试";
+const string UPLOAD_LOG_NAME     = "上传日志";
+const string NEXT_PROCESS_NAME   = "下道工序";
 
 
-const string FACTORY_PATH         = "/usr/local/bin/factory/";
-const string STRESS_LOCK_FILE     = FACTORY_PATH + "lock";
-const string FAN_TEST_SCRIPT      = FACTORY_PATH + "fan_test.sh";
-const string MEM_TEST_SCRIPT      = FACTORY_PATH + "mem_test.sh";
-const string WIFI_TEST_SCRIPT     = FACTORY_PATH + "wifi_test.sh";
-const string HDD_TEST_SCRIPT      = FACTORY_PATH + "hdd_test.sh";
-const string CAMERA_CHECK_SCRIPT  = FACTORY_PATH + "check_camera.sh";
-const string CAMERA_START_SCRIPT  = FACTORY_PATH + "start_xawtv.sh";
-const string GET_CPU_TEMP_SCRIPT  = FACTORY_PATH + "get_cpu_temp.sh";
+const string FACTORY_PATH        = "/usr/local/bin/factory/";
+const string STRESS_LOCK_FILE    = FACTORY_PATH + "lock";
+const string FAN_TEST_SCRIPT     = FACTORY_PATH + "fan_test.sh";
+const string MEM_TEST_SCRIPT     = FACTORY_PATH + "mem_test.sh";
+const string WIFI_TEST_SCRIPT    = FACTORY_PATH + "wifi_test.sh";
+const string HDD_TEST_SCRIPT     = FACTORY_PATH + "hdd_test.sh";
+const string CAMERA_CHECK_SCRIPT = FACTORY_PATH + "check_camera.sh";
+const string CAMERA_START_SCRIPT = FACTORY_PATH + "start_xawtv.sh";
+const string GET_CPU_TEMP_SCRIPT = FACTORY_PATH + "get_cpu_temp.sh";
 
-const string GET_BASEINFO_INI     = FACTORY_PATH + "hwcfg.ini";
+const string GET_BASEINFO_INI    = FACTORY_PATH + "hwcfg.ini";
 
-const string MEM_UI_LOG           = FACTORY_PATH + "mem_ui_log";
-const string FAC_CONFIG_FILE      = "/tmp/fac_config.conf";
+const string MEM_UI_LOG          = FACTORY_PATH + "mem_ui_log";
+const string FAC_CONFIG_FILE     = "/tmp/fac_config.conf";
 
-#define AGAIN           (3)
-#define SUCCESS         (0)
-#define FAIL            (1)
-#define TIME_MAX_LEN    (50)
+const int BRIGHTNESS_VALUE[6] = 
+{
+    7, 17, 27, 37, 47, 57,
+};
 
-#define USB_MAX_NUM       (10)
-#define USB_BLOCK_LEN     (16)
-#define USB_VENDOR_LEN    (64)
-#define USB_WRITE_LEN     (1024 * 1024)
+#define DEFAULT_FTP_IP          ("172.21.5.48")
+#define DEFAULT_FTP_USER        ("test")
+#define DEFAULT_FTP_PASSWD      ("test")
 
-#define USB_PATH_LEN      (1024)
-#define USB_SPEED_LEN     (32)
+#define AGAIN                   (3)
+#define SUCCESS                 (0)
+#define FAIL                    (1)
+#define TIME_MAX_LEN            (50)
 
-#define MAC_ADDR_LEN      (6)
-#define CMD_BUF_SIZE      (256)
+#define USB_MAX_NUM             (10)
+#define USB_BLOCK_LEN           (16)
+#define USB_VENDOR_LEN          (64)
+#define USB_WRITE_LEN           (1024 * 1024)
+#define USB_PATH_LEN            (1024)
+#define USB_SPEED_LEN           (32)
 
-#define MES_FILE          ("/var/log/mes.txt")
-#define STRESS_RECORD     ("/var/log/stress.log")
-#define LOG_FILE          ("/var/log/factory.log")
-#define LOG_FILE_BAK      ("/var/log/factory_bak.log")
+#define MAC_ADDR_LEN            (6)
+#define CMD_BUF_SIZE            (256)
+#define TEST_PROTO              (0xaaaa)
+#define TEST_MAGIC              (0xffffeeee)
 
-#define NEXT_LOCK         ("next")
-#define PCBA_LOCK         ("PCBA")
-#define WHOLE_LOCK        ("whole")
-#define WHOLE_TEST_FILE   ("/tmp/whole_test")
+#define ETH_LINK_SPEED          (1000) /* Mbps */
+#define ETH_NAME_LEN            (16)
+#define ETH_STATUS_UP           (0)
+#define ETH_STATUS_DOWN         (1)
+
+#define WLAN_NAME_LEN           (16)
+#define TOTAL_SEND_NUM          (100)
+#define RECEIVE_NUM             (70)
+#define INTERFACE_NUM           (512)
+
+#define MES_FILE                ("/var/log/mes.txt")
+#define STRESS_RECORD           ("/var/log/stress.log")
+#define LOG_FILE                ("/var/log/factory.log")
+#define LOG_FILE_BAK            ("/var/log/factory_bak.log")
+
+#define NEXT_LOCK               ("next")
+#define PCBA_LOCK               ("PCBA")
+#define WHOLE_LOCK              ("whole")
+#define WHOLE_TEST_FILE         ("/tmp/whole_test")
+
+#define XAWTV_MAX_FAIL_COUNT    (5)
 
 #define STRESS_RECORD_NUM       (10)
 #define STRESS_MEM_CAP_MAX      (100)

@@ -68,7 +68,8 @@ static int detect_invalid_device(const char *name)
     return idx;
 }
 
-int parseedid() {
+int parseedid()
+{
     int i;
     int j;
     int idx;
@@ -76,13 +77,13 @@ int parseedid() {
     char modelname[13];
     char modetmp[128];
     //int ptm;
-//    int compsync = 0;
+	//int compsync = 0;
     int hres;
     int vres;
     int ret;
 
     //check the checksum
-    for (i = 0; i<128; i++) {
+    for (i = 0; i < 128; i++) {
         sum += edid[i];
     }
     if (sum) {
@@ -109,13 +110,12 @@ int parseedid() {
     //Product Identification
     /* Model Name: Only thing I do out of order of edid, to comply with X standards... */
     for (i = 0x36; i < 0x7E; i += 0x12) { //read through descriptor blocks...
-        if (edid[i] == 0x00) { //not a timing descriptor
-            if (edid[i+3] == 0xfc) { //Model Name tag
-                for (j = 0; j < 13; j++) {
-                    if (edid[i+5+j] == 0x0a)
-                        modelname[j] = 0x00;
-                    else
-                        modelname[j] = edid[i+5+j];
+        if (edid[i] == 0x00 && edid[i + 3] == 0xfc) { //not a timing descriptor
+            for (j = 0; j < 13; j++) {
+                if (edid[i + 5 + j] == 0x0a) {
+                    modelname[j] = 0x00;
+                } else {
+                    modelname[j] = edid[i+5+j];
                 }
             }
         }
@@ -141,41 +141,42 @@ int parseedid() {
 
     /* Skip Product ID and Serial Number. */
     /* Week and Year: not required, but do it for fun. */
-    if (edid[0x10] <= 54)
+    if (edid[0x10] <= 54) {
         LOG_INFO("\t# Monitor Manufactured week %i of %i\n", (int)(edid[0x10]), ((int)(edid[0x11])) + 1990);
-    else if (edid[0x10] != 0xff)
+    } else if (edid[0x10] != 0xff) {
         LOG_INFO("\t# Monitor Manufactured in %i\n", ((int)(edid[0x11])) + 1990);
-    else if (edid[0x10] == 0xff)
+    } else if (edid[0x10] == 0xff) {
         LOG_INFO("\t# Monitor Model Year: %i\n", ((int)(edid[0x11])) + 1990);
-    
+    }
     //Edid Version
     LOG_INFO("\t# EDID version %i.%i\n", (int)(edid[0x12]), (int)(edid[0x13]));
 
     //Basic Display Parameter
     /* Digital or not? */
-    if (edid[0x14] & 0x80)
+    if (edid[0x14] & 0x80) {
         LOG_INFO("\t# Digital Display\n");
-    else {
+    } else {
         LOG_INFO("\t# Analog Display\n");
-        if (edid[0x14] & 0x02) //sync on green.
+        if (edid[0x14] & 0x02) {    //sync on green.
             LOG_INFO("\tOption \"SyncOnGreen\" \"true\"\n");
+		}
 //        if (edid[0x14] & 0x04)
 //            compsync = 1; //Composite sync. Save for modelines.
-    }
+	}
     /* Ignore video input definitions, because X doesn't care. */
 
     /* Size parameters: H and V, in centimeters. Projectors put 0 here. 
      * DiplaySize is in millimeters, so multiply by 10 
      * If 0x16 is 0, but not 0x15, you really should do aspect ratio... */
-    if (edid[0x15] && edid[0x16])
+    if (edid[0x15] && edid[0x16]) {
         LOG_INFO("\tDisplaySize %i %i\n", ((int)(edid[0x15])) * 10, ((int)(edid[0x16])) * 10);
-    else
+    } else {
         LOG_INFO("\t# Display Physical Size not given. Normal for projectors.\n");
-    
+    }
     /* Gamma. Divide by 100, add 1. Defaults to 1, so if 0, it'll be 1 anyway. */
-    if (edid[0x17] != 0xff)
+    if (edid[0x17] != 0xff) {
         LOG_INFO("\tGamma %.2f\n", (float)((((float)edid[0x17]) / 100) + 1));
-
+    }
     /* DPMS. Simple yes or no. */
     LOG_INFO("\tOption \"DPMS\" \"%s\"\n", (edid[0x18] & 0xE0) ? "true" : "false");
     
@@ -192,9 +193,11 @@ int parseedid() {
     for (i = 0x36; i < 0x7E; i += 0x12) { //read through descriptor blocks...
         if (edid[i] == 0x00) { //not a timing descriptor
             if (edid[i+3] == 0xfd) { //monitor limits tag
-                LOG_INFO("\tHorizsync %i-%i\n", (int)edid[i+7] + (((edid[i+4] & 0x0c) & 0x04) ? 255 : 0), (int)edid[i+8] + ((edid[i+4] & 0x08) ? 255 : 0));
-                LOG_INFO("\tVertRefresh %i-%i\n", (int)edid[i+5] + (((edid[i+4] & 0x03) & 0x01) ? 255 : 0), (int)edid[i+6] + ((edid[i+4] & 0x02) ? 255 : 0));
-                LOG_INFO("\t# Maximum pixel clock is %iMHz\n", (int)edid[i+9] * 10);
+                LOG_INFO("\tHorizsync %i-%i\n", (int)edid[i + 7] + (((edid[i + 4] & 0x0c) & 0x04) ? 255 : 0),
+							(int)edid[i + 8] + ((edid[i + 4] & 0x08) ? 255 : 0));
+                LOG_INFO("\tVertRefresh %i-%i\n", (int)edid[i + 5] + (((edid[i + 4] & 0x03) & 0x01) ? 255 : 0),
+							(int)edid[i + 6] + ((edid[i + 4] & 0x02) ? 255 : 0));
+                LOG_INFO("\t# Maximum pixel clock is %iMHz\n", (int)edid[i + 9] * 10);
             }
         }
     }
@@ -204,13 +207,13 @@ int parseedid() {
     int hactive, vactive, pixclk, hsyncoff, hsyncwidth, hblank, vsyncoff, vsyncwidth, vblank;
     //Parse for Detailed Timing Descriptors...
     for (i = 0x36; i < 0x7E; i += 0x12) { //read through descriptor blocks...
-        if ((edid[i] != 0x00) && (edid[i+1] != 0x00)) { //a dtd
-            hactive = edid[i+2] + ((edid[i+4] & 0xf0) << 4);
-            hblank = edid[i+3] + ((edid[i+4] & 0x0f) << 8);
-            vactive = edid[i+5] + ((edid[i+7] & 0xf0) << 4);
-            vblank = edid[i+6] + ((edid[i+7] & 0x0f) << 8);
+        if ((edid[i] != 0x00) && (edid[i + 1] != 0x00)) { //a dtd
+            hactive = edid[i + 2] + ((edid[i + 4] & 0xf0) << 4);
+            hblank = edid[i + 3] + ((edid[i + 4] & 0x0f) << 8);
+            vactive = edid[i + 5] + ((edid[i + 7] & 0xf0) << 4);
+            vblank = edid[i + 6] + ((edid[i + 7] & 0x0f) << 8);
             
-            pixclk = (edid[i+1] << 8) | (edid[i]);
+            pixclk = (edid[i + 1] << 8) | (edid[i]);
 
             sprintf(modearray[currentmode], "%.2f ", (double)pixclk / 100.0);
             
@@ -218,10 +221,10 @@ int parseedid() {
             //sync offset = front porch
             //sync width = sync pulse width
 
-            hsyncoff = edid[i+8] | ((edid[i+11] & 0xC0) << 2);
-            hsyncwidth = edid[i+9] | ((edid[i+11] & 0x30) << 4);
-            vsyncoff = ((edid[i+10] & 0xf0) >> 4) | ((edid[i+11] & 0x0C) << 2);
-            vsyncwidth = (edid[i+10] & 0x0f) | ((edid[i+11] & 0x03) << 4);
+            hsyncoff = edid[i + 8] | ((edid[i + 11] & 0xC0) << 2);
+            hsyncwidth = edid[i + 9] | ((edid[i + 11] & 0x30) << 4);
+            vsyncoff = ((edid[i + 10] & 0xf0) >> 4) | ((edid[i + 11] & 0x0C) << 2);
+            vsyncwidth = (edid[i + 10] & 0x0f) | ((edid[i + 11] & 0x03) << 4);
 
             sprintf(modetmp, "%s%u %u %u %u ", modearray[currentmode], (unsigned int)hactive, 
                 (unsigned int)hactive+hsyncoff, (unsigned int)hactive+hsyncoff+hsyncwidth, (unsigned int)hactive+hblank);
@@ -230,8 +233,9 @@ int parseedid() {
                 (unsigned int)vactive+vsyncoff, (unsigned int)vactive+vsyncoff+vsyncwidth, (unsigned int)vactive+vblank);
             strcpy(modearray[currentmode], modetmp);
 
-            if ( (edid[i+17]&0x80) || ((edid[i+17]&0x18) == 0x18) ) {
-                sprintf(modetmp, "%s%shsync %svsync %s", modearray[currentmode], ((edid[i+17]&0x10) && (edid[i+17]&0x02)) ? "+": "-", ((edid[i+17]&0x10) && (edid[i+17]&0x04)) ? "+": "-", (edid[i+17]&0x80) ? "interlace": "");
+            if ((edid[i + 17] & 0x80) || ((edid[i + 17] & 0x18) == 0x18) ) {
+                sprintf(modetmp, "%s%shsync %svsync %s", modearray[currentmode], ((edid[i + 17] & 0x10) && (edid[i + 17] & 0x02)) ? "+": "-",
+					((edid[i + 17] & 0x10) && (edid[i + 17] & 0x04)) ? "+": "-", (edid[i + 17] & 0x80) ? "interlace": "");
                 strcpy(modearray[currentmode], modetmp);
 
             //hehe... there's been at least 2 bugs in the old parse-edid the whole time - somebody caught the htimings one, and I just caught two problems right here - lack of checking for analog sync and getting hsync and vsync backwards... yes, vsync and hsync have been flipped this whole time. Glad I'm rewriting
@@ -246,9 +250,9 @@ int parseedid() {
     /* I started doing this, but I think it's unnecessary. Think not? you do it. I'll comment what you're missing.*/
     int refresh;
     for (i = 0x26; i < 0x36; i += 0x2) { //read through list of resolutions...
-        if (!(edid[i] == 1 && edid[i+1] == 1)) { //skip if it's "blank"
+        if (!(edid[i] == 1 && edid[i + 1] == 1)) { //skip if it's "blank"
             hres = (((int)edid[i]) + 31) * 8;
-            switch ((edid[i+1] & 0xC0) >> 6) {
+            switch ((edid[i + 1] & 0xC0) >> 6) {
             case 0: vres = (hres * 10) / 16; //16:10 aspect ratio
                 break;
             case 1: vres = (hres * 3) / 4; //4:3
@@ -261,7 +265,7 @@ int parseedid() {
                 LOG_ERROR("The impossible has happened.\n");
                 break;
             }
-            refresh = (edid[i+1] & 0x3F) + 60;
+            refresh = (edid[i + 1] & 0x3F) + 60;
             LOG_INFO("\t#Not giving standard mode: ");
             LOG_INFO("%ix%i, %iHz\n", hres, vres, refresh);
         }
@@ -270,7 +274,8 @@ int parseedid() {
     return ret;
 }
 
-int parseextb() {
+int parseextb()
+{
     int i, curloc;
     char modetmp[128];
     //char nativename[64];
@@ -282,15 +287,16 @@ int parseextb() {
     */
     //printf("Tag: %x\n", extb[0]);
     
-    for (i=0;i<128;i++) {
-        sum +=extb[i];
+    for (i = 0; i < 128; i++) {
+        sum += extb[i];
     }
     if (sum != 0x00) {
         LOG_ERROR("Extension block checksum failed\n");
     }
-    if (extb[0] != 0x02) 
+    if (extb[0] != 0x02) {
         LOG_INFO("I only know about extension blocks of type 02h. PLEASE email me!\n");
-    curloc = extb[2];
+    }
+	curloc = extb[2];
     if (curloc == 0) {
         LOG_INFO("#No data in the extension block\n");
         return 0;
@@ -301,25 +307,24 @@ int parseextb() {
     //see CEA tables 28-30
     if (curloc > 4) {
         if ((extb[4] & 0xE0) != 0x40) { //if the first one is not a video one
-            LOG_INFO("extb[4]: 0x%x (0x%x)\n", extb[4], extb[4]&0xE0);
+            LOG_INFO("extb[4]: 0x%x (0x%x)\n", extb[4], extb[4] & 0xE0);
             LOG_ERROR("Hmm, you have data blocks, but not video ones... weird\n");
-            
         }
 
-        for (i=0;i<(extb[4]&0x1F);i++) {
-                if ((extb[5+i]&0x7f) > 59) {
-                    LOG_WARN("#WARNING: I may have missed a mode (CEA mode %i)\n", extb[5+i]&0x7f);
-                    if (native==-1)
-                        LOG_WARN("#DOUBLE WARNING: It's your first mode, too, so this may actually be important.\n");
+        for (i = 0; i < (extb[4] & 0x1F); i++) {
+            if ((extb[5 + i] & 0x7f) > 59) {
+                LOG_WARN("#WARNING: I may have missed a mode (CEA mode %i)\n", extb[5 + i] & 0x7f);
+                if (native == -1) {
+                    LOG_WARN("#DOUBLE WARNING: It's your first mode, too, so this may actually be important.\n");
                 }
-                else {
-                    if (native==-1)
-                        native = currentmode;
-                    sprintf(modearray[currentmode], "%s", ceamodes[extb[5+i]&0x7F]);
-                    currentmode++;
+            } else {
+                if (native==-1) {
+                    native = currentmode;
                 }
+                sprintf(modearray[currentmode], "%s", ceamodes[extb[5 + i] & 0x7F]);
+                currentmode++;
+            }
         }
-
     }
 
     //starting 18-byte DTD's.
@@ -328,21 +333,21 @@ int parseextb() {
     //Copypaste the DTD stuff from above.
     int hactive, vactive, pixclk, hsyncoff, hsyncwidth, hblank, vsyncoff, vsyncwidth, vblank;
     //Parse for Detailed Timing Descriptors...
-    for (i = curloc; i < curloc+(18*4); i += 0x12) { //read through descriptor blocks...
-        if ((extb[i] != 0x00) && (extb[i+1] != 0x00)) { //a dtd
-            hactive = extb[i+2] + ((extb[i+4] & 0xf0) << 4);
-            hblank = extb[i+3] + ((extb[i+4] & 0x0f) << 8);
-            vactive = extb[i+5] + ((extb[i+7] & 0xf0) << 4);
-            vblank = extb[i+6] + ((extb[i+7] & 0x0f) << 8);
+    for (i = curloc; i < curloc + (18 * 4); i += 0x12) { //read through descriptor blocks...
+        if ((extb[i] != 0x00) && (extb[i + 1] != 0x00)) { //a dtd
+            hactive = extb[i + 2] + ((extb[i + 4] & 0xf0) << 4);
+            hblank = extb[i + 3] + ((extb[i + 4] & 0x0f) << 8);
+            vactive = extb[i + 5] + ((extb[i + 7] & 0xf0) << 4);
+            vblank = extb[i + 6] + ((extb[i + 7] & 0x0f) << 8);
 
             //printf("\tModeline \t\"%dx%d\" ", hactive, vactive);
             
-            if (i == curloc && (extb[3]&0x0F) > 0) {
+            if (i == curloc && (extb[3] & 0x0F) > 0) {
                 native = currentmode;
                 //sprintf(nativename, "%dx%d", hactive, vactive);
             }
 
-            pixclk = (extb[i+1] << 8) | (extb[i]);
+            pixclk = (extb[i + 1] << 8) | (extb[i]);
 
             sprintf(modearray[currentmode], "%.2f ", (double)pixclk / 100.0);
             
@@ -350,10 +355,10 @@ int parseextb() {
             //sync offset = front porch
             //sync width = sync pulse width
 
-            hsyncoff = extb[i+8] | ((extb[i+11] & 0xC0) << 2);
-            hsyncwidth = extb[i+9] | ((extb[i+11] & 0x30) << 4);
-            vsyncoff = ((extb[i+10] & 0xf0) >> 4) | ((extb[i+11] & 0x0C) << 2);
-            vsyncwidth = (extb[i+10] & 0x0f) | ((extb[i+11] & 0x03) << 4);
+            hsyncoff = extb[i + 8] | ((extb[i + 11] & 0xC0) << 2);
+            hsyncwidth = extb[i + 9] | ((extb[i + 11] & 0x30) << 4);
+            vsyncoff = ((extb[i + 10] & 0xf0) >> 4) | ((extb[i + 11] & 0x0C) << 2);
+            vsyncwidth = (extb[i + 10] & 0x0f) | ((extb[i + 11] & 0x03) << 4);
 
 
             sprintf(modetmp, "%s%u %u %u %u ", modearray[currentmode], (unsigned int)hactive, 
@@ -363,8 +368,9 @@ int parseextb() {
                 (unsigned int)vactive+vsyncoff, (unsigned int)vactive+vsyncoff+vsyncwidth, (unsigned int)vactive+vblank);
             strcpy(modearray[currentmode], modetmp);
 
-            if ( (extb[i+17]&0x80) || ((extb[i+17]&0x18) == 0x18) ) {
-                sprintf(modetmp, "%s%shsync %svsync %s", modearray[currentmode], ((extb[i+17]&0x10) && (extb[i+17]&0x02)) ? "+": "-", ((extb[i+17]&0x10) && (extb[i+17]&0x04)) ? "+": "-", (extb[i+17]&0x80) ? "interlace": "");
+            if ((extb[i + 17] & 0x80) || ((extb[i + 17] & 0x18) == 0x18)) {
+                sprintf(modetmp, "%s%shsync %svsync %s", modearray[currentmode], ((extb[i + 17] & 0x10) && (extb[i + 17] & 0x02)) ? "+" : "-",
+					((extb[i + 17] & 0x10) && (extb[i + 17] & 0x04)) ? "+" : "-", (extb[i + 17] & 0x80) ? "interlace" : "");
                 strcpy(modearray[currentmode], modetmp);
             //hehe... there's been at least 2 bugs in the old parse-edid the whole time - somebody caught the htimings one, and I just caught two problems right here - lack of checking for analog sync and getting hsync and vsync backwards... yes, vsync and hsync have been flipped this whole time. Glad I'm rewriting
 
@@ -376,23 +382,28 @@ int parseextb() {
     return 0;
 }
 
-int dofooter() {
+int dofooter()
+{
     int i;
     if (native != -1)
         LOG_INFO("\tModeline \t\"Mode %i\" %s\n", native, modearray[native]);
-    for (i=0;i<currentmode;i++) {
-        if (i != native)
+    for (i = 0; i < currentmode; i++) {
+        if (i != native) {
             LOG_INFO("\tModeline \t\"Mode %i\" %s\n", i, modearray[i]);
+        }
     }
 
-    if (native != -1)
+    if (native != -1) {
         LOG_INFO("\tOption \"PreferredMode\" \"Mode %i\"\n", native); //half a chance of giving us the native default... The preferred mode is already in front.
-    LOG_INFO("EndSection\n");
+    }
+	LOG_INFO("EndSection\n");
+	
     return 0;
 }
 
 
-int parse_edid_from_file(const char *edid_info) {
+int parse_edid_from_file(const char *edid_info)
+{
     int infd;
     int i;
     int extblock = 0;
@@ -422,7 +433,7 @@ int parse_edid_from_file(const char *edid_info) {
             goto _exit;
         }
         for (i = 0; i < 128; i++) {
-            LOG_INFO("byte %i: %02x\n", i+128, extb[i]);
+            LOG_INFO("byte %i: %02x\n", i + 128, extb[i]);
         }
         extblock = 1;
     } else if (edid[126] > 0x01) {
@@ -432,8 +443,9 @@ int parse_edid_from_file(const char *edid_info) {
     }
     
     ret = parseedid();
-    if (extblock)
+    if (extblock) {
         parseextb();
+    }
     dofooter();
 
 _exit:

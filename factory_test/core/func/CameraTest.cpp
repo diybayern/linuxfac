@@ -6,12 +6,6 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-#define XAWTV_MAX_FAIL_COUNT   (5)
-
-CameraTest::CameraTest()
-{
-}
-
 unsigned long CameraTest::get_window_id(const char *winid_file)
 {
     char winidbuf[CMD_BUF_SIZE];
@@ -19,13 +13,15 @@ unsigned long CameraTest::get_window_id(const char *winid_file)
     int size = 0;
 
     memset(winidbuf, 0, CMD_BUF_SIZE);
-    if(!get_file_size(winid_file, &size))
+    if (!get_file_size(winid_file, &size)) {
         return 0;
+    }
     LOG_INFO("%s file size %d\n", winid_file, size);
     
-    if(!read_local_data(winid_file, winidbuf, size))
+    if (!read_local_data(winid_file, winidbuf, size)) {
         return 0;
-
+    }
+	
     winid = strtoul(winidbuf, NULL, 16);
     LOG_INFO("%s: xawtv window ID: [0x%x]\n", winid_file, winid);
 
@@ -61,7 +57,7 @@ void CameraTest::move_xawtv_window(int new_x, int new_y)
     LOG_ERROR("Move xawtv window to (%d)x(%d) location.\n", new_x, new_y);
 }
 
-void CameraTest::move_xawtv_window_on_func_test(void)
+void CameraTest::move_xawtv_window_on_func_test()
 {
     int screen_width;
     int new_x, new_y;
@@ -87,6 +83,7 @@ void CameraTest::start_camera_xawtv()
         return ;
     }
     usleep(5000);
+	
     move_xawtv_window_on_func_test();
 }
 
@@ -142,6 +139,7 @@ bool CameraTest::camera_test_all()
         LOG_ERROR("ERROR: Failed to start xawtv, GPU fault may be detected!\n");
         control->update_screen_log("ERROR: Failed to start xawtv, GPU fault may be detected!\n");
     }
+	
     return false;
 }
 
@@ -157,7 +155,7 @@ void* CameraTest::test_all(void*)
 void CameraTest::start_test(BaseInfo* baseInfo)
 {
     pthread_t tid;
-    pthread_create(&tid,NULL,test_all,baseInfo);
+    pthread_create(&tid, NULL, test_all, baseInfo);
 }
 
 void CameraTest::start_camera_xawtv_on_stress()
@@ -175,13 +173,13 @@ void CameraTest::start_camera_xawtv_on_stress()
 
     if (system("/usr/local/bin/factory/start_xawtv.sh") < 0) {
         LOG_ERROR("system run start_xawtv.sh error!\n");
-        return ;
+        return;
     }
     usleep(50000);
     
     if (system("/usr/local/bin/factory/close_xawtv.sh") < 0) {
         LOG_ERROR("system run close_xawtv.sh error!\n");
-        return ;
+        return;
     }
     usleep(5000);
     move_xawtv_window_on_func_test();

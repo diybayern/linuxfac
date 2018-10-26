@@ -4,7 +4,7 @@ MainTestWindow::MainTestWindow(QWidget *parent)
         : QDialog(parent)
 {
     _desktopWidget = QApplication::desktop();
-     connect(&updatetimer, SIGNAL(timeout()), this, SLOT(_record_play_audio()));
+    connect(&updatetimer, SIGNAL(timeout()), this, SLOT(_record_play_audio()));
 }
 
 MainTestWindow::~MainTestWindow()
@@ -15,92 +15,92 @@ MainTestWindow::~MainTestWindow()
     }
 
     if (NULL != _grid_main_label_layout) {
-       delete _grid_main_label_layout;
+       	delete _grid_main_label_layout;
         _grid_main_label_layout = NULL;
     }
 
     if (NULL != _hbox_main_label_layout) {
-       delete _hbox_main_label_layout;
+       	delete _hbox_main_label_layout;
         _hbox_main_label_layout = NULL;
     }
 
     if (NULL != _grid_main_test_layout) {
-       delete _grid_main_test_layout;
+       	delete _grid_main_test_layout;
         _grid_main_test_layout = NULL;
     }
 
     if (NULL != _vbox_main_test_layout) {
-       delete _vbox_main_test_layout;
+       	delete _vbox_main_test_layout;
         _vbox_main_test_layout = NULL;
     }
 
     if (NULL != _hbox_main_test_layout) {
-       delete _hbox_main_test_layout;
+       	delete _hbox_main_test_layout;
         _hbox_main_test_layout = NULL;
     }
 
     if (NULL != _lineedit_test_count) {
-       delete _lineedit_test_count;
+       	delete _lineedit_test_count;
         _lineedit_test_count = NULL;
     }
 
     if (NULL != _checkbox_auto_upload_log) {
-       delete _checkbox_auto_upload_log;
+       	delete _checkbox_auto_upload_log;
         _checkbox_auto_upload_log = NULL;
     }
 
     if (NULL != _lab_test_count) {
-       delete _lab_test_count;
+       	delete _lab_test_count;
         _lab_test_count = NULL;
     }
 
     if (NULL != _hbox_test_count_layout) {
-       delete _hbox_test_count_layout;
+       	delete _hbox_test_count_layout;
         _hbox_test_count_layout = NULL;
     }
 
     if (NULL != _hbox_checkbox_auto_upload_log) {
-       delete _hbox_checkbox_auto_upload_log;
+       	delete _hbox_checkbox_auto_upload_log;
         _hbox_checkbox_auto_upload_log = NULL;
     }
 
     if (NULL != _vbox_test_count_auto_upload_layout) {
-       delete _vbox_test_count_auto_upload_layout;
+       	delete _vbox_test_count_auto_upload_layout;
         _vbox_test_count_auto_upload_layout = NULL;
     }
 
     if (NULL != _hbox_bottom_left_layout) {
-       delete _hbox_bottom_left_layout;
+       	delete _hbox_bottom_left_layout;
         _hbox_bottom_left_layout = NULL;
     }
 
     if (NULL != _editInfo) {
-       delete _editInfo;
+       	delete _editInfo;
         _editInfo = NULL;
     }
 
     if (NULL != _vbox_screenlog_layout) {
-       delete _vbox_screenlog_layout;
+       	delete _vbox_screenlog_layout;
         _vbox_screenlog_layout = NULL;
     }
 
     if (NULL != _vbox_function_layout) {
-       delete _vbox_function_layout;
+       	delete _vbox_function_layout;
         _vbox_function_layout = NULL;
     }
 
     if (NULL != _grid_main_test_window_layout) {
-       delete _grid_main_test_window_layout;
+       	delete _grid_main_test_window_layout;
         _grid_main_test_window_layout = NULL;
     }
 
     if (NULL != _spilter_line) {
-       delete _spilter_line;
+       	delete _spilter_line;
         _spilter_line = NULL;
     }
 
     if (NULL != _lab_complete_or_single_test) {
-       delete _lab_complete_or_single_test;
+       	delete _lab_complete_or_single_test;
         _lab_complete_or_single_test = NULL;
     }
 
@@ -165,7 +165,7 @@ void MainTestWindow::add_complete_or_single_test_label(QString config)
 
 void MainTestWindow::confirm_test_result_dialog(QString title)
 {
-    MessageBox(MessageForm::Message, title, title + "结果确认", "请确认"+title+"结果是PASS 还是 FAIL", "", 0);
+    MessageBox(MessageForm::Message, title, title + "结果确认", "请确认" + title + "结果是PASS 还是 FAIL", "", 0);
 }
 
 void MainTestWindow::confirm_test_result_warning(QString title)
@@ -286,9 +286,9 @@ void MainTestWindow::update_screen_log(QString textInfo)
         return ;
     }
 
-    QColor  clrR(0,0,0);
+    QColor clrR(0, 0, 0);
     _string_to_htmlFilter(textInfo);
-    _string_to_html(textInfo,clrR);
+    _string_to_html(textInfo, clrR);
     _editInfo->insertHtml(textInfo);
     _editInfo->append("");
 }
@@ -503,8 +503,8 @@ void MainTestWindow::_create_main_test_layout()
                     connect(checkbox, SIGNAL(stateChanged(int)), this, SLOT(on_state_changed(int)));
                     label = new QLabel;
 
-                    _grid_main_test_layout->addWidget(checkbox, j+1, 1);
-                    _grid_main_test_layout->addWidget(label, j+1, 2);
+                    _grid_main_test_layout->addWidget(checkbox, j + 1, 1);
+                    _grid_main_test_layout->addWidget(label, j+ 1, 2);
                     iteminfo.name = _interface_test_list.at(j).itemname;
                     iteminfo.checkbox = checkbox;
                     iteminfo.label = label;
@@ -544,7 +544,7 @@ void MainTestWindow::_create_screen_log_layout()
     _editInfo = new QTextEdit;
     _editInfo->setReadOnly(true);
     _editInfo->setFont(font);
-    _editInfo->setFrameStyle(QFrame::Panel|QFrame::Sunken);
+    _editInfo->setFrameStyle(QFrame::Panel | QFrame::Sunken);
 
     connect(_editInfo, SIGNAL(textChanged()), this, SLOT(_slot_text_changed()));
     _vbox_screenlog_layout->addWidget(_editInfo);

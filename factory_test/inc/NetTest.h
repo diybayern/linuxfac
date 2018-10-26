@@ -5,10 +5,6 @@
 #include "Control.h"
 #include "FuncBase.h"
 
-#define ETH_NAME_LEN     (16)
-#define ETH_STATUS_UP    (0)
-#define ETH_STATUS_DOWN  (1)
-
 struct NetInfo {
     unsigned char mac[MAC_ADDR_LEN];
     unsigned char eth_name[ETH_NAME_LEN];
@@ -24,16 +20,18 @@ struct NetInfo {
 class NetTest : public FuncBase
 {
 public:
-    NetTest();
-    static bool init();
+    bool init();
     static bool net_test_all();
     static void* test_all(void*);
     void start_test(BaseInfo* baseInfo);
 
 private:
-    static bool net_get_eth_name(char* eth_name, int size);
-    static bool net_get_eth_index(char* eth_name, unsigned int* index);
-    static bool net_get_mac_addr0(unsigned char* eth_name, unsigned char* hw_buf);
+    static NetInfo* g_net_info;
+    static string screen_log_black;
+    static string screen_log_red;
+    bool net_get_eth_name(char* eth_name, int size);
+    bool net_get_eth_index(char* eth_name, unsigned int* index);
+    bool net_get_mac_addr0(unsigned char* eth_name, unsigned char* hw_buf);
     static bool net_sprintf_mac_addr(unsigned char* src, char* dst);
     static void* net_recv_loopback_msg(void *arg);
     static bool net_get_eth_info(NetInfo *info);

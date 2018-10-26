@@ -17,16 +17,10 @@
 #include "../../inc/fac_log.h"
 #include "../../inc/fac_utils.h"
 
-#define TEST_PROTO   (0xaaaa)
-#define TEST_MAGIC   (0xffffeeee)
 
-WifiInfo* g_wifi_info = NULL;
-string wifi_screen_log = "";
-string wifi_screen_red = "";
-
-WifiTest::WifiTest()
-{
-}
+WifiInfo* WifiTest::g_wifi_info = NULL;
+string WifiTest::screen_log_black = "";
+string WifiTest::screen_log_red = "";
 
 bool WifiTest::wifi_get_wlan_name(char* wlan_name, int size)
 {
@@ -50,7 +44,7 @@ bool WifiTest::wifi_get_wlan_name(char* wlan_name, int size)
     }
 
     ifconf.ifc_len = INTERFACE_NUM;
-    ifconf.ifc_buf = (char *)buf;
+    ifconf.ifc_buf = (char*)buf;
 
     ret = ioctl(fd, SIOCGIFCONF, &ifconf);
     if (ret < 0) {
@@ -108,9 +102,13 @@ bool WifiTest::wifi_get_wlan_index(char* wlan_name, unsigned int* index)
 bool WifiTest::wifi_sprintf_mac_addr(unsigned char* src, char* dst)
 {
     int ret = 0;
-    ret = sprintf((char *)dst, "%02x:%02x:%02x:%02x:%02x:%02x", src[0], src[1], src[2],
-            src[3], src[4], src[5]);
+	if (src == NULL || dst == NULL) {
+		LOG_ERROR("sprintf src or dst mac is null\n");
+		return false;
+	}
+	ret = sprintf((char*)dst, "%02x:%02x:%02x:%02x:%02x:%02x", src[0], src[1], src[2], src[3], src[4], src[5]);
     if (ret < 0) {
+		LOG_ERROR("sprintf mac addr failed\n");
         return false;
     }
 
@@ -207,12 +205,10 @@ void* WifiTest::wifi_recv_loopback_msg(void *arg)
                 info->recv_num++;
             } else {
                 // if broadcast package, send back orientation package
-                wifi_send_msg((char *)info->mac, (char *)recv_packet.src_mac, info->wlan_index,
-                        recv_packet.index);
+                wifi_send_msg((char *)info->mac, (char *)recv_packet.src_mac, info->wlan_index, recv_packet.index);
 
                 wifi_sprintf_mac_addr(recv_packet.src_mac, (char *)buf);
-
-                LOG_ERROR("send back to %s index=%d\n", buf, recv_packet.index);
+                LOG_INFO("send back to %s index=%d\n", buf, recv_packet.index);
             }
         }
         
@@ -244,8 +240,7 @@ bool WifiTest::wifi_send_msg(char* src_mac, char* dst_mac, unsigned int index, u
     packet.magic = TEST_MAGIC;
     packet.index = seq;
 
-    ret = sendto(fd, (void*) &packet, sizeof(packet), 0,
-            (struct sockaddr *) &sll, sizeof(sll));
+    ret = sendto(fd, (void*) &packet, sizeof(packet), 0, (struct sockaddr *)&sll, sizeof(sll));
     if (ret < 0) {
         LOG_ERROR("send failed ret=%d errno=%d\n", ret, errno);
         close(fd);
@@ -307,7 +302,7 @@ bool WifiTest::wifi_send_broadcast_msg(WifiInfo* info, int num)
 
     int i = 0;
     bool ret = true;
-    unsigned char dest_mac[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+    unsigned char dest_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
     for (i = 0; i < num; i++) {
         ret &= wifi_send_msg((char *)info->mac, (char *)dest_mac, info->wlan_index, info->seq++);
@@ -324,13 +319,13 @@ bool WifiTest::wifi_test_send_msg() {
     info = g_wifi_info;
     if (info == NULL) {
         LOG_ERROR("wifi info is null");
-        wifi_screen_log += "wifi info is null\n\n";
-        wifi_screen_red += "\t错误：WiFi初始化错误，获取WiFi信息失败\n";
+        screen_log_black += "wifi info is null\n\n";
+        screen_log_red += "\t错误：WiFi初始化错误，获取WiFi信息失败\n";
         return false;    
     }
     
     LOG_INFO("wifi send package test start: \n");
-    wifi_screen_log += "wifi send package test start: \n\n";
+    screen_log_black += "wifi send package test start: \n\n";
 
     info->recv_num = 0;
     wifi_send_broadcast_msg(info, TOTAL_SEND_NUM);
@@ -338,25 +333,25 @@ bool WifiTest::wifi_test_send_msg() {
     //waiting for receiving msg
     usleep(20000 * TOTAL_SEND_NUM);
 
-    LOG_INFO("send package num: \t\t%d\n",  TOTAL_SEND_NUM);
-    LOG_INFO("recv package num: \t\t%d\n",  info->recv_num);
-    wifi_screen_log += "send package num:\t\t100\nrecv package num:\t\t" + to_string(info->recv_num) + "\n";
+    LOG_INFO("send package num: \t\t%d\n", TOTAL_SEND_NUM);
+    LOG_INFO("recv package num: \t\t%d\n", info->recv_num);
+    screen_log_black += "send package num:\t\t100\nrecv package num:\t\t" + to_string(info->recv_num) + "\n";
     if (info->recv_num < RECEIVE_NUM) {
         ret = false;
         LOG_ERROR("WIFI test failed!\n");
-        wifi_screen_red += "\t错误：WiFi收包个数不达标\n";
+        screen_log_red += "\t错误：WiFi收包个数不达标\n";
     }
     if (system("ifconfig wlan0 down") < 0) {
         LOG_ERROR("wifi down error!\n");
-        wifi_screen_log += "wifi down error!\n";
-        wifi_screen_red += "\t错误：WiFi关闭失败\n";
+        screen_log_black += "wifi down error!\n";
+        screen_log_red += "\t错误：WiFi关闭失败\n";
         ret = false;
     }
     
     return ret;
 }
 
-bool WifiTest::check_if_wifi_connect_pass(void)
+bool WifiTest::check_if_wifi_connect_pass()
 {
     char wifi_info[CMD_BUF_SIZE];
     char wifi_status[CMD_BUF_SIZE];
@@ -365,67 +360,67 @@ bool WifiTest::check_if_wifi_connect_pass(void)
     
     if (!get_file_size("/tmp/wifi_test_info.tmp", &size)) {
         LOG_ERROR("/tmp/wifi_test_info.tmp is null");
-        wifi_screen_log += "\tERROR:get wifi info error\n";
-        wifi_screen_red += "\t错误：WiFi信息获取失败\n";
+        screen_log_black += "\tERROR:get wifi info error\n";
+        screen_log_red += "\t错误：WiFi信息获取失败\n";
         return false;
     }
     memset(wifi_info, 0, CMD_BUF_SIZE);
-    if (!read_local_data("/tmp/wifi_test_info.tmp",wifi_info,size)) {
+    if (!read_local_data("/tmp/wifi_test_info.tmp", wifi_info, size)) {
         LOG_ERROR("read /tmp/wifi_test_info.tmp error");
-        wifi_screen_log += "\tERROR:get wifi info error\n";
-        wifi_screen_red += "\t错误：WiFi信息获取失败\n";
+        screen_log_black += "\tERROR:get wifi info error\n";
+        screen_log_red += "\t错误：WiFi信息获取失败\n";
         return false;
     }
     LOG_INFO("WIFI INFO:%s\n",wifi_info);
-    wifi_screen_log += "WIFI INFO:" + (string)wifi_info + "\n";
+    screen_log_black += "WIFI INFO:" + (string)wifi_info + "\n";
 
 
     if (!get_file_size("/tmp/wifi.status", &size)) {
         LOG_ERROR("/tmp/wifi.status is null\n");
-        wifi_screen_log += "\tERROR:get wifi status error\n";
-        wifi_screen_red += "\t错误：WiFi状态获取失败\n";
+        screen_log_black += "\tERROR:get wifi status error\n";
+        screen_log_red += "\t错误：WiFi状态获取失败\n";
         return false;
     }
     memset(wifi_status, 0, CMD_BUF_SIZE);
     if (!read_local_data("/tmp/wifi.status", wifi_status, size)) {
         LOG_ERROR("read /tmp/wifi.status error");
-        wifi_screen_log += "\tERROR:get wifi status error\n";
-        wifi_screen_red += "\t错误：WiFi状态获取失败\n";
+        screen_log_black += "\tERROR:get wifi status error\n";
+        screen_log_red += "\t错误：WiFi状态获取失败\n";
         return false;
     }
 
 
     if (!strcmp(delNL(wifi_status), "SUCCESS")) {
         LOG_INFO("WIFI is ready\n");
-        wifi_screen_log += "WIFI is ready\n";
+        screen_log_black += "WIFI is ready\n";
 
         if(!get_file_size("/tmp/ssid.mac", &size)) {
             LOG_ERROR("/tmp/ssid.mac is null\n");
-            wifi_screen_log += "\tERROR:get ssid mac error\n";
-            wifi_screen_red += "\t错误：所连ap路由mac地址获取失败\n";
+            screen_log_black += "\tERROR:get ssid mac error\n";
+            screen_log_red += "\t错误：所连ap路由mac地址获取失败\n";
             return false;
         }
         memset(wifi_ssid_mac, 0, CMD_BUF_SIZE);
-        if(!read_local_data("/tmp/ssid.mac",wifi_ssid_mac,size)) {
+        if(!read_local_data("/tmp/ssid.mac", wifi_ssid_mac, size)) {
             LOG_ERROR("/tmp/ssid.mac read error\n");
-            wifi_screen_log += "\tERROR:get ssid mac error\n";
-            wifi_screen_red += "\t错误：所连ap路由mac地址获取失败\n";
+            screen_log_black += "\tERROR:get ssid mac error\n";
+            screen_log_red += "\t错误：所连ap路由mac地址获取失败\n";
             return false;
         }
-        LOG_INFO("WIFI SSID mac:\t%s\n",wifi_ssid_mac);
-        wifi_screen_log += "WIFI ssid mac:\t\t" + (string)wifi_ssid_mac + "\n";
+        LOG_INFO("WIFI SSID mac:\t%s\n", wifi_ssid_mac);
+        screen_log_black += "WIFI ssid mac:\t\t" + (string)wifi_ssid_mac + "\n";
         
         return true;
     } else {
         if (!strcmp(delNL(wifi_status), "IP not available!")) {
             LOG_ERROR("IP not available\n");
-            wifi_screen_log += "IP not available\n";
-            wifi_screen_red += "\t错误：IP不可用\n";
+            screen_log_black += "IP not available\n";
+            screen_log_red += "\t错误：IP不可用\n";
             return true;
         } else {
             LOG_ERROR("WIFI fail reason: \t%s\n", wifi_status);
-            wifi_screen_log += "WIFI fail reason: \t" + (string)wifi_status + "\n";
-            wifi_screen_red += "\t错误：" + (string)wifi_status + "\n";
+            screen_log_black += "WIFI fail reason: \t" + (string)wifi_status + "\n";
+            screen_log_red += "\t错误：" + (string)wifi_status + "\n";
             return false;
         }
     }
@@ -442,15 +437,17 @@ void* WifiTest::test_all(void*)
         }
         sleep(1);
     }
-    wifi_screen_log += "==================== " + WIFI_TEST_NAME + " ====================\n";
+    screen_log_black = "";
+	screen_log_red = "";
+    screen_log_black += "==================== " + WIFI_TEST_NAME + " ====================\n";
     bool is_pass = false;
     FacArg* _facArg = control->get_fac_arg();
     string cmd = "bash " + WIFI_TEST_SCRIPT + " " + to_string(check_file_exit(WHOLE_TEST_FILE)) + " " + _facArg->wifi_ssid
-                                            + " " + _facArg->wifi_passwd + " " + _facArg->wifi_enp;
+        		+ " " + _facArg->wifi_passwd + " " + _facArg->wifi_enp;
     if (system(cmd.c_str()) < 0){
         LOG_ERROR("ERROR:wifi_test.sh run error!\n");
-        wifi_screen_log += "wifi_test.sh run error!\n";
-        wifi_screen_red += "\t错误：wifi脚本执行失败!\n";
+        screen_log_black += "wifi_test.sh run error!\n";
+        screen_log_red += "\t错误：wifi脚本执行失败!\n";
     }else {
         if (check_if_wifi_connect_pass()) {
             is_pass = wifi_test_send_msg();        
@@ -459,27 +456,25 @@ void* WifiTest::test_all(void*)
 
     if (is_pass) {
         LOG_INFO("wifi test result:\tPASS\n");
-        wifi_screen_log += "\n" + WIFI_TEST_NAME + "结果:\t\t\t成功\n\n";
+        screen_log_black += "\n" + WIFI_TEST_NAME + "结果:\t\t\t成功\n\n";
         control->set_interface_test_result(WIFI_TEST_NAME, true); 
     } else {
         LOG_INFO("wifi test result:\tFAIL\n");
-        wifi_screen_red = WIFI_TEST_NAME + "结果:\t\t\t失败\n\n" + wifi_screen_red;
+        screen_log_red = WIFI_TEST_NAME + "结果:\t\t\t失败\n\n" + screen_log_red;
         control->set_interface_test_result(WIFI_TEST_NAME, false); 
     }
-    control->update_screen_log(wifi_screen_log);
-    wifi_screen_log = "";
-    if (wifi_screen_red != "") {
-        control->update_color_screen_log(wifi_screen_red, "red");
-        wifi_screen_red = "";
+    control->update_screen_log(screen_log_black);
+    if (screen_log_red != "") {
+        control->update_color_screen_log(screen_log_red, "red");
     }
-control->set_interface_test_status(WIFI_TEST_NAME, true);
+	control->set_interface_test_status(WIFI_TEST_NAME, true);
     return NULL;
 }
 
 void WifiTest::start_test(BaseInfo* baseInfo)
 {
     pthread_t tid;
-    pthread_create(&tid,NULL,test_all,baseInfo);
+    pthread_create(&tid, NULL, test_all, baseInfo);
 }
 
 

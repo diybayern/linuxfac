@@ -40,7 +40,7 @@ int VideoTestThread::ffmpeg_read_stream()
     }
 
     //(1) open video file
-    if(avformat_open_input(&pFormatCtx, filepath, NULL, NULL) != 0) {
+    if (avformat_open_input(&pFormatCtx, filepath, NULL, NULL) != 0) {
         LOG_ERROR("Couldn't open input stream.");
         return _FAIL;
     }
@@ -80,7 +80,7 @@ int VideoTestThread::ffmpeg_read_stream()
     pCodecCtx->codec_id = pCodec->id;
 
     //(4) open the decoder
-    if(avcodec_open2(pCodecCtx, pCodec, NULL) < 0) {
+    if (avcodec_open2(pCodecCtx, pCodec, NULL) < 0) {
         LOG_ERROR("Could not open codec.");
         return _FAIL;
     }
@@ -106,7 +106,7 @@ int VideoTestThread::ffmpeg_video_change_format(AVFrame* frame, int dst_w, int d
 
     numBytes = avpicture_get_size(AV_PIX_FMT_RGBA, dst_w, dst_h);
 
-    buffer = (unsigned char *) av_malloc(numBytes * sizeof(unsigned char));
+    buffer = (unsigned char *)av_malloc(numBytes * sizeof(unsigned char));
     if (NULL == buffer) {
         mutext.unlock();
         LOG_ERROR("av_malloc error.");
@@ -130,7 +130,7 @@ int VideoTestThread::ffmpeg_video_change_format(AVFrame* frame, int dst_w, int d
                         pFrameRGB->linesize);
 
     QImage tmpImg((uchar *)buffer, dst_w, dst_h, QImage::Format_RGBA8888);
-    QPixmap pixmap2(QPixmap::fromImage (tmpImg));
+    QPixmap pixmap2(QPixmap::fromImage(tmpImg));
     /*
     if (NULL != StressTestWindow::g_get_stress_test_window()) {
         StressTestWindow::g_get_stress_test_window()->_lb_video->setPixmap(pixmap2);

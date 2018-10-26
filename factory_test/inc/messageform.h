@@ -29,14 +29,14 @@ public:
         Success,
         NOICON
     };
-    MessageForm(QWidget *parent = 0,const int mode=0, const QString button=0, const int timeout = 0);
+    MessageForm(QWidget *parent = 0,const int mode = 0, const QString button = 0, const int timeout = 0);
     ~MessageForm();
     int startExec();
 
 public slots:
-    void setTitle(const QString &title)   {lb_title->setText(title);lb_title->update();}
-    void setText(const QString &str)      {lb_text->setText(str);lb_text->update();}
-    void setLabel(const QString &str)     {lb_snmac->setText(str);lb_snmac->update();}
+    void setTitle(const QString &title)   {lb_title->setText(title); lb_title->update();}
+    void setText(const QString &str)      {lb_text->setText(str); lb_text->update();}
+    void setLabel(const QString &str)     {lb_snmac->setText(str); lb_snmac->update();}
     void setTestItem(const QString &item) {_m_test_item = item;}
     void setSNMACState(const QString &state) {_m_snmac_state = state;}
 
@@ -89,11 +89,11 @@ private:
    int             timeout;
    QGroupBox       *groupBox;
    QLineEdit       *le_input;
-   int              _main_w;
-   int              _main_h;
-   int              _dialog_w;
-   int              _dialog_h;
-   int              _lb_text_w;
+   int             _main_w;
+   int             _main_h;
+   int             _dialog_w;
+   int             _dialog_h;
+   int             _lb_text_w;
 };
 
 extern QString g_sn_mac_message;

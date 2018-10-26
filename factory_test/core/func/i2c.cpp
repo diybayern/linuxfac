@@ -81,8 +81,9 @@ static int parse_i2c_edid(char *block, int len)
         LOG_ERROR("Failed to create %s to write!\n", EDID_INFO_FILE);
         return FAIL;
     }
-    for (i = 0; i < len; i++)
+    for (i = 0; i < len; i++) {
         fprintf(fp, "%c", block[i]);
+    }
     fflush(fp);
     fclose(fp);
 
@@ -118,11 +119,12 @@ static char *edid_i2c_dev_name(int i2cbus)
 
 int edid_read_i2c_test(int edid_num)
 {
-    i2c_screen_log = "";
-    i2c_screen_red = "";
     int i, j, ret, len, numbusses=0, i2cfile, i2cbus=0;
     int goodbus[128];
     unsigned char block[256];
+	
+    i2c_screen_log = "";
+    i2c_screen_red = "";
 
     for (i2cfile = open_i2c_dev(i2cbus); i2cfile >= 0 || i2cfile < -3;) {
         //read a byte. This is the official way to scan
@@ -155,7 +157,7 @@ endloop:
 
     i2c_screen_log += to_string(numbusses) + " potential buses found: [";
     LOG_INFO("%i potential buses found: [", numbusses);
-    for (i=0; i<numbusses; i++) {
+    for (i = 0; i < numbusses; i++) {
         i2c_screen_log += " " + to_string(goodbus[i]) + " ";
         LOG_INFO(" %i ", goodbus[i]);
     }
@@ -163,33 +165,32 @@ endloop:
     LOG_INFO("]\n\n");
 
     ret = 0;
-    for (i=0; i < numbusses; i++) {
+    for (i = 0; i < numbusses; i++) {
         i2cbus = goodbus[i];
         i2cfile = open_i2c_dev(i2cbus);
         if (i2cfile >= 0) {
             //no matter how many times, >=0 still looks really angry.
-            for (j=0; j<256; j++)
+            for (j = 0; j < 256; j++)
                 block[j] = i2c_smbus_read_byte_data(i2cfile, j);
         }
         close(i2cfile);
-        if (block[0]==0x00 && block[7]==0x00
-            && block[1]==0xff && block[2]==0xff
-            && block[3]==0xff && block[4]==0xff
-            && block[5]==0xff && block[6]==0xff) {
+        if (block[0] == 0x00 && block[7] == 0x00
+            && block[1] == 0xff && block[2] == 0xff
+            && block[3] == 0xff && block[4] == 0xff
+            && block[5] == 0xff && block[6] == 0xff) {
             if (block[128] == 0xff)
                 len = 128;
             else
                 len = 256;
-            i2c_screen_log += to_string(len) + "-byte EDID successfully retrieved from i2c bus [" +
-                                to_string(i2cbus) + "]:\n";
+            i2c_screen_log += to_string(len) + "-byte EDID successfully retrieved from i2c bus ["
+                            + to_string(i2cbus) + "]:\n";
             LOG_INFO("%d-byte EDID successfully retrieved from i2c bus [%d]:\n", len, i2cbus);
             i2c_screen_log += "\tEDID I2C device name: " + (string)edid_i2c_dev_name(i2cbus) + "\n";
             LOG_INFO("\tEDID I2C device name: %s\n", edid_i2c_dev_name(i2cbus));
-            if (parse_i2c_edid((char *)block, len) == FAIL) {
+            if (parse_i2c_edid((char*)block, len) == FAIL) {
                 ret = FAIL;
-                i2c_screen_log += "ERROR: Failed to parse the EDID information from i2c bus " +
-                                to_string(i2cbus) + "\n";
-                i2c_screen_red +="\t错误：无法从i2c总线" + to_string(i2cbus) + "获取EDID信息\n";
+                i2c_screen_log += "ERROR: Failed to parse the EDID information from i2c bus " + to_string(i2cbus) + "\n";
+                i2c_screen_red += "\t错误：无法从i2c总线" + to_string(i2cbus) + "获取EDID信息\n";
                 LOG_ERROR("ERROR: Failed to parse the EDID information from i2c bus %i!\n", i2cbus);
             }
         } else {
@@ -202,12 +203,12 @@ endloop:
 
     if (numbusses < edid_num) {
         /* Detected bus less than the real num, FAIL */
-        i2c_screen_log += "ERROR: This product contains " + to_string(edid_num) + " DDC interfaces, but only " + 
-                            to_string(numbusses) +" detected.\n";
-        i2c_screen_red += "\t错误：本产品包含" + to_string(edid_num) + "个DDC接口，但只检测到" + 
-                            to_string(numbusses) +"台连接\n";
+        i2c_screen_log += "ERROR: This product contains " + to_string(edid_num) + " DDC interfaces, but only "
+                        + to_string(numbusses) +" detected.\n";
+        i2c_screen_red += "\t错误：本产品包含" + to_string(edid_num) + "个DDC接口，但只检测到"
+                        + to_string(numbusses) +"台连接\n";
 
-        LOG_ERROR("ERROR: This product contains %d DDC interfaces, but only %d detected.\n",edid_num, numbusses);
+        LOG_ERROR("ERROR: This product contains %d DDC interfaces, but only %d detected.\n", edid_num, numbusses);
         ret = FAIL;
     }
     return ret;

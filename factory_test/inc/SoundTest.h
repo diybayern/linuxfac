@@ -35,7 +35,6 @@ class Control;
 class SoundTest : public FuncBase
 {
 public:
-    SoundTest();
     static bool start_playback();
     static bool stop_playback();
 
@@ -49,6 +48,9 @@ public:
     static bool sound_record_restore(BaseInfo* baseInfo);
 
 private:
+    static SndInfo *g_record_info;
+    static SndInfo *g_playback_info;
+    static SndStatus gStatus;
     static bool open_sound_card(SndInfo *info);
     static void close_sound_card(SndInfo *info);
     static void* record_loop(void *arg);

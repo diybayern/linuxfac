@@ -6,10 +6,6 @@
 
 netbuf* ftp_handle;
 
-#define DEFAULT_FTP_IP       "172.21.5.48"
-#define DEFAULT_FTP_USER     "test"
-#define DEFAULT_FTP_PASSWD   "test"
-
 /*
 **execute command and return output result
 */
@@ -19,12 +15,12 @@ string execute_command(string cmd)
     char result[1024];
     int rc = 0;
     FILE *fp;
-    fp = popen(cmd.c_str(),"r");
+    fp = popen(cmd.c_str(), "r");
     if (fp == NULL) {
         LOG_ERROR("popen execute fail.");
         return "error";
     }
-    while (fgets(result,sizeof(result),fp) != NULL) {
+    while (fgets(result,sizeof(result), fp) != NULL) {
         string tempResult = result;
         cmd_result = cmd_result + tempResult;
     }
@@ -33,7 +29,7 @@ string execute_command(string cmd)
         LOG_ERROR("close fp fail.");
         return "error";
     } else {
-        LOG_INFO("command:%s,subprocess end status:%d,command end status:%d",cmd.c_str(),rc,WEXITSTATUS(rc));
+        LOG_INFO("command:%s, subprocess end status:%d, command end status:%d", cmd.c_str(), rc, WEXITSTATUS(rc));
 
         if (WEXITSTATUS(rc) != 0) {
             return "error";
@@ -49,7 +45,7 @@ string execute_command(string cmd)
         } else {
             return cmd_result;
         }
-   }
+       }
 }
 
 string execute_command_err_log(string cmd)
@@ -58,12 +54,12 @@ string execute_command_err_log(string cmd)
     char result[1024];
     int rc = 0;
     FILE *fp;
-    fp = popen(cmd.c_str(),"r");
+    fp = popen(cmd.c_str(), "r");
     if (fp == NULL) {
         LOG_ERROR("popen execute fail.");
         return "error";
     }
-    while (fgets(result,sizeof(result),fp) != NULL) {
+    while (fgets(result,sizeof(result), fp) != NULL) {
         string tempResult = result;
         cmd_result = cmd_result + tempResult;
     }
@@ -73,7 +69,7 @@ string execute_command_err_log(string cmd)
         return "error";
     } else {
         if (WEXITSTATUS(rc) != 0) {
-            LOG_ERROR("command:%s,subprocess end status:%d,command end status:%d",cmd.c_str(),rc,WEXITSTATUS(rc));
+            LOG_ERROR("command:%s, subprocess end status:%d, command end status:%d", cmd.c_str(), rc, WEXITSTATUS(rc));
             return "error";
         }
 
@@ -89,7 +85,7 @@ string execute_command_err_log(string cmd)
             LOG_ERROR("cmd result is null\n");
             return cmd_result;
         }
-   }
+       }
 }
 
 void get_current_time(char tmp_buf[])
@@ -101,7 +97,7 @@ void get_current_time(char tmp_buf[])
     localtime_r(&tv.tv_sec, &nowtime);
     strftime(tmp_buf, TIME_MAX_LEN, "%Y-%m-%d %H:%M:%S", &nowtime);
     tmp_buf += strlen(tmp_buf);
-    snprintf(tmp_buf, TIME_MAX_LEN, ".%03ld", tv.tv_usec/1000);
+    snprintf(tmp_buf, TIME_MAX_LEN, ".%03ld", tv.tv_usec / 1000);
 }
 
 void get_current_open_time(TimeInfo* date)
@@ -176,7 +172,7 @@ bool write_local_data(const char* filename, const char* mod, char* buf, int size
     FILE * outfile = NULL;
 
     if ((outfile = fopen(filename, mod)) == NULL) {
-        LOG_ERROR("Can't open %s\n",filename);
+        LOG_ERROR("Can't open %s\n", filename);
         return false;
     }
 
@@ -225,11 +221,12 @@ bool remove_local_file(const char* filename)
         LOG_ERROR("system sync error\n");
     }
     
-    if(ret == 0)
+    if(ret == 0) {
         return true;
+    }
+    
     return false;
 }
-    
 
 void get_hwinfo(HwInfo* hwInfo)
 {
@@ -237,15 +234,17 @@ void get_hwinfo(HwInfo* hwInfo)
     
     string mac = execute_command("ifconfig | grep HWaddr | awk '/eth0/ {print $5}'");
     char* new_mac = (char*)malloc(128);
-    new_mac = lower_to_capital(mac.c_str(),new_mac);
+    new_mac = lower_to_capital(mac.c_str(), new_mac);
     hwInfo->mac = new_mac;
     
-    hwInfo->product_name = execute_command("dmidecode -s system-product-name");
-    hwInfo->product_id = execute_command("dmidecode -s baseboard-product-name");
+    hwInfo->product_name       = execute_command("dmidecode -s system-product-name");
+    hwInfo->product_id         = execute_command("dmidecode -s baseboard-product-name");
     hwInfo->product_hw_version = execute_command("dmidecode -s system-version");
-    hwInfo->cpu_type = execute_command("dmidecode -s processor-version");
-    hwInfo->cpu_fre = execute_command("cat /proc/cpuinfo | grep 'model name' |uniq | awk '/model name/ {print $NF}'");
-    hwInfo->mem_cap = execute_command("free -m | awk '/Mem/ {print $2}'");
+    hwInfo->cpu_type           = execute_command("dmidecode -s processor-version");
+    hwInfo->cpu_fre            = execute_command("cat /proc/cpuinfo | grep 'model name' |uniq | awk '/model name/ {print $NF}'");
+    hwInfo->mem_cap            = execute_command("free -m | awk '/Mem/ {print $2}'");
+
+    free(new_mac);
 }
 
 int get_int_value(const string str)
@@ -257,7 +256,8 @@ int get_int_value(const string str)
     }
 }
 
-void get_baseinfo(BaseInfo* baseInfo, const string info) {
+void get_baseinfo(BaseInfo* baseInfo, const string info)
+{
     map<string, string> tmap;
     string str;
     char buf[128] = {0};
@@ -265,13 +265,13 @@ void get_baseinfo(BaseInfo* baseInfo, const string info) {
     int idx;
     for (unsigned int i = 0; i < info.size(); i++) {
         if (info[i] != ';') {
-            buf[cnt++]  = info[i];
+            buf[cnt++] = info[i];
         } else {
             buf[cnt] = '\0';
             str = string(buf);
 
             idx = str.find_first_of(':');
-            tmap[str.substr(0, idx)] = str.substr(idx+1, str.length()-idx-1); 
+            tmap[str.substr(0, idx)] = str.substr(idx + 1, str.length() - idx - 1); 
             cnt = 0;
         }
     }
@@ -280,13 +280,13 @@ void get_baseinfo(BaseInfo* baseInfo, const string info) {
         buf[cnt] = '\0';
         str = string(buf); 
         idx = str.find_first_of(':');
-        tmap[str.substr(0, idx)] = str.substr(idx+1, str.length()-idx-1);      
+        tmap[str.substr(0, idx)] = str.substr(idx + 1, str.length() - idx - 1);      
     }
 
     string usb   = tmap["USB"];
     idx = usb.find_first_of('/');
     string usb_3 = usb.substr(0, idx);
-    string usb_t = usb.substr(idx+1, usb.length()-idx-1); 
+    string usb_t = usb.substr(idx + 1, usb.length() - idx - 1); 
 
     baseInfo->platform      = tmap["PLAT"];
     baseInfo->mem_cap       = tmap["MEM"];
@@ -305,7 +305,8 @@ void get_baseinfo(BaseInfo* baseInfo, const string info) {
     baseInfo->lcd_info      = tmap["LCD"];
 }
 
-bool is_digit(string str) {
+bool is_digit(string str)
+{
     int len = 0;
 
     len = str.size();
@@ -313,7 +314,7 @@ bool is_digit(string str) {
         return false;
     }
 
-    for (int i=0; i < len; i++) {
+    for (int i = 0; i < len; i++) {
         if (str[i] < '0' || str[i] > '9') {
             return false;
         }
@@ -366,23 +367,23 @@ int get_fac_config_from_conf(const string conf_path, FacArg *fac)
     memset(job_number, 0, 128);
     if (read_conf_line(conf_path, "job_number", job_number) == false) {
         LOG_ERROR("read job_number faild\n");
-		if (ret == NO_FTP_PATH) {
-			ret = NO_PATH_AND_NUM;
-		} else {
-			ret = NO_JOB_NUMBER;
-		}
+        if (ret == NO_FTP_PATH) {
+            ret = NO_PATH_AND_NUM;
+        } else {
+            ret = NO_JOB_NUMBER;
+        }
     } else if (*job_number == 0){
         LOG_ERROR("job_number is empty\n");
-		if (ret == NO_FTP_PATH) {
-			ret = NO_PATH_AND_NUM;
-		} else {
-			ret = NO_JOB_NUMBER;
-		}
+        if (ret == NO_FTP_PATH) {
+            ret = NO_PATH_AND_NUM;
+        } else {
+            ret = NO_JOB_NUMBER;
+        }
     }
 
     char* IP = (char*)malloc(128);
     memset(IP, 0, 128);
-    if (read_conf_line(conf_path, "ftp_ip",IP) == false) {
+    if (read_conf_line(conf_path, "ftp_ip", IP) == false) {
         memcpy(IP, DEFAULT_FTP_IP, strlen(DEFAULT_FTP_IP));
         LOG_INFO("use default ftp_ip\n");
     }
@@ -401,10 +402,10 @@ int get_fac_config_from_conf(const string conf_path, FacArg *fac)
         LOG_INFO("use default ftp_passwd\n");
     }
 
-    fac->ftp_ip = IP;
-    fac->ftp_user = ftp_user;
-    fac->ftp_passwd = ftp_passwd;
-    fac->ftp_dest_path = dest_path;
+    fac->ftp_ip         = IP;
+    fac->ftp_user       = ftp_user;
+    fac->ftp_passwd     = ftp_passwd;
+    fac->ftp_dest_path  = dest_path;
     fac->ftp_job_number = job_number;
 
 
@@ -426,9 +427,9 @@ int get_fac_config_from_conf(const string conf_path, FacArg *fac)
         LOG_INFO("no wifi_enp config\n");
     }
 
-    fac->wifi_ssid = ssid;
+    fac->wifi_ssid   = ssid;
     fac->wifi_passwd = wifi_passwd;;
-    fac->wifi_enp = wifi_enp;
+    fac->wifi_enp    = wifi_enp;
 
     return ret;
 }
@@ -461,12 +462,13 @@ char* response_to_chinese(const char* response)
     }
 }
 
-bool combine_fac_log_to_mes(string sendLogPath, string path) {
+bool combine_fac_log_to_mes(string sendLogPath, string path)
+{
     FILE* fp_mes;
     FILE* fp_fac;
     int c;
-    fp_mes = fopen(sendLogPath.c_str(),"ab");
-    fp_fac = fopen(path.c_str(),"rb");
+    fp_mes = fopen(sendLogPath.c_str(), "ab");
+    fp_fac = fopen(path.c_str(), "rb");
     if (fp_mes == NULL || fp_fac == NULL) {
         if (fp_mes) {
             fclose(fp_mes);
@@ -477,7 +479,7 @@ bool combine_fac_log_to_mes(string sendLogPath, string path) {
         return false;
     }
     while ((c = fgetc(fp_fac)) != EOF) {
-        fputc(c,fp_mes);
+        fputc(c, fp_mes);
     }
     fclose(fp_mes);
     fclose(fp_fac);
@@ -500,18 +502,18 @@ char* ftp_send_file(const char* local_file_path, FacArg* fac)
     }
     if (FtpLogin(fac->ftp_user, fac->ftp_passwd, ftp_handle) != 1) {
         ftp_rsp = FtpLastResponse(ftp_handle);
-        ret_rsp = (char*)memcpy(ret_rsp, ftp_rsp, strlen(ftp_rsp)+1);
+        ret_rsp = (char*)memcpy(ret_rsp, ftp_rsp, strlen(ftp_rsp) + 1);
         FtpQuit(ftp_handle);
         return ret_rsp;
     }
     if (FtpPut(local_file_path, fac->ftp_dest_path, FTPLIB_ASCII, ftp_handle) != 1) {
         ftp_rsp = FtpLastResponse(ftp_handle);
-        ret_rsp = (char*)memcpy(ret_rsp, ftp_rsp, strlen(ftp_rsp)+1);
+        ret_rsp = (char*)memcpy(ret_rsp, ftp_rsp, strlen(ftp_rsp) + 1);
         FtpQuit(ftp_handle);
         return ret_rsp;
     }
     ftp_rsp = FtpLastResponse(ftp_handle);    
-    ret_rsp = (char*)memcpy(ret_rsp, ftp_rsp, strlen(ftp_rsp)+1);
+    ret_rsp = (char*)memcpy(ret_rsp, ftp_rsp, strlen(ftp_rsp) + 1);
     FtpQuit(ftp_handle);
     
     return ret_rsp;
@@ -521,17 +523,17 @@ char* delNL(char *line)
 {
     int len = strlen(line);
 
-    if (line[len-1] == '\n')
-        line[len-1] = '\0';
+    if (line[len - 1] == '\n')
+        line[len - 1] = '\0';
     return line;
 }
 
 char* lower_to_capital(const char* lower_str, char* capital_str)
 {
-    int i=0;
+    int i = 0;
     while (lower_str[i] != '\0') {
-        if (lower_str[i]>='a' && lower_str[i]<='z') {
-            capital_str[i] = lower_str[i]-32;
+        if (lower_str[i] >= 'a' && lower_str[i] <= 'z') {
+            capital_str[i] = lower_str[i] - 32;
         } else {
             capital_str[i] = lower_str[i];
         }
@@ -643,15 +645,15 @@ string get_cpu_info(CpuStatus* st_cpu)
     }
     fclose(fp);
     
-    cpu_info.cpu_total = cpu_info.cpu_user + cpu_info.cpu_nice + cpu_info.cpu_sys
+    cpu_info.cpu_total  = cpu_info.cpu_user + cpu_info.cpu_nice + cpu_info.cpu_sys
             + cpu_info.cpu_idle + cpu_info.cpu_iowait + cpu_info.cpu_hardirq 
             + cpu_info.cpu_softirq + cpu_info.cpu_steal;
 
-    cpu_diff.cpu_total = cpu_info.cpu_total - st_cpu->cpu_total;
+    cpu_diff.cpu_total  = cpu_info.cpu_total - st_cpu->cpu_total;
 
-    cpu_diff.cpu_user = cpu_info.cpu_user - st_cpu->cpu_user;
-    cpu_diff.cpu_sys = cpu_info.cpu_sys - st_cpu->cpu_sys;
-    cpu_diff.cpu_idle = cpu_info.cpu_idle - st_cpu->cpu_idle;
+    cpu_diff.cpu_user   = cpu_info.cpu_user - st_cpu->cpu_user;
+    cpu_diff.cpu_sys    = cpu_info.cpu_sys - st_cpu->cpu_sys;
+    cpu_diff.cpu_idle   = cpu_info.cpu_idle - st_cpu->cpu_idle;
     cpu_diff.cpu_iowait = cpu_info.cpu_iowait - st_cpu->cpu_iowait;
 
     str = change_float_to_string(100.0 * cpu_diff.cpu_user / cpu_diff.cpu_total);

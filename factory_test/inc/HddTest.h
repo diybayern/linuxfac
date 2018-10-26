@@ -8,11 +8,12 @@
 class HddTest : public FuncBase
 {
 public:
-    HddTest();
     static bool hdd_test_all(string hdd_cap);
     static bool check_if_hdd_pass();
     static void *test_all(void *arg);
     void start_test(BaseInfo* baseInfo);
+    static string screen_log_black;
+    static string screen_log_red;
 };
 
 #endif

@@ -1,13 +1,8 @@
 #include "../../inc/FuncTest.h"
 #include "../../inc/fac_log.h"
 
-string usb_screen_log = "";
-string usb_screen_red = "";
-
-UsbTest::UsbTest()
-{
-    
-}
+string UsbTest::screen_log_black = "";
+string UsbTest::screen_log_red = "";
 
 bool UsbTest::usb_num_test(string total_num, string num_3)
 {
@@ -15,19 +10,19 @@ bool UsbTest::usb_num_test(string total_num, string num_3)
     string real_num_3 = execute_command("lsusb -t | grep \"Mass Storage\" | grep \"5000M\" | wc -l");
     if (real_total_num == total_num) {
         if (real_num_3 == num_3) {
-            usb_screen_log += "usb3.0 num is " + real_num_3 + ",total usb num is " + real_total_num + "\n";
-            LOG_INFO("usb3.0 num is %s, total usb num is %s\n",real_num_3.c_str(),real_total_num.c_str());
+            screen_log_black += "usb3.0 num is " + real_num_3 + ",total usb num is " + real_total_num + "\n";
+            LOG_INFO("usb3.0 num is %s, total usb num is %s\n", real_num_3.c_str(), real_total_num.c_str());
             return true;
         } else {
-            usb_screen_red += "\t错误：需要" + num_3 + "个usb3.0，但只检测到" + real_num_3 + "个\n";
-            usb_screen_log += "ERROR:usb3.0 num is " + real_num_3 + ", which need " + num_3 + "\n";
-            LOG_ERROR("usb3.0 num is %s, which need %s!",real_num_3.c_str(),num_3.c_str());
+            screen_log_red += "\t错误：需要" + num_3 + "个usb3.0，但只检测到" + real_num_3 + "个\n";
+            screen_log_black += "ERROR:usb3.0 num is " + real_num_3 + ", which need " + num_3 + "\n";
+            LOG_ERROR("usb3.0 num is %s, which need %s!", real_num_3.c_str(), num_3.c_str());
             return false;
         }
     } else {
-        usb_screen_red += "\t错误：需要" + num_3 + "/" + total_num + " (usb3.0/usb总数) 个usb，但只检测到" + real_num_3+ "/" + real_total_num + "个\n";
-        usb_screen_log += "ERROR:current usb num is " + real_num_3+ "/" + real_total_num + ", which need " + num_3 + "/" + total_num + "\n";
-        LOG_ERROR("usb num is %s/%s,which need %s/%s\n!",real_num_3.c_str(),real_total_num.c_str(),num_3.c_str(),total_num.c_str());
+        screen_log_red += "\t错误：需要" + num_3 + "/" + total_num + " (usb3.0/usb总数) 个usb，但只检测到" + real_num_3+ "/" + real_total_num + "个\n";
+        screen_log_black += "ERROR:current usb num is " + real_num_3 + "/" + real_total_num + ", which need " + num_3 + "/" + total_num + "\n";
+        LOG_ERROR("usb num is %s/%s,which need %s/%s\n!", real_num_3.c_str(), real_total_num.c_str(), num_3.c_str(), total_num.c_str());
         return false;
     }
 }
@@ -114,17 +109,14 @@ void UsbTest::get_usb_mass_storage(USB_INFO_T* info)
         struct udev_device* block = get_child(udev, scsi, "block");
         struct udev_device* scsi_disk = get_child(udev, scsi, "scsi_disk");
 
-        struct udev_device* usb = udev_device_get_parent_with_subsystem_devtype(
-                scsi, "usb", "usb_device");
+        struct udev_device* usb = udev_device_get_parent_with_subsystem_devtype(scsi, "usb", "usb_device");
 
         if (block && scsi_disk && usb) {
             ret = get_dev_mount_point(block, info->dev[index].block);
             if (ret == false) {
                 continue;
             }
-            strncpy(info->dev[index].vendor,
-                    udev_device_get_sysattr_value(scsi, "vendor"),
-                    USB_VENDOR_LEN);
+            strncpy(info->dev[index].vendor, udev_device_get_sysattr_value(scsi, "vendor"), USB_VENDOR_LEN);
 
             index++;
         }
@@ -156,8 +148,8 @@ bool UsbTest::usb_test_mount(char* block, const char* dir)
     sprintf(cmd, "mount %s %s", block, dir);
     if (system(cmd) < 0) {
         LOG_INFO("run %s failed\n", cmd);
-        usb_screen_log += "ERROR: " + (string)cmd + "failed\n";
-        usb_screen_red += "\t错误：u盘挂载失败\n";
+        screen_log_black += "ERROR: " + (string)cmd + "failed\n";
+        screen_log_red += "\t错误：u盘挂载失败\n";
         return false;
     }
 
@@ -176,11 +168,11 @@ bool UsbTest::usb_test_write(const char* dir, const char* file_name)
     }
 
     sprintf(name, "%s/%s", dir, file_name);
-    ret = write_local_data(name, "w+", (char*) buf, USB_WRITE_LEN * sizeof(int));
+    ret = write_local_data(name, "w+", (char*)buf, USB_WRITE_LEN * sizeof(int));
     if (ret == false) {
         LOG_INFO("write data to usb failed\n");
-        usb_screen_log += "ERROR: write data to usb failed\n";
-        usb_screen_red += "\t错误：u盘 数据写入失败\n";
+        screen_log_black += "ERROR: write data to usb failed\n";
+        screen_log_red += "\t错误：u盘 数据写入失败\n";
     }
 
     return ret;
@@ -197,8 +189,8 @@ bool UsbTest::usb_test_read(const char* dir, const char* file_name)
     ret = read_local_data(name, (char*) buf, USB_WRITE_LEN * sizeof(int));
     if (ret == false) {
         LOG_INFO("read data from usb failed\n");
-        usb_screen_log += "ERROR: read data from usb failed\n";
-        usb_screen_red += "\t错误：u盘 数据读取失败\n";
+        screen_log_black += "ERROR: read data from usb failed\n";
+        screen_log_red += "\t错误：u盘 数据读取失败\n";
         return false;
     }
 
@@ -206,14 +198,14 @@ bool UsbTest::usb_test_read(const char* dir, const char* file_name)
         if (buf[i] != i) {
             ret = false;
             LOG_INFO("read data failed\n");
-            usb_screen_log += "ERROR: read data is not equal to write data\n";
-            usb_screen_red += "\t错误：u盘 读取的数据与写入数据不等\n";
+            screen_log_black += "ERROR: read data is not equal to write data\n";
+            screen_log_red += "\t错误：u盘 读取的数据与写入数据不等\n";
             break;
         }
 
     }
 
-    (void) remove(name);
+    (void)remove(name);
 
     return ret;
 }
@@ -231,8 +223,8 @@ bool UsbTest::usb_test_umount(const char* dir)
     ret = system(cmd);
     if (ret < 0) {
         LOG_INFO("run %s failed\n", cmd);
-        usb_screen_log += "ERROR: " + (string)cmd + " failed\n";
-        usb_screen_red += "\t错误：u盘卸载失败\n";
+        screen_log_black += "ERROR: " + (string)cmd + " failed\n";
+        screen_log_red += "\t错误：u盘卸载失败\n";
         return false;
     }
 
@@ -245,7 +237,7 @@ bool UsbTest::usb_test_write_read(USB_INFO_T* info)
     string path = "/mnt/usb_factory_test";
     string file_name = "usbbbbbb_test";
 
-    (void) mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    (void)mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     
     for (i = 0; i < info->dev_num; i++) {
         if (!usb_test_mount(info->dev[i].block, path.c_str())) {
@@ -284,8 +276,11 @@ bool UsbTest::usb_test_all(int num)
     if (num == info.dev_num) {
         ret = usb_test_write_read(&info);
     } else {
+	    udev_unref(info.udev);
         return false;
     }
+
+    udev_unref(info.udev);
     return ret;
 }
 
@@ -295,7 +290,10 @@ void* UsbTest::test_all(void *arg)
     Control *control = Control::get_control();
     control->set_interface_test_status(USB_TEST_NAME, false);
     BaseInfo* baseInfo = (BaseInfo *)arg;
-    usb_screen_log += "==================== " + USB_TEST_NAME + " ====================\n";
+
+    screen_log_black = "";
+	screen_log_red = "";
+	screen_log_black += "==================== " + USB_TEST_NAME + " ====================\n";
     int num = get_int_value(baseInfo->usb_total_num);
     bool result_num_test = false;
     result_num_test = usb_num_test(baseInfo->usb_total_num, baseInfo->usb_3_num);
@@ -304,23 +302,21 @@ void* UsbTest::test_all(void *arg)
         bool result_write_read = usb_test_all(num);
         if (result_write_read) {
             LOG_INFO("usb test result:\tPASS\n");
-            usb_screen_log += "\n" + USB_TEST_NAME + "结果:\t\t\t成功\n\n";
+            screen_log_black += "\n" + USB_TEST_NAME + "结果:\t\t\t成功\n\n";
                control->set_interface_test_result(USB_TEST_NAME, true); 
         } else {
             LOG_INFO("usb test result:\tFAIL\n");
-            usb_screen_red = "\n" + USB_TEST_NAME + "结果:\t\t\t失败\n\n" + usb_screen_red;
+            screen_log_red = "\n" + USB_TEST_NAME + "结果:\t\t\t失败\n\n" + screen_log_red;
             control->set_interface_test_result(USB_TEST_NAME, false);
         }
     } else {
         LOG_INFO("usb test result:\tFAIL\n");
-        usb_screen_red = USB_TEST_NAME + "结果:\t\t\t失败\n\n" + usb_screen_red;
+        screen_log_red = USB_TEST_NAME + "结果:\t\t\t失败\n\n" + screen_log_red;
         control->set_interface_test_result(USB_TEST_NAME, false); 
     }    
-    control->update_screen_log(usb_screen_log);
-    usb_screen_log = "";
-    if (usb_screen_red != "") {
-        control->update_color_screen_log(usb_screen_red, "red");
-        usb_screen_red = "";
+    control->update_screen_log(screen_log_black);
+    if (screen_log_red != "") {
+        control->update_color_screen_log(screen_log_red, "red");
     }
     control->set_interface_test_status(USB_TEST_NAME, true);
     return NULL;
@@ -329,7 +325,7 @@ void* UsbTest::test_all(void *arg)
 void UsbTest::start_test(BaseInfo* baseInfo)
 {
     pthread_t tid;
-    pthread_create(&tid,NULL,test_all,baseInfo);
+    pthread_create(&tid, NULL, test_all, baseInfo);
 }
 
 

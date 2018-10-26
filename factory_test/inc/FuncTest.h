@@ -24,20 +24,20 @@ private:
 class FanTest : public FuncBase
 {
 public:
-    FanTest();
     static string fan_speed_test(string speed);
     static void *test_all(void *arg);
     void start_test(BaseInfo* baseInfo);
+    static string screen_log_black;
+    static string screen_log_red;
 };
 
 class UsbTest : public FuncBase
 {
 public:
-    UsbTest();
-
-    void read_fac_config();
-    static bool usb_num_test(string total_num, string num_3);
+    static string screen_log_black;
+    static string screen_log_red;
     
+    static bool usb_num_test(string total_num, string num_3);
     static bool get_dev_mount_point(struct udev_device* dev, char* dst);
     static struct udev_device* get_child(struct udev* udev, struct udev_device* parent, const char* subsystem);
     static void get_usb_mass_storage(USB_INFO_T* info);
@@ -47,7 +47,6 @@ public:
     static bool usb_test_umount(const char* dir);
     static bool usb_test_write_read(USB_INFO_T* info);
     static bool usb_test_all(int num);
-    
     static void *test_all(void *arg);
     void start_test(BaseInfo* baseInfo);
 
@@ -80,7 +79,6 @@ private:
 class NextProcess : public FuncBase
 {
 public:
-    NextProcess();
     static void* test_all(void* arg);
     void start_test(BaseInfo* baseInfo);
     static void next_process_handle(BaseInfo* baseInfo);
@@ -91,8 +89,7 @@ public:
 class UploadMesLog : public FuncBase
 {
 public:
-    UploadMesLog();
-    static void* test_all(void *);
+    static void* test_all(void*);
     void start_test(BaseInfo* baseInfo);
 };
 
