@@ -795,12 +795,8 @@ void Control::set_test_result_pass_or_fail(string func, string result)
             LOG_INFO("stress test result:\tPASS\n");
             StressTest* stress = (StressTest*)_funcBase[STRESS];
             string result = stress->get_stress_result_record();
-            while (result == "") {
-                usleep(500000);
-                result = stress->get_stress_result_record();
-            }
             _record.push_back("PASS  " + result);
-            while (_record.size() > STRESS_RECORD_NUM) {
+            if (_record.size() > STRESS_RECORD_NUM) {
                 _record.erase(_record.begin());
             }
             write_stress_record(_record);
