@@ -32,7 +32,7 @@ bool NetTest::net_get_eth_name(char* eth_name, int size)
     char buf[512] = { 0, };
     struct ifreq *ifreq = NULL;    
 
-    if (NULL == eth_name) {
+    if (eth_name == NULL) {
         return false;
     }
 
@@ -74,7 +74,7 @@ bool NetTest::net_get_eth_index(char* eth_name, unsigned int* index)
     int fd = -1;
     struct ifreq ifr;
 
-    if (NULL == eth_name) {
+    if (eth_name == NULL) {
         return false;
     }
 
@@ -102,7 +102,7 @@ bool NetTest::net_get_eth_index(char* eth_name, unsigned int* index)
 
 bool NetTest::net_sprintf_mac_addr(unsigned char* src, char* dst)
 {
-    if (NULL == src || NULL == dst) {
+    if (src == NULL || dst == NULL) {
         return false;
     }
 
@@ -121,7 +121,7 @@ bool NetTest::net_get_mac_addr0(unsigned char* eth_name, unsigned char* hw_buf)
     struct ifreq ifr;
     unsigned char buf[128] = { 0, };
 
-    if (NULL == eth_name || NULL == hw_buf) {
+    if (eth_name == NULL || hw_buf == NULL) {
         return false;
     }
 
@@ -192,14 +192,14 @@ void* NetTest::net_recv_loopback_msg(void *arg)
             goto start;
         }
 
-        if (TEST_MAGIC != recv_packet.magic) {
+        if (recv_packet.magic != TEST_MAGIC) {
             LOG_ERROR("recv magic=%d is invalid\n", recv_packet.magic);
             close(fd);
             goto start;
         }
 
         // exchange will transform message
-        if (0 != memcmp(recv_packet.dst_mac, bc_mac, MAC_ADDR_LEN)) {
+        if (memcmp(recv_packet.dst_mac, bc_mac, MAC_ADDR_LEN) != 0) {
             LOG_INFO("recv roll back msg index=%d\n", recv_packet.index);
             info->recv_num++;
         } else {
@@ -228,21 +228,21 @@ bool NetTest::init()
     memset(info, 0, sizeof(NetInfo));
 
     ret = net_get_eth_name((char*)info->eth_name, ETH_NAME_LEN);
-    if (false == ret) {
+    if (ret == false) {
         LOG_ERROR("get eth name failed\n");
         free(info);
         return false;
     }
 
     ret = net_get_eth_index((char*)info->eth_name, &info->eth_index);
-    if (false == ret) {
+    if (ret == false) {
         LOG_ERROR("get eth index failed\n");
         free(info);
         return false;
     }
 
     ret = net_get_mac_addr0(info->eth_name, info->mac);
-    if (false == ret) {
+    if (ret == false) {
         LOG_ERROR("get mac addr failed\n");
         free(info);
         return false;
@@ -425,7 +425,7 @@ bool NetTest::net_test_all()
     NetInfo *info = NULL;
 
     info = g_net_info;
-    if (NULL == info) {
+    if (info == NULL) {
         LOG_ERROR("net info is null");
         screen_log_red += "\t错误：网口初始化错误，获取网口信息失败\n";
         screen_log_black += "ERROR:net init error! get net info failed\n";
@@ -483,7 +483,7 @@ bool NetTest::net_test_all()
                                         ETH_LINK_SPEED, info->eth_speed);
             screen_log_black += "\tERROR: Network speed must be " + to_string(ETH_LINK_SPEED)
                         + "Mbps, but current is " + to_string(info->eth_speed) + "Mbps\n";
-            screen_log_red += "\t错误：网卡速率必须为"+ to_string(ETH_LINK_SPEED)
+            screen_log_red += "\t错误：网卡速率必须为" + to_string(ETH_LINK_SPEED)
                         + "Mbps,但检测到速率为" + to_string(info->eth_speed) + "Mbps\n";
             ret = false;
         }
@@ -502,15 +502,16 @@ bool NetTest::net_test_all()
     info->recv_num = 0;
     net_send_broadcast_msg(info, 100);
 
+	LOG_INFO("before wait 2 seconds, info->recv_num=%d", info->recv_num);
     // wait for 2 seconds
     while (1) {
         i++;
-        if (100 == info->recv_num || 100 == i){
+        if (info->recv_num == 100 || i == 100){
             break;
         }
         usleep(20000);
     }
-
+	
     if (info->recv_num < 90) {
         screen_log_red += "\t错误：网口收报个数未达标\n";
         ret = false;

@@ -273,7 +273,6 @@ void Control::init_fac_config()
 
 void Control::start_interface_test()
 {
-    LOG_INFO("******************** start interface test ********************");
     _testStep = STEP_INTERFACE;
     _funcBase[INTERFACE]->start_test(_baseInfo);
 }

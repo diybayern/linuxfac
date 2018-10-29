@@ -279,8 +279,7 @@ void* StressTest::test_all(void* arg)
     start_cpuburn_stress();
     
     get_current_open_time(&init_time);
-    while(true)
-    {
+    while(true) {
         if (!control->is_stress_test_window_quit_safely()) {
             if (baseInfo->platform == "IDV") {
                 stop_gpu_stress_test();
@@ -465,14 +464,15 @@ void* InterfaceTest::test_all(void *arg)
     Control *control = Control::get_control();
 
     if (control->get_interface_run_status() == INF_RUNNING) {
+		LOG_INFO("******************** stop interface test ********************");
         control->set_interface_run_status(INF_BREAK);
         control->get_ui_handle()->ui_set_interface_test_state(INF_BREAK);
         return NULL;
     }
-
+	
     FuncFinishStatus* funcFinishStatus = control->get_func_finish_status();
     if (funcFinishStatus->interface_finish) {
-        LOG_INFO("interface test has finished,do not need test again");
+        LOG_INFO("interface test has finished, do not need test again");
         return NULL;
     }
 
@@ -482,6 +482,7 @@ void* InterfaceTest::test_all(void *arg)
     }
 
     if (control->get_interface_run_status() == INF_RUNEND) {
+		LOG_INFO("******************** start interface test ********************");
         control->set_interface_run_status(INF_RUNNING);
         control->get_ui_handle()->ui_set_interface_test_state(INF_RUNNING);
     }    
