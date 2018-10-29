@@ -79,7 +79,7 @@ QPixmap DisplayTestWindow::_text2Pixmap(QString text)
 
 void DisplayTestWindow::finish_display_window()
 {
-    if (NULL != _display_test_window) {
+    if (_display_test_window != NULL) {
         hide();
         this->deleteLater();
         _display_test_window = NULL;
@@ -106,7 +106,7 @@ void DisplayTestWindow::mousePressEvent(QMouseEvent* event)
                 break;
            	}
            	case 2: {
-                if (NULL != _display_test_window) {
+                if (_display_test_window != NULL) {
                     emit sig_finish_show_display_window(true);
                 }
                 break;
@@ -116,7 +116,7 @@ void DisplayTestWindow::mousePressEvent(QMouseEvent* event)
         }
 
     } else if (event->button() == Qt::RightButton) {
-        if (NULL != _display_test_window) {
+        if (_display_test_window != NULL) {
             emit sig_finish_show_display_window(false);
         }
     }
@@ -148,7 +148,7 @@ void DisplayTestWindow::keyPressEvent(QKeyEvent *event)
         }
 
     } else if (event->key() == Qt::Key_Escape) {
-        if (NULL != _display_test_window) {
+        if (_display_test_window != NULL) {
             emit sig_finish_show_display_window(false);
         }
     }

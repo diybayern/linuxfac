@@ -141,7 +141,7 @@ QPixmap StressTestWindow::_text2Pixmap(QString text, QColor color)
 
 void StressTestWindow::finish_stress_window()
 {
-    if (NULL != _stress_test_window) {
+    if (_stress_test_window != NULL) {
         hide();
         this->deleteLater();
         _stress_test_window = NULL;
@@ -150,7 +150,7 @@ void StressTestWindow::finish_stress_window()
 
 void StressTestWindow::update_stress_test_pass_or_fail(QString result)
 {
-    if (NULL != _stress_test_window) {
+    if (_stress_test_window != NULL) {
 
         if (result.compare("PASS") == 0) {
             LOG_INFO("update_stress_test_pass_or_fail PASS");
@@ -166,14 +166,14 @@ void StressTestWindow::update_stress_test_pass_or_fail(QString result)
 
 void StressTestWindow::update_stress_label_value(QString item, QString result)
 {
-    if ((stress_test_info_list.isEmpty()) || (NULL == _stress_test_window)) {
+    if ((stress_test_info_list.isEmpty()) || (_stress_test_window == NULL)) {
         return ;
     }
 
     foreach (Stress_Test_Info item_info, stress_test_info_list) {
         qApp->processEvents();
         if (item.compare(item_info.name) == 0) {
-            if ((NULL != _stress_test_window)) {
+            if ((_stress_test_window != NULL)) {
                 QLabel* label = item_info.label;
                 label->setText(result);
                 label->update();
@@ -189,8 +189,8 @@ void StressTestWindow::start_exec()
 
 void StressTestWindow::slot_get_one_frame(QPixmap img)
 {
-    if (NULL != _stress_test_window) {
-        if (NULL != _lb_video) {
+    if (_stress_test_window != NULL) {
+        if (_lb_video != NULL) {
             _lb_video->setPixmap(img);
             _lb_video->update();
         }
@@ -199,7 +199,7 @@ void StressTestWindow::slot_get_one_frame(QPixmap img)
 
 void StressTestWindow::slot_get_one_pixmap(QPixmap pix)
 {
-    if (NULL != _stress_test_window) {
+    if (_stress_test_window != NULL) {
         QPixmap fixtmp = pix.scaled(_lb_image_frame->width()/4, _lb_image_frame->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         _set_picture(fixtmp);
     }
@@ -208,7 +208,7 @@ void StressTestWindow::slot_get_one_pixmap(QPixmap pix)
 void StressTestWindow::mousePressEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::RightButton) {
-        if (NULL != _stress_test_window) {
+        if (_stress_test_window != NULL) {
             emit sig_finish_video_test_thread();
             emit sig_finish_image_test_thread();
             emit sig_finish_show_stress_window();
@@ -223,7 +223,7 @@ void StressTestWindow::_set_picture(QPixmap& pix)
     }
 
     foreach (image_layout_attr item, _image_label_list) {
-        if (NULL != _stress_test_window) {
+        if (_stress_test_window != NULL) {
             QLabel* lb = item.lb_image;
             lb->setPixmap(pix);
             lb->update();
@@ -234,7 +234,7 @@ void StressTestWindow::_set_picture(QPixmap& pix)
 void StressTestWindow::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) {
-        if (NULL != _stress_test_window) {
+        if (_stress_test_window != NULL) {
             emit sig_finish_video_test_thread();
             emit sig_finish_image_test_thread();
             emit sig_finish_show_stress_window();

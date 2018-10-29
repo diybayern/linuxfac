@@ -193,14 +193,14 @@ lrmi_start:
     iopl(3);
 
     read_ret = read_edid(0, edid_buf);    
-    if (false == read_ret) {
+    if (read_ret == false) {
         LOG_ERROR("read edid failed\n");
         failed++;
         goto error;
     }
 
     parse_ret = parse_edid(edid_buf);    
-    if (false == parse_ret) {
+    if (parse_ret == false) {
         LOG_ERROR("parse edid failed\n");
         failed++;
         goto error;
@@ -209,7 +209,7 @@ lrmi_start:
     failed = 0;
 
 error:
-    if (0 != failed && failed < 4) {
+    if (failed != 0 && failed < 4) {
         goto lrmi_start;
     }
     

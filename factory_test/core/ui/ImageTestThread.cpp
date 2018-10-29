@@ -25,7 +25,7 @@ void ImageTestThread::slot_finish_image_test_thread()
 {
     if (_image_test_thread->isRunning()) {
 
-        if (NULL != _image_test_thread) {
+        if (_image_test_thread != NULL) {
             disconnect(_image_test_thread);
             _m_stopped = true;
             //quit();

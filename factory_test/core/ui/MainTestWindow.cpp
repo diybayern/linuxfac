@@ -14,92 +14,92 @@ MainTestWindow::~MainTestWindow()
         _main_test_window = NULL;
     }
 
-    if (NULL != _grid_main_label_layout) {
+    if (_grid_main_label_layout != NULL) {
        	delete _grid_main_label_layout;
         _grid_main_label_layout = NULL;
     }
 
-    if (NULL != _hbox_main_label_layout) {
+    if (_hbox_main_label_layout != NULL) {
        	delete _hbox_main_label_layout;
         _hbox_main_label_layout = NULL;
     }
 
-    if (NULL != _grid_main_test_layout) {
+    if (_grid_main_test_layout != NULL) {
        	delete _grid_main_test_layout;
         _grid_main_test_layout = NULL;
     }
 
-    if (NULL != _vbox_main_test_layout) {
+    if (_vbox_main_test_layout != NULL) {
        	delete _vbox_main_test_layout;
         _vbox_main_test_layout = NULL;
     }
 
-    if (NULL != _hbox_main_test_layout) {
+    if (_hbox_main_test_layout != NULL) {
        	delete _hbox_main_test_layout;
         _hbox_main_test_layout = NULL;
     }
 
-    if (NULL != _lineedit_test_count) {
+    if (_lineedit_test_count != NULL) {
        	delete _lineedit_test_count;
         _lineedit_test_count = NULL;
     }
 
-    if (NULL != _checkbox_auto_upload_log) {
+    if (_checkbox_auto_upload_log != NULL) {
        	delete _checkbox_auto_upload_log;
         _checkbox_auto_upload_log = NULL;
     }
 
-    if (NULL != _lab_test_count) {
+    if (_lab_test_count != NULL) {
        	delete _lab_test_count;
         _lab_test_count = NULL;
     }
 
-    if (NULL != _hbox_test_count_layout) {
+    if (_hbox_test_count_layout != NULL) {
        	delete _hbox_test_count_layout;
         _hbox_test_count_layout = NULL;
     }
 
-    if (NULL != _hbox_checkbox_auto_upload_log) {
+    if (_hbox_checkbox_auto_upload_log != NULL) {
        	delete _hbox_checkbox_auto_upload_log;
         _hbox_checkbox_auto_upload_log = NULL;
     }
 
-    if (NULL != _vbox_test_count_auto_upload_layout) {
+    if (_vbox_test_count_auto_upload_layout != NULL) {
        	delete _vbox_test_count_auto_upload_layout;
         _vbox_test_count_auto_upload_layout = NULL;
     }
 
-    if (NULL != _hbox_bottom_left_layout) {
+    if (_hbox_bottom_left_layout != NULL) {
        	delete _hbox_bottom_left_layout;
         _hbox_bottom_left_layout = NULL;
     }
 
-    if (NULL != _editInfo) {
+    if (_editInfo != NULL) {
        	delete _editInfo;
         _editInfo = NULL;
     }
 
-    if (NULL != _vbox_screenlog_layout) {
+    if (_vbox_screenlog_layout != NULL) {
        	delete _vbox_screenlog_layout;
         _vbox_screenlog_layout = NULL;
     }
 
-    if (NULL != _vbox_function_layout) {
+    if (_vbox_function_layout != NULL) {
        	delete _vbox_function_layout;
         _vbox_function_layout = NULL;
     }
 
-    if (NULL != _grid_main_test_window_layout) {
+    if (_grid_main_test_window_layout != NULL) {
        	delete _grid_main_test_window_layout;
         _grid_main_test_window_layout = NULL;
     }
 
-    if (NULL != _spilter_line) {
+    if (_spilter_line != NULL) {
        	delete _spilter_line;
         _spilter_line = NULL;
     }
 
-    if (NULL != _lab_complete_or_single_test) {
+    if (_lab_complete_or_single_test != NULL) {
        	delete _lab_complete_or_single_test;
         _lab_complete_or_single_test = NULL;
     }
@@ -646,7 +646,7 @@ void MainTestWindow::show_main_test_window()
 
 QString MainTestWindow::ui_get_test_count()
 {
-    if (NULL != _lineedit_test_count) {
+    if (_lineedit_test_count != NULL) {
         return _lineedit_test_count->text();
     }
 
@@ -679,7 +679,7 @@ void MainTestWindow::slot_finish_show_stress_window()
 
 void MainTestWindow::slot_finish_show_display_window(bool state)
 {
-    if (NULL != DisplayTestWindow::g_get_display_test_window()) {
+    if (DisplayTestWindow::g_get_display_test_window() != NULL) {
         DisplayTestWindow::g_get_display_test_window()->finish_display_window();
 
         if (state == true) {
@@ -695,7 +695,7 @@ QPushButton* MainTestWindow::_get_interface_test_button()
     }
 
     foreach (ItemCheck item, itemlist) {
-        if (0 == item.name.compare("接口测试")) {
+        if (item.name.compare("接口测试") == 0) {
             return (QPushButton*)item.button;
         }
     }
@@ -719,15 +719,15 @@ void MainTestWindow::_set_interface_test_item_enable(bool state)
 
 void MainTestWindow::slot_set_interface_test_state(int state)
 {
-    if (NULL == _get_interface_test_button()) {
+    if (_get_interface_test_button() == NULL) {
         return ;
     }
 
-    if (UI_INF_RUNNING == state) {
+    if (state == UI_INF_RUNNING) {
         _get_interface_test_button()->setText("结束");
         _set_interface_test_item_enable(false);
 
-    } else if (UI_INF_RUNEND == state) {
+    } else if (state == UI_INF_RUNEND) {
         _get_interface_test_button()->setEnabled(true);
         _get_interface_test_button()->setText("接口测试");
         _set_interface_test_item_enable(true);
@@ -764,8 +764,8 @@ void MainTestWindow::update_stress_label_value(QString item, QString result)
 
 void MainTestWindow::slot_set_brightness_dialog_button_state(bool state)
 {
-    if (NULL != g_form) {
-        if (NULL != g_form->bt_ok) {
+    if (g_form != NULL) {
+        if (g_form->bt_ok != NULL) {
             g_form->bt_ok->setEnabled(state);
         }
     }

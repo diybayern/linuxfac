@@ -178,10 +178,11 @@ endloop:
             && block[1] == 0xff && block[2] == 0xff
             && block[3] == 0xff && block[4] == 0xff
             && block[5] == 0xff && block[6] == 0xff) {
-            if (block[128] == 0xff)
+            if (block[128] == 0xff) {
                 len = 128;
-            else
+            } else {
                 len = 256;
+            }
             i2c_screen_log += to_string(len) + "-byte EDID successfully retrieved from i2c bus ["
                             + to_string(i2cbus) + "]:\n";
             LOG_INFO("%d-byte EDID successfully retrieved from i2c bus [%d]:\n", len, i2cbus);

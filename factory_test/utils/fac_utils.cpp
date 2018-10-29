@@ -73,7 +73,7 @@ string execute_command_err_log(string cmd)
             return "error";
         }
 
-        if (0 < cmd_result.length())
+        if (cmd_result.length() > 0)
         {
             string tmp = cmd_result.substr(cmd_result.length() - 1, cmd_result.length());
             if (tmp == "\n" || tmp == "\r"){
@@ -193,8 +193,9 @@ bool read_local_data(const char* filename, char* buf, int size)
 {
     int ret = 0;
     FILE * infile = NULL;
-
-    if ((infile = fopen(filename, "rb")) == NULL) {
+	
+	infile = fopen(filename, "rb");
+    if (infile == NULL) {
         LOG_ERROR("Can't open %s\n", filename);
         return false;
     }
@@ -310,7 +311,7 @@ bool is_digit(string str)
     int len = 0;
 
     len = str.size();
-    if (0 == len) {
+    if (len == 0) {
         return false;
     }
 
@@ -337,7 +338,7 @@ bool read_conf_line(const string conf_path, const char* tag,char* value)
         while (fgets(line, sizeof(line), conf_fp) != NULL) {
             delNL(line);
             if (line[0] != '#') {//ignore the comment
-                if (strstr(line, tag)!=NULL) {
+                if (strstr(line, tag) != NULL) {
                     sscanf(line, match, value);
                     return true;
                 } 
@@ -355,7 +356,7 @@ int get_fac_config_from_conf(const string conf_path, FacArg *fac)
 
     char* dest_path = (char*)malloc(128);
     memset(dest_path, 0, 128);
-    if (read_conf_line(conf_path, "ftp_dest_path",dest_path) == false) {
+    if (read_conf_line(conf_path, "ftp_dest_path", dest_path) == false) {
         LOG_ERROR("read dest_path failed\n");
         ret = NO_FTP_PATH;
     } else if (*dest_path != '\\'){

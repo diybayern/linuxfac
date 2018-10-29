@@ -400,7 +400,7 @@ bool SoundTest::start_record()
 
 bool SoundTest::stop_record()
 {
-    if (SOUND_RECORD_STOP == gStatus) {
+    if (gStatus == SOUND_RECORD_STOP) {
         return false;
     }
 

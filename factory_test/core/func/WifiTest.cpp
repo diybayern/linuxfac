@@ -163,7 +163,7 @@ void* WifiTest::wifi_recv_loopback_msg(void *arg)
     pthread_detach(pthread_self());
     info = (WifiInfo*) arg;
 
-    while(1) {
+    while (1) {
         fd = socket(PF_PACKET, SOCK_RAW, htons(TEST_PROTO));
         if (fd < 0) {
             LOG_ERROR("create (recv) raw sock failed\n");
@@ -182,7 +182,7 @@ void* WifiTest::wifi_recv_loopback_msg(void *arg)
             return NULL;
         }
 
-        while(1) {
+        while (1) {
             len = recvfrom(fd, &recv_packet, sizeof(recv_packet), 0, 0, 0);
         
             if (len != sizeof(recv_packet)) {

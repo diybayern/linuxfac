@@ -39,15 +39,15 @@ bool UsbTest::get_dev_mount_point(struct udev_device* dev, char* dst)
     sys_name = udev_device_get_sysname(dev);
 
     dir = opendir(sys_path);
-    if (NULL == dir) {
+    if (dir == NULL) {
         LOG_INFO("open dir=%s\n", sys_path);
         return false;
     }
 
     len = strlen(sys_name);
 
-    while (NULL != (ptr = readdir(dir))) {
-        if (0 == strncmp(ptr->d_name, sys_name, len)) {
+    while ((ptr = readdir(dir)) != NULL) {
+        if (strncmp(ptr->d_name, sys_name, len) == 0) {
             snprintf(dst, USB_BLOCK_LEN, "/dev/%s", ptr->d_name);
             break;
         }
@@ -140,7 +140,7 @@ bool UsbTest::usb_test_mount(char* block, const char* dir)
 {
     char cmd[64] = { 0, };
 
-    if (NULL == block || NULL == dir) {
+    if (block == NULL || dir == NULL) {
         LOG_INFO("mount dir=%s to block=%s failed\n", dir, block);
         return false;
     }
@@ -215,7 +215,7 @@ bool UsbTest::usb_test_umount(const char* dir)
     int ret = false;
     char cmd[64] = { 0, };
 
-    if (NULL == dir) {
+    if (dir == NULL) {
         LOG_INFO("dir=%s doesn't exist\n", dir);
         return false;
     }
@@ -267,7 +267,7 @@ bool UsbTest::usb_test_all(int num)
     memset(&info, 0, sizeof(USB_INFO_T));
 
     info.udev = udev_new();
-    if (NULL == info.udev) {
+    if (info.udev == NULL) {
         LOG_INFO("new udev failed\n");
         return false;
     }
@@ -382,14 +382,14 @@ bool UsbTest::usb_test_read_status()
     memset(&info, 0, sizeof(USB_INFO_T));
 
     info.udev = udev_new();
-    if (NULL == info.udev) {
+    if (info.udev == NULL) {
         LOG_ERROR("new udev failed\n");
         return false;
     }
     
     get_usb_mass_storage(&info);
 
-    if (0 != info.dev_num) {
+    if (info.dev_num != 0) {
         ret = usb_test_read_cfg(&info);
     } else {
         ret = false;

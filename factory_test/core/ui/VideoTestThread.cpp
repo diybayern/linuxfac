@@ -34,7 +34,7 @@ int VideoTestThread::ffmpeg_read_stream()
 {
     //(0) alloc storage to save the info of the video
     pFormatCtx = avformat_alloc_context();
-    if (NULL == pFormatCtx) {
+    if (pFormatCtx == NULL) {
         LOG_ERROR("malloc format failed.");
         return _FAIL;
     }
@@ -98,7 +98,7 @@ int VideoTestThread::ffmpeg_video_change_format(AVFrame* frame, int dst_w, int d
 
     mutext.lock();
     pFrameRGB = avcodec_alloc_frame();
-    if (NULL == pFrameRGB) {
+    if (pFrameRGB == NULL) {
         mutext.unlock();
         LOG_ERROR("avcodec_alloc_frame error.");
         return _FAIL;
@@ -107,7 +107,7 @@ int VideoTestThread::ffmpeg_video_change_format(AVFrame* frame, int dst_w, int d
     numBytes = avpicture_get_size(AV_PIX_FMT_RGBA, dst_w, dst_h);
 
     buffer = (unsigned char *)av_malloc(numBytes * sizeof(unsigned char));
-    if (NULL == buffer) {
+    if (buffer == NULL) {
         mutext.unlock();
         LOG_ERROR("av_malloc error.");
         return _FAIL;
@@ -119,7 +119,7 @@ int VideoTestThread::ffmpeg_video_change_format(AVFrame* frame, int dst_w, int d
                 frame->height, AV_PIX_FMT_YUV420P, dst_w, dst_h, AV_PIX_FMT_RGBA,
                 SWS_BILINEAR, NULL, NULL, NULL);
 
-    if (NULL == img_convert_ctx) {
+    if (img_convert_ctx == NULL) {
         mutext.unlock();
         LOG_ERROR("sws_getCachedContext error.");
         return _FAIL;
@@ -172,7 +172,7 @@ int VideoTestThread::ffmpeg_video_decode(unsigned char* buf, int size)
 
     ret = ffmpeg_video_change_format(&frame, sws_width, sws_height);
 
-    if (_OUT == ret) {
+    if (ret == _OUT) {
         LOG_ERROR("exit video test.");
     }
     return ret;
@@ -180,12 +180,12 @@ int VideoTestThread::ffmpeg_video_decode(unsigned char* buf, int size)
 
 void VideoTestThread::ffmpeg_decode_deinit()
 {
-    if (NULL != pCodecCtx) {
+    if (pCodecCtx != NULL) {
         avcodec_close(pCodecCtx);
         pCodecCtx = NULL;
     }
 
-    if (NULL != pFormatCtx) {
+    if (pFormatCtx != NULL) {
         avformat_close_input(&pFormatCtx);
         pFormatCtx = NULL;
     }
@@ -204,7 +204,7 @@ void VideoTestThread::start_play()
 void VideoTestThread::stop_play()
 {
     if (_video_test_thread->isRunning()) {
-        if (NULL != _video_test_thread) {
+        if (_video_test_thread != NULL) {
             disconnect(_video_test_thread);
             _m_stopped = true;
             quit();
@@ -254,10 +254,10 @@ void VideoTestThread::run()
 
         if (pkt.stream_index == videoindex) {
             ret = ffmpeg_video_decode(pkt.data, pkt.size);
-            if (_FAIL == ret) {
+            if (ret == _FAIL) {
                 emit sig_g_decode_status(false);
             }
-            if (_OUT == ret) {
+            if (ret == _OUT) {
                 LOG_ERROR("exit video test.");
                 break;
             }
@@ -271,17 +271,17 @@ void VideoTestThread::run()
 
 void VideoTestThread::uninit()
 {
-    if (NULL != img_convert_ctx) {
+    if (img_convert_ctx != NULL) {
         LOG_INFO("img_convert_ctx free.");
         sws_freeContext(img_convert_ctx);
     }
 
-    if (NULL != pCodecCtx) {
+    if (pCodecCtx != NULL) {
         LOG_INFO("pCodecCtx free.");
         avcodec_close(pCodecCtx);
     }
 
-    if (NULL != pFormatCtx) {
+    if (pFormatCtx != NULL) {
         LOG_INFO("pFormatCtx free.");
         avformat_close_input(&pFormatCtx);
     }
