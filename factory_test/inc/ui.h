@@ -82,6 +82,8 @@ class CustomProgressDialog: public QDialog
         void startExec();
         QProgressBar    *progressbar;
         QLabel          *lb_title;
+    protected:
+        void keyPressEvent(QKeyEvent *event);
     private:
         QFrame          *frame;
 };
@@ -189,6 +191,7 @@ class MainTestWindow : public QDialog
         void _set_interface_test_item_enable(bool state);
     protected:
         void closeEvent(QCloseEvent *event);
+        void keyPressEvent(QKeyEvent *event);
 
     signals:
         void to_quit_test_window(QString item);

@@ -218,6 +218,17 @@ MessageForm::~MessageForm()
     LOG_INFO("~MessageForm()");
 }
 
+void MessageForm::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key())
+    {
+        case Qt::Key_Escape:
+            break;
+        default:
+            QDialog::keyPressEvent(event);
+    }
+}
+
 bool MessageForm::eventFilter(QObject *obj, QEvent *event)
 {
     if (obj == le_snmac && event->type() == QEvent::KeyPress) {

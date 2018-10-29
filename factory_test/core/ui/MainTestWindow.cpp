@@ -129,6 +129,17 @@ void MainTestWindow::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
+void MainTestWindow::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key())
+    {
+        case Qt::Key_Escape:
+            break;
+        default:
+            QDialog::keyPressEvent(event);
+    }
+}
+
 void MainTestWindow::add_main_label(QString item, QString result)
 {
     MainLabelItem listitem;
@@ -409,6 +420,17 @@ CustomProgressDialog::CustomProgressDialog(QWidget *parent)
 CustomProgressDialog::~CustomProgressDialog()
 {
     LOG_INFO("~CustomProgressDialog");
+}
+
+void CustomProgressDialog::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key())
+    {
+        case Qt::Key_Escape:
+            break;
+        default:
+            QDialog::keyPressEvent(event);
+    }
 }
 
 void CustomProgressDialog::startExec()

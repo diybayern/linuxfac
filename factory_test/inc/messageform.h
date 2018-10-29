@@ -43,6 +43,7 @@ public slots:
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
     void timerEvent(QTimerEvent *evt);
+    void keyPressEvent(QKeyEvent *event);
 
 signals:
     void sig_handled_test_result(QString test_item, QString result);
