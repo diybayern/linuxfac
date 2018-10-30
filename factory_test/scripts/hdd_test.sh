@@ -105,7 +105,7 @@ if [[ $mount_point_unit =~ $cap_unit ]];then
     fi
 else
     echo 'cap unit is wrong' >> $log_file
-    echo "hdd容量上限错误" > /tmp/hdd.status
+    echo "hdd容量单位错误" > /tmp/hdd.status
     exit
 fi
 

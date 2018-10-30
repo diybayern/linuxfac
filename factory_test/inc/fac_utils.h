@@ -28,6 +28,7 @@ const string CPU_TEST_NAME  = "CPU测试";
 const string HDD_TEST_NAME  = "HDD测试";
 const string FAN_TEST_NAME  = "FAN测试";
 const string WIFI_TEST_NAME = "WIFI测试";
+const string SSD_TEST_NAME  = "SSD测试";
 
 const string INTERFACE_TEST_NAME = "接口测试";
 const string SOUND_TEST_NAME     = "音频测试";
@@ -45,6 +46,7 @@ const string FAN_TEST_SCRIPT     = FACTORY_PATH + "fan_test.sh";
 const string MEM_TEST_SCRIPT     = FACTORY_PATH + "mem_test.sh";
 const string WIFI_TEST_SCRIPT    = FACTORY_PATH + "wifi_test.sh";
 const string HDD_TEST_SCRIPT     = FACTORY_PATH + "hdd_test.sh";
+const string SSD_TEST_SCRIPT     = FACTORY_PATH + "ssd_test.sh";
 const string CAMERA_CHECK_SCRIPT = FACTORY_PATH + "check_camera.sh";
 const string CAMERA_START_SCRIPT = FACTORY_PATH + "start_xawtv.sh";
 const string GET_CPU_TEMP_SCRIPT = FACTORY_PATH + "get_cpu_temp.sh";

@@ -501,6 +501,7 @@ void* InterfaceTest::test_all(void *arg)
     interfaceTestFailNum->hdd_test_fail_num    = 0;
     interfaceTestFailNum->fan_test_fail_num    = 0;
     interfaceTestFailNum->wifi_test_fail_num   = 0;
+    interfaceTestFailNum->ssd_test_fail_num    = 0;
     
     int test_num = control->get_interface_test_times();
     int real_test_num = 0;
@@ -545,6 +546,7 @@ void* InterfaceTest::test_all(void *arg)
                 FuncBase[HDD]->start_test(baseInfo);
             }
         }
+		
         if (baseInfo->fan_speed != "0" && baseInfo->fan_speed != "") {
             if (interfaceSelectStatus->fan_select) {
 				LOG_INFO("---------- start fan test ----------\n");
@@ -554,8 +556,14 @@ void* InterfaceTest::test_all(void *arg)
         
         if (baseInfo->wifi_exist != "0" && baseInfo->wifi_exist != "") {
             if (interfaceSelectStatus->wifi_select) {
-				LOG_INFO("---------- start wifi test ----------\n");
                 FuncBase[WIFI]->start_test(baseInfo);
+            }
+        }
+		
+        if (baseInfo->ssd_cap != "0" && baseInfo->ssd_cap != "") {
+            if (interfaceSelectStatus->ssd_select) {
+				LOG_INFO("---------- start ssd test ----------\n");
+                FuncBase[SSD]->start_test(baseInfo);
             }
         }
 
@@ -568,7 +576,8 @@ void* InterfaceTest::test_all(void *arg)
                 && interfaceTestStatus->net_test_over
                 && interfaceTestStatus->hdd_test_over
                 && interfaceTestStatus->fan_test_over
-                && interfaceTestStatus->wifi_test_over){
+                && interfaceTestStatus->wifi_test_over
+                && interfaceTestStatus->ssd_test_over){
 
                 if (!interfaceTestResult->mem_test_result) {
                    interfaceTestFailNum->mem_test_fail_num++;
@@ -600,6 +609,10 @@ void* InterfaceTest::test_all(void *arg)
 
                 if (!interfaceTestResult->wifi_test_result) {
                    interfaceTestFailNum->wifi_test_fail_num++;
+                }
+				
+                if (!interfaceTestResult->ssd_test_result) {
+                   interfaceTestFailNum->ssd_test_fail_num++;
                 }
                 break;
             }
@@ -741,6 +754,24 @@ void* InterfaceTest::test_all(void *arg)
             control->update_screen_log(wifi_total_result);
         }
     }
+	
+    if (baseInfo->ssd_cap != "0" && baseInfo->ssd_cap != "") {
+        if (interfaceSelectStatus->ssd_select) {
+            string ssd_total_result = "SSD\t";
+            if (interfaceTestFailNum->ssd_test_fail_num == 0) {
+                control->update_mes_log("SSD", "PASS");
+                control->set_func_test_result(SSD_TEST_NAME, "PASS");
+                control->set_interface_test_finish(SSD_TEST_NAME);
+                ssd_total_result = ssd_total_result + "PASS (Time:" + to_string(real_test_num) + ",ERROR:0)";
+            } else {
+                control->update_mes_log("SSD", "FAIL");
+                control->set_func_test_result(SSD_TEST_NAME, "FAIL");
+                ssd_total_result = ssd_total_result + "FAIL (Time:" + to_string(real_test_num) + ",ERROR:" 
+                               + to_string(interfaceTestFailNum->ssd_test_fail_num) + ")";
+            }
+            control->update_screen_log(ssd_total_result);
+        }
+    }
     control->update_screen_log("===============================================");
     if (funcFinishStatus->mem_finish
       && funcFinishStatus->usb_finish
@@ -749,7 +780,8 @@ void* InterfaceTest::test_all(void *arg)
       && funcFinishStatus->edid_finish
       && funcFinishStatus->hdd_finish
       && funcFinishStatus->fan_finish
-      && funcFinishStatus->wifi_finish) {
+      && funcFinishStatus->wifi_finish
+      && funcFinishStatus->ssd_finish) {
          funcFinishStatus->interface_finish = true;
     }
     

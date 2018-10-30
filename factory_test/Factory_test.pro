@@ -14,26 +14,27 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-    core/func/BrightTest.cpp \
-    core/func/CameraTest.cpp \
+    core/control/Control.cpp \
     core/func/EdidTest.cpp \
     core/func/FuncTest.cpp \
     core/func/HddTest.cpp \
     core/func/MemTest.cpp \
     core/func/NetTest.cpp \
-    core/func/SoundTest.cpp \
     core/func/UsbTest.cpp \
     core/func/WifiTest.cpp \
+    core/func/SsdTest.cpp \
     core/func/i2c.cpp \
     core/func/parse_edid.cpp \
-    core/ui/UiHandle.cpp \
+    core/func/SoundTest.cpp \
+    core/func/BrightTest.cpp \
+    core/func/CameraTest.cpp \
     utils/fac_log.cpp \
     utils/fac_utils.cpp \
+    core/ui/UiHandle.cpp \
     core/ui/DisplayTestWindow.cpp \
     core/ui/MainTestWindow.cpp \
     core/ui/StressTestWindow.cpp \
     core/ui/messageform.cpp \
-    core/control/Control.cpp \
     core/ui/VideoTestThread.cpp \
     core/ui/ImageTestThread.cpp
 
@@ -41,16 +42,19 @@ SOURCES += main.cpp\
 HEADERS  += \
     inc/Control.h \
     inc/EdidTest.h \
-    inc/fac_log.h \
-    inc/fac_utils.h \
     inc/FuncBase.h \
     inc/FuncTest.h \
+    inc/MemTest.h \
     inc/NetTest.h \
-    inc/SoundTest.h \
-    inc/ui.h \
+    inc/HddTest.h \
+    inc/SsdTest.h \
     inc/WifiTest.h \
+    inc/SoundTest.h \
     inc/BrightTest.h \
     inc/CameraTest.h \
+    inc/fac_log.h \
+    inc/fac_utils.h \
+    inc/ui.h \
     inc/UiHandle.h \
     inc/messageform.h \
     inc/VideoTestThread.h \

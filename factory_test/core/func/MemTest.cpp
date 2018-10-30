@@ -47,7 +47,10 @@ void* MemTest::test_all(void *arg)
 	screen_log_red = "";
     screen_log_black += "==================== " + MEM_TEST_NAME + " ====================\n";
 	
-    is_pass = compare_men_cap(get_int_value(baseInfo->mem_cap));
+	if (1) {  //TODO:third
+    	is_pass = compare_men_cap(get_int_value(baseInfo->mem_cap));
+	}
+	
     is_pass &= mem_stability_test();
     string stability_result = execute_command("cat " + MEM_UI_LOG);
     screen_log_black += stability_result + "\n\n";

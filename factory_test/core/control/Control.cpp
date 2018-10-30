@@ -14,6 +14,7 @@ Control::Control():QObject()
     _funcBase[HDD]            = new HddTest();
     _funcBase[FAN]            = new FanTest();
     _funcBase[WIFI]           = new WifiTest();
+    _funcBase[SSD]            = new SsdTest();
     _funcBase[SOUND]          = new SoundTest();
     _funcBase[BRIGHT]         = new BrightTest();
     _funcBase[CAMERA]         = new CameraTest();
@@ -97,6 +98,13 @@ void Control::init_ui()
     } else {
         _funcFinishStatus->hdd_finish = true;
         _interfaceTestStatus->hdd_test_over = true;
+    }
+	
+    if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
+        _uiHandle->add_interface_test_button(SSD_TEST_NAME);
+    } else {
+        _funcFinishStatus->ssd_finish = true;
+        _interfaceTestStatus->ssd_test_over = true;
     }
     
     if (_baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") {
@@ -436,6 +444,9 @@ void Control::init_mes_log()
     if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
         LOG_MES("HDD:       NULL\n");
     }
+    if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
+        LOG_MES("SSD:       NULL\n");
+    }
     if (_baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") {
         LOG_MES("FAN:       NULL\n");
     }
@@ -657,6 +668,15 @@ void Control::set_interface_select_status(string func, bool state) {
             _interfaceTestStatus->wifi_test_over = true;
         }
     }
+    if (func == SSD_TEST_NAME) {
+        _interfaceSelectStatus->ssd_select = state;
+        if (_interfaceSelectStatus->ssd_select) {
+            _funcFinishStatus->ssd_finish = false;
+        } else {
+            _funcFinishStatus->ssd_finish = true;
+            _interfaceTestStatus->ssd_test_over = true;
+        }
+    }
 }
 
 void Control::set_interface_test_status(string func, bool status){
@@ -683,6 +703,9 @@ void Control::set_interface_test_status(string func, bool status){
     }
     if (func == WIFI_TEST_NAME) {
         _interfaceTestStatus->wifi_test_over = status;
+    }
+    if (func == SSD_TEST_NAME) {
+        _interfaceTestStatus->ssd_test_over = status;
     }
 }
 
@@ -711,6 +734,9 @@ void Control::set_interface_test_finish(string func){
     if (func == WIFI_TEST_NAME) {
         _funcFinishStatus->wifi_finish = true;
     }
+    if (func == SSD_TEST_NAME) {
+        _funcFinishStatus->ssd_finish = true;
+    }
 }
 
 void Control::set_interface_test_result(string func, bool status) {
@@ -737,6 +763,9 @@ void Control::set_interface_test_result(string func, bool status) {
     }
     if (func == WIFI_TEST_NAME) {
         _interfaceTestResult->wifi_test_result = status;
+    }
+    if (func == SSD_TEST_NAME) {
+        _interfaceTestResult->ssd_test_result = status;
     }
 }
 

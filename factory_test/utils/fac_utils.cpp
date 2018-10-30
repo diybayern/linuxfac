@@ -251,7 +251,7 @@ void get_hwinfo(HwInfo* hwInfo)
 int get_int_value(const string str)
 {
     if (str.size() == 0) {
-        return -1;
+        return 0;
     } else {
         return atoi(str.c_str());
     }

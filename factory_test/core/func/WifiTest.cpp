@@ -437,18 +437,19 @@ void* WifiTest::test_all(void*)
         }
         sleep(1);
     }
+	
+	LOG_INFO("---------- start wifi test ----------\n");
     screen_log_black = "";
 	screen_log_red = "";
     screen_log_black += "==================== " + WIFI_TEST_NAME + " ====================\n";
     bool is_pass = false;
     FacArg* _facArg = control->get_fac_arg();
-    string cmd = "bash " + WIFI_TEST_SCRIPT + " " + to_string(check_file_exit(WHOLE_TEST_FILE)) + " " + _facArg->wifi_ssid
-        		+ " " + _facArg->wifi_passwd + " " + _facArg->wifi_enp;
+    string cmd = "bash " + WIFI_TEST_SCRIPT + + " " + _facArg->wifi_ssid + " " + _facArg->wifi_passwd + " " + _facArg->wifi_enp;
     if (system(cmd.c_str()) < 0){
         LOG_ERROR("ERROR:wifi_test.sh run error!\n");
         screen_log_black += "wifi_test.sh run error!\n";
         screen_log_red += "\t错误：wifi脚本执行失败!\n";
-    }else {
+    } else {
         if (check_if_wifi_connect_pass()) {
             is_pass = wifi_test_send_msg();        
         }

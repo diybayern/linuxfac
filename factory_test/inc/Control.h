@@ -10,13 +10,14 @@
 #include "EdidTest.h"
 #include "WifiTest.h"
 #include "HddTest.h"
+#include "SsdTest.h"
 #include "BrightTest.h"
 #include "CameraTest.h"
 
 #include "FuncBase.h"
 #include "UiHandle.h"
 
-#define   FUNC_TYPE_NUM     (15)
+#define   FUNC_TYPE_NUM     (16)
 
 enum FuncType {
     INTERFACE = 0,
@@ -28,6 +29,7 @@ enum FuncType {
     HDD,
     FAN,
     WIFI,
+    SSD,
     SOUND,
     BRIGHT,
     CAMERA,
@@ -65,6 +67,7 @@ struct FuncFinishStatus {
         hdd_finish       = false;
         fan_finish       = false;
         wifi_finish      = false;
+        ssd_finish       = false;
         sound_finish     = false;
         display_finish   = false;
         bright_finish    = false;
@@ -80,6 +83,7 @@ struct FuncFinishStatus {
     bool hdd_finish;
     bool fan_finish;
     bool wifi_finish;
+    bool ssd_finish;
     bool sound_finish;
     bool display_finish;
     bool bright_finish;
@@ -97,6 +101,7 @@ struct InterfaceTestStatus {
         hdd_test_over  = false;
         fan_test_over  = false;
         wifi_test_over = false;
+        ssd_test_over  = false;
     }
     bool mem_test_over;
     bool usb_test_over;
@@ -106,6 +111,7 @@ struct InterfaceTestStatus {
     bool hdd_test_over;
     bool fan_test_over;
     bool wifi_test_over;
+    bool ssd_test_over;
 };
 
 struct InterfaceTestResult {
@@ -118,6 +124,7 @@ struct InterfaceTestResult {
         hdd_test_result  = false;
         fan_test_result  = false;
         wifi_test_result = false;
+        ssd_test_result  = false;
     }
     bool mem_test_result;
     bool usb_test_result;
@@ -127,6 +134,7 @@ struct InterfaceTestResult {
     bool hdd_test_result;
     bool fan_test_result;
     bool wifi_test_result;
+    bool ssd_test_result;
 };
 
 struct InterfaceTestFailNum {
@@ -138,6 +146,7 @@ struct InterfaceTestFailNum {
     int hdd_test_fail_num;
     int fan_test_fail_num;
     int wifi_test_fail_num;
+    int ssd_test_fail_num;
 };
 
 struct InterfaceSelectStatus {
@@ -150,6 +159,7 @@ struct InterfaceSelectStatus {
         hdd_select  = true;
         fan_select  = true;
         wifi_select = true;
+        ssd_select  = true;
     }
     bool mem_select;
     bool usb_select;
@@ -159,6 +169,7 @@ struct InterfaceSelectStatus {
     bool hdd_select;
     bool fan_select;
     bool wifi_select;
+    bool ssd_select;
 };
 
 struct MesInfo {
