@@ -19,7 +19,6 @@
 
 pthread_mutex_t g_reg_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-extern int edid_read_i2c_test(int edid_num);
 extern string get_edid_i2c_screen_log();
 extern string get_edid_i2c_screen_red();
 

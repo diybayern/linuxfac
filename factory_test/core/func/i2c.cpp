@@ -122,7 +122,7 @@ int edid_read_i2c_test(int edid_num)
     int i, j, ret, len, numbusses=0, i2cfile, i2cbus=0;
     int goodbus[128];
     unsigned char block[256];
-	
+
     i2c_screen_log = "";
     i2c_screen_red = "";
 
@@ -149,7 +149,9 @@ endloop:
         return 1;
     }
 #endif
-
+    if (edid_num == -1) {
+        return numbusses;
+    }
     if (numbusses == 0) {
         LOG_ERROR("Looks like no buses have an EDID. Sorry!\n");
         return AGAIN;

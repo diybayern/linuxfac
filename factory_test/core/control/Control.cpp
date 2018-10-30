@@ -95,14 +95,15 @@ void Control::init_ui()
     if (_is_third_product) {
         _uiHandle->add_main_label("CPU型号:", _hwInfo->cpu_type);
         _uiHandle->add_main_label("内存容量:", execute_command("free -m | awk '/Mem/ {print $2}'") + "M");
-        _uiHandle->add_main_label("网卡信息:", get_third_net_info());
         _uiHandle->add_main_label("HDD容量:", "--");//TODO
         _uiHandle->add_main_label("SSD容量:", "--");//TODO
+        _uiHandle->add_main_label("EDID信息:", to_string(edid_read_i2c_test(-1)));
         
         string real_total_num = execute_command("lsusb -t | grep \"Mass Storage\" | wc -l");
         string real_num_3 = execute_command("lsusb -t | grep \"Mass Storage\" | grep \"5000M\" | wc -l");
         _uiHandle->add_main_label("USB信息:", real_num_3 + "/" + real_total_num);
-        
+        _uiHandle->add_main_label("网卡信息:", get_third_net_info());
+
         string wifi_exist = execute_command("ifconfig -a | grep wlan0");
         if (wifi_exist != "error" && wifi_exist != "") {
             _uiHandle->add_main_label("WIFI信息:", "存在");
@@ -172,7 +173,7 @@ void Control::init_ui()
         } else {
             _funcFinishStatus->camera_finish = true;
         }
-    } else {
+    } else {//TODO:camera test
         _funcFinishStatus->bright_finish = true;
         _funcFinishStatus->camera_finish = true;
     }

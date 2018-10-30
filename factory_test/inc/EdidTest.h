@@ -7,6 +7,8 @@
 
 typedef struct LRMI_regs reg_frame;
 
+extern int edid_read_i2c_test(int edid_num);
+
 class EdidTest : public FuncBase
 {
 public:
