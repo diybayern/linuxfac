@@ -46,6 +46,7 @@ enum InterfaceRunStatus {
 
 enum TestStep {
     STEP_IDLE = 0,
+    STEP_THIRD_NET,
     STEP_INTERFACE,
     STEP_SOUND,
     STEP_DISPLAY,
@@ -299,6 +300,12 @@ public:
     FacArg* get_fac_arg() {
         return _facArg;
     }
+
+    bool get_third_product_state() {
+        return _is_third_product;
+    }
+
+    string get_third_net_info();
     
 private:
     void init_base_info();
@@ -327,10 +334,12 @@ private:
     bool _stress_test_window_quit_status;
     bool _pcba_whole_lock_state;
     vector<string> _record;
+    bool _is_third_product;
 
 signals:
 
 public slots:
+    void start_third_net_test();
     void start_interface_test();
     void start_sound_test();
     void start_display_test();

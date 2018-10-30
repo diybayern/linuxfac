@@ -1,13 +1,14 @@
 #!/bin/bash
 #
 log_file=/var/log/factory.log
+hdd_status=/tmp/hdd.status
 hdd_exist_result=0
 hdd_cap_result=0
 health_result=0
 bcache_result=0
 dd_result=0
-min_mount_point_cap=450     #unit:G
 max_mount_point_cap=$1     #unit:G
+min_mount_point_cap=$[$1*9/10]     #unit:G
 dd_test_file_size=1024      #unit:M
 block_dir="/sys/block/"
 whole_test_file="/tmp/whole_test"
@@ -55,7 +56,7 @@ judge_bcache_constitute_mmc_hdd()
     return 0
 }
 
-rm -rf /tmp/hdd.status
+rm -rf $hdd_status
 
 #if hdd exist
 mount_point=`python3 /etc/bcache-status -s | awk '/\/dev\/sd/ {print $2}'`
@@ -78,7 +79,7 @@ if [ -z "$mount_point" ]; then
     done
     if [ -z ${hdd_base} ];then
         echo 'no /dev/sd' >> $log_file
-        echo "hdd不存在" > /tmp/hdd.status
+        echo "hdd不存在" > $hdd_status
         exit
     fi
 else
@@ -100,12 +101,12 @@ if [[ $mount_point_unit =~ $cap_unit ]];then
         hdd_cap_result=1
     else
         echo 'hdd cap is wrong' >> $log_file
-        echo "hdd容量错误" > /tmp/hdd.status
+        echo "hdd容量错误" > $hdd_status
         exit
     fi
 else
     echo 'cap unit is wrong' >> $log_file
-    echo "hdd容量单位错误" > /tmp/hdd.status
+    echo "hdd容量单位错误" > $hdd_status
     exit
 fi
 
@@ -118,7 +119,7 @@ if [ -n "$smartctl_result" ];then
     health_result=1
 else
     echo 'hdd is not health' >> $log_file
-    echo "hdd有异常" > /tmp/hdd.status
+    echo "hdd有异常" > $hdd_status
     exit
 fi
 
@@ -133,7 +134,7 @@ else
     if [ $? -ne 0 ];then
         bcache_result=0
         echo 'bcache is not ready' >> $log_file
-        echo "bcache未准备" > /tmp/hdd.status
+        echo "bcache未准备" > $hdd_status
         exit
     else
         bcache_result=1
@@ -172,7 +173,7 @@ else
             diff /tmp/.norm_file /opt/lessons/.tmp_factory_test_norm$i
             if [ $? -ne 0 ];then
                 echo "dd diff error at $i compare." >> $log_file
-                echo "hdd读写失败" > /tmp/hdd.status
+                echo "hdd读写失败" > $hdd_status
                 break
             fi
 
@@ -191,6 +192,6 @@ echo "hdd_exist_result:${hdd_exist_result},hdd_cap_result:${hdd_cap_result},heal
 
 if [ ${hdd_exist_result} -eq 1 -a ${hdd_cap_result} -eq 1 -a ${health_result} -eq 1 -a ${bcache_result} -eq 1 -a ${dd_result} -eq 1 ];then
     echo "hdd test:PASS" >> $log_file
-    echo "SUCCESS" > /tmp/hdd.status
+    echo "SUCCESS" > $hdd_status
 fi
 

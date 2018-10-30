@@ -30,6 +30,7 @@ const string FAN_TEST_NAME  = "FAN测试";
 const string WIFI_TEST_NAME = "WIFI测试";
 const string SSD_TEST_NAME  = "SSD测试";
 
+const string THIRD_NET_TEST_NAME = "网口收发包";
 const string INTERFACE_TEST_NAME = "接口测试";
 const string SOUND_TEST_NAME     = "音频测试";
 const string DISPLAY_TEST_NAME   = "显示测试";

@@ -12,8 +12,9 @@ bool HddTest::hdd_test_all(string hdd_cap)
         screen_log_black += "ERROR:hdd_test.sh run error\n";
         screen_log_red += "\t错误：HDD测试脚本运行失败\n";
     }
-    if (check_if_hdd_pass())
+    if (check_if_hdd_pass()) {
         return true;
+    }
     return false;
 }
 

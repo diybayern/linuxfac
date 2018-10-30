@@ -12,8 +12,9 @@ bool SsdTest::ssd_test_all(string ssd_cap)
         screen_log_black += "ERROR:ssd_test.sh run error\n";     //TODO: ssd_test.sh
         screen_log_red += "\t错误：HDD测试脚本运行失败\n";
     }
-    if (check_if_ssd_pass())
+    if (check_if_ssd_pass()) {
         return true;
+    }
     return false;
 }
 

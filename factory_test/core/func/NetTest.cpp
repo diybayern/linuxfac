@@ -418,8 +418,9 @@ bool NetTest::net_send_broadcast_msg(NetInfo* info, int num)
     return ret;
 }
 
-bool NetTest::net_test_all()
+bool NetTest::net_test_all(bool test_flag)
 {
+    Control *control = Control::get_control();
     int i = 0;
     bool ret = 0;
     NetInfo *info = NULL;
@@ -456,21 +457,23 @@ bool NetTest::net_test_all()
         ret = false;
         goto error;
     }
-
-    if (info->eth_link) {
-        LOG_INFO("Network link detected: \tyes\n");
-        screen_log_black += "Network link detected: \t\tyes\n";
-    } else {
-        LOG_ERROR("ERROR: network is not linked!\n");
-        screen_log_black += "Network link detected: \t\tno\n\tERROR: network is not linked!\n";
-        screen_log_red += "\t错误：网口未连接\n";
-        ret = false;
-        goto error;
+    
+    if (test_flag) {
+        if (info->eth_link) {
+            LOG_INFO("Network link detected: \tyes\n");
+            screen_log_black += "Network link detected: \t\tyes\n";
+        } else {
+            LOG_ERROR("ERROR: network is not linked!\n");
+            screen_log_black += "Network link detected: \t\tno\n\tERROR: network is not linked!\n";
+            screen_log_red += "\t错误：网口未连接\n";
+            ret = false;
+            goto error;
+        }
     }
-
+    
     if (info->eth_speed == 0
-        	|| info->eth_speed == (unsigned short)(-1)
-        	|| info->eth_speed == (unsigned int)(-1)) {
+            || info->eth_speed == (unsigned short)(-1)
+            || info->eth_speed == (unsigned int)(-1)) {
         LOG_ERROR("Network card speed: \tUnknown!\n");
         screen_log_black += "Network card speed: \t\tUnknown!\n";
         screen_log_red += "\t错误：网卡速率未知\n";
@@ -478,7 +481,7 @@ bool NetTest::net_test_all()
     } else {
         LOG_INFO("Network card speed: \t%uMbps\n", info->eth_speed);
         screen_log_black += "Network card speed: \t\t" + to_string(info->eth_speed) + "Mbps\n";
-        if (info->eth_speed != ETH_LINK_SPEED) {
+        if (!control->get_third_product_state() && info->eth_speed != ETH_LINK_SPEED) {
             LOG_ERROR("ERROR: Network speed must be %uMbps, but current is %uMbps\n",
                                         ETH_LINK_SPEED, info->eth_speed);
             screen_log_black += "\tERROR: Network speed must be " + to_string(ETH_LINK_SPEED)
@@ -491,36 +494,37 @@ bool NetTest::net_test_all()
 
     screen_log_black += "Network card duplex: \t\t" + net_get_duplex_desc(info->eth_duplex) + "\n";
     LOG_INFO("Network card duplex: \t\t%s\n", (net_get_duplex_desc(info->eth_duplex)).c_str());
-    if (info->eth_duplex != DUPLEX_FULL) {
+    if (!control->get_third_product_state() && info->eth_duplex != DUPLEX_FULL) {
         screen_log_black += "\tERROR: Network duplex must be Full, but current is "
                     + net_get_duplex_desc(info->eth_duplex) + "\n";
         screen_log_red += "\t错误：网卡必须为Full全双工，但检测到网卡为" + net_get_duplex_desc(info->eth_duplex) + "\n";
         LOG_ERROR("ERROR: Network duplex must be Full, but current is %s\n", (net_get_duplex_desc(info->eth_duplex)).c_str());
         ret = false;
     }
+    
+    if (test_flag) {
+        info->recv_num = 0;
+        net_send_broadcast_msg(info, 100);
 
-    info->recv_num = 0;
-    net_send_broadcast_msg(info, 100);
-
-	LOG_INFO("before wait 2 seconds, info->recv_num=%d", info->recv_num);
-    // wait for 2 seconds
-    while (1) {
-        i++;
-        if (info->recv_num == 100 || i == 100){
-            break;
+        LOG_INFO("before wait 2 seconds, info->recv_num=%d", info->recv_num);
+        // wait for 2 seconds
+        while (1) {
+            i++;
+            if (info->recv_num == 100 || i == 100){
+                break;
+            }
+            usleep(20000);
         }
-        usleep(20000);
-    }
-	
-    if (info->recv_num < 90) {
-        screen_log_red += "\t错误：网口收报个数未达标\n";
-        ret = false;
-    }
+    
+        if (info->recv_num < 90) {
+            screen_log_red += "\t错误：网口收报个数未达标\n";
+            ret = false;
+        }
 
-    LOG_INFO("send package num: \t\t100\n");
-    LOG_INFO("recv package num: \t\t%d\n",  info->recv_num);
-    screen_log_black += "send package num: \t\t100\nrecv package num: \t\t" + to_string(info->recv_num) + "\n\n";
-
+        LOG_INFO("send package num: \t\t100\n");
+        LOG_INFO("recv package num: \t\t%d\n",  info->recv_num);
+        screen_log_black += "send package num: \t\t100\nrecv package num: \t\t" + to_string(info->recv_num) + "\n\n";
+    }
 error:
 
     return ret;
@@ -530,19 +534,28 @@ void* NetTest::test_all(void*)
 {
     Control *control = Control::get_control();
     control->set_interface_test_status(NET_TEST_NAME, false);
-	
+    
     screen_log_black = "";
-	screen_log_red = "";
-	screen_log_black += "==================== " + NET_TEST_NAME + " ====================\n";
-    bool is_pass = net_test_all();
+    screen_log_red = "";
+    if (!control->get_third_product_state()) {
+        screen_log_black += "==================== " + NET_TEST_NAME + " ====================\n";
+    }
+    bool is_pass = net_test_all(true);
     if (is_pass) {
         LOG_INFO("net test result:\tPASS\n");
         screen_log_black += NET_TEST_NAME + "结果：\t\t\t成功\n\n";
         control->set_interface_test_result(NET_TEST_NAME, true);
+        if (control->get_third_product_state()) {
+            control->set_func_test_result(THIRD_NET_TEST_NAME, "PASS");
+            control->set_interface_test_finish(NET_TEST_NAME);
+        }
     } else {
         LOG_INFO("net test result:\tFAIL\n");
         screen_log_red = NET_TEST_NAME + "结果：\t\t\t失败\n\n" + screen_log_red;
         control->set_interface_test_result(NET_TEST_NAME, false);
+        if (control->get_third_product_state()) {
+            control->set_func_test_result(THIRD_NET_TEST_NAME, "FAIL");
+        }
     }
     control->update_screen_log(screen_log_black);
     if (screen_log_red != "") {

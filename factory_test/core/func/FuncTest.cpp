@@ -26,8 +26,8 @@ void CpuTest::start_test(BaseInfo* baseInfo)
 {
     Control *control = Control::get_control();
     control->set_interface_test_status(CPU_TEST_NAME, false);
-	screen_log_black = "";
-	screen_log_red = "";
+    screen_log_black = "";
+    screen_log_red = "";
     screen_log_black += "==================== " + CPU_TEST_NAME + " ====================\n";
     if (is_cpu_test_pass(baseInfo)) {
         LOG_INFO("cpu test result:\tPASS\n");
@@ -59,12 +59,12 @@ void* FanTest::test_all(void *arg)
 {
     Control *control = Control::get_control();
     control->set_interface_test_status(FAN_TEST_NAME, false);
-	BaseInfo* baseInfo = (BaseInfo*)arg;
-	
-	screen_log_black = "";
-	screen_log_red = "";
+    BaseInfo* baseInfo = (BaseInfo*)arg;
+    
+    screen_log_black = "";
+    screen_log_red = "";
     screen_log_black += "==================== " + FAN_TEST_NAME + " ====================\n";
-	
+    
     string result = fan_speed_test(baseInfo->fan_speed);
     if (result == "SUCCESS") {
         LOG_INFO("fan test result:\tPASS\n");
@@ -93,7 +93,7 @@ void FanTest::start_test(BaseInfo* baseInfo)
 }
 
 
-int	 StressTest::mem_stress_num = 0;
+int  StressTest::mem_stress_num = 0;
 bool StressTest::mem_stress_status = false;
 bool StressTest::mem_stress_result = true;
 string StressTest::stress_result = "";
@@ -131,7 +131,7 @@ bool StressTest::start_cpuburn_stress()
     stop_cpuburn_stress();
 
     if (processornum > 32) {
-		processornum = 32;
+        processornum = 32;
     }
     while(processornum-- > 0) {
         char cmd_burn[CMD_BUF_SIZE];
@@ -160,34 +160,34 @@ void StressTest::stop_cpuburn_stress()
 void* StressTest::mem_stress_test(void*)
 {
     pthread_detach(pthread_self());
-	mem_stress_status = true;
-	mem_stress_num++;
-	LOG_INFO("---------- start stress mem test NO.%d ----------\n", mem_stress_num);
+    mem_stress_status = true;
+    mem_stress_num++;
+    LOG_INFO("---------- start stress mem test NO.%d ----------\n", mem_stress_num);
     stop_mem_stress_test();
-	
+    
     string free_mem_cap = execute_command("free -m | awk '/Mem/ {print $4}'");
-	if (free_mem_cap == "error") {
-		LOG_ERROR("get free mem cap error\n");
-		mem_stress_result &= false;
-		mem_stress_status = false;
-		return NULL;
-	}
-	
-	int test_mem_cap = (int)(get_int_value(free_mem_cap.c_str()) * STRESS_MEM_PERCENT);
-	if (test_mem_cap > STRESS_MEM_CAP_MAX) {
-		test_mem_cap = STRESS_MEM_CAP_MAX;
-	}
-	
+    if (free_mem_cap == "error") {
+        LOG_ERROR("get free mem cap error\n");
+        mem_stress_result &= false;
+        mem_stress_status = false;
+        return NULL;
+    }
+    
+    int test_mem_cap = (int)(get_int_value(free_mem_cap.c_str()) * STRESS_MEM_PERCENT);
+    if (test_mem_cap > STRESS_MEM_CAP_MAX) {
+        test_mem_cap = STRESS_MEM_CAP_MAX;
+    }
+    
     string result = execute_command("bash " + MEM_TEST_SCRIPT + " " + to_string(test_mem_cap) + "M");
     if (result == "SUCCESS") {
         LOG_INFO("mem stress test result:\tPASS\n");
-		mem_stress_result &= true;
+        mem_stress_result &= true;
     } else {
         LOG_ERROR("mem stress test result:\tfailed\n");
-		mem_stress_result &= false;
+        mem_stress_result &= false;
     }
-	mem_stress_status = false;
-	
+    mem_stress_status = false;
+    
     return NULL;
 }
 
@@ -203,31 +203,31 @@ void* StressTest::test_all(void* arg)
     BaseInfo* baseInfo = (BaseInfo*)arg;
     Control*  control  = Control::get_control();
     UiHandle* uihandle = UiHandle::get_uihandle();
-	
+    
     TimeInfo init_time = {0,0,0,0};
     TimeInfo tmp_dst   = {0,0,0,0};
-	TimeInfo mem_src   = {0,0,0,0};
-	TimeInfo mem_dst   = {0,0,0,0};
-	
+    TimeInfo mem_src   = {0,0,0,0};
+    TimeInfo mem_dst   = {0,0,0,0};
+    
     char datebuf[CMD_BUF_SIZE] = {0};
     CpuStatus st_cpu = {0,0,0,0,0,0,0,0,0,0,0};
     pthread_t pid_t1, pid_t2;
 
-    stress_result = "";	
+    stress_result = ""; 
     string mem_result_str = "NULL";
-	mem_stress_num = 0;
-	mem_stress_status = false;
-	mem_stress_result = true;
-	bool encode = true;
-	bool decode = true;
-	
+    mem_stress_num = 0;
+    mem_stress_status = false;
+    mem_stress_result = true;
+    bool encode = true;
+    bool decode = true;
+    
     FuncBase** _funcBase = control->get_funcbase();
     CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
 
     control->set_pcba_whole_lock_state(false);
     if (check_file_exit(STRESS_LOCK_FILE.c_str())) {
         string stress_lock_state = execute_command("cat " + STRESS_LOCK_FILE);
-		LOG_INFO("auto stress lock file is: %s", stress_lock_state.c_str());
+        LOG_INFO("auto stress lock file is: %s", stress_lock_state.c_str());
         remove_local_file(STRESS_LOCK_FILE.c_str());
         if (stress_lock_state == WHOLE_LOCK || stress_lock_state == PCBA_LOCK) {
             control->set_pcba_whole_lock_state(true);
@@ -297,7 +297,7 @@ void* StressTest::test_all(void* arg)
         }
         
         get_current_open_time(&tmp_dst);
-		mem_dst = tmp_dst;
+        mem_dst = tmp_dst;
         diff_running_time(&tmp_dst, &init_time);
         if (STRESS_TIME_ENOUGH(tmp_dst)) {
             remove_local_file(STRESS_LOCK_FILE.c_str());
@@ -313,15 +313,15 @@ void* StressTest::test_all(void* arg)
         }
 
         if (STRESS_MEMTEST_START(tmp_dst) && !mem_stress_status) {
-			get_current_open_time(&mem_src);
+            get_current_open_time(&mem_src);
             pthread_create(&pid_t1, NULL, mem_stress_test, NULL);
         }
 
         diff_running_time(&mem_dst, &mem_src);
-		if (STRESS_MEMTEST_ITV(mem_dst) && !mem_stress_status) {
-			get_current_open_time(&mem_src);
+        if (STRESS_MEMTEST_ITV(mem_dst) && !mem_stress_status) {
+            get_current_open_time(&mem_src);
             pthread_create(&pid_t1, NULL, mem_stress_test, NULL);
-		}
+        }
 
         if (mem_stress_num == 1 && !mem_stress_status && mem_stress_result) {
             mem_result_str = "PASS";
@@ -331,7 +331,7 @@ void* StressTest::test_all(void* arg)
             uihandle->update_stress_label_value("Mem压力测试", mem_result_str);
             uihandle->set_stress_test_pass_or_fail("FAIL");
         }
-		
+        
         encode = true;
         decode = control->get_decode_status();
 
@@ -340,19 +340,19 @@ void* StressTest::test_all(void* arg)
             uihandle->set_stress_test_pass_or_fail("FAIL");
         }
 
-		stress_result = "运行时间:" + to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour)
-						+ "小时" + to_string(tmp_dst.minute) + "分" + to_string(tmp_dst.second)
-						+ "秒  编码状态:" + (string)PRINT_RESULT_STR(encode) + "  解码状态:"
-						+ (string)PRINT_RESULT_STR(decode) + "  Mem压力测试:" + mem_result_str + "\n";			
+        stress_result = "运行时间:" + to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour)
+                        + "小时" + to_string(tmp_dst.minute) + "分" + to_string(tmp_dst.second)
+                        + "秒  编码状态:" + (string)PRINT_RESULT_STR(encode) + "  解码状态:"
+                        + (string)PRINT_RESULT_STR(decode) + "  Mem压力测试:" + mem_result_str + "\n";          
 
         snprintf(datebuf, CMD_BUF_SIZE, "%d天%d时%d分%d秒", tmp_dst.day, tmp_dst.hour, tmp_dst.minute, tmp_dst.second);
         uihandle->update_stress_label_value("运行时间", datebuf);
-		
+        
         uihandle->update_stress_label_value("CPU温度", execute_command_err_log("bash " + GET_CPU_TEMP_SCRIPT));
         uihandle->update_stress_label_value("CPU频率", get_current_cpu_freq());
         uihandle->update_stress_label_value("Mem", get_mem_info());
         uihandle->update_stress_label_value("Cpu", get_cpu_info(&st_cpu));
-				
+                
         sleep(1);
     }    
     return NULL;
@@ -389,7 +389,7 @@ void NextProcess::next_process_handle(BaseInfo* baseInfo)
     Control* control = Control::get_control();
     UiHandle* uihandle = UiHandle::get_uihandle();
     int next_process_f = -1;
-	
+    
     pthread_detach(pthread_self());    
     if (pthread_mutex_trylock(&g_next_process_lock)) {
         LOG_ERROR("g_next_process_lock has been locked\n");
@@ -403,13 +403,13 @@ void NextProcess::next_process_handle(BaseInfo* baseInfo)
         usleep(1000000);
         LOG_INFO("bache check result value is %d\n", WEXITSTATUS(next_process_f));
 
-		if (WEXITSTATUS(next_process_f) > 0) {
-        	LOG_ERROR("The disk is abnormal and cannot enter the next process.\n");
-        	uihandle->confirm_test_result_warning("磁盘异常，无法进入下道工序");
-        	control->update_screen_log("磁盘异常，无法进入下道工序");
+        if (WEXITSTATUS(next_process_f) > 0) {
+            LOG_ERROR("The disk is abnormal and cannot enter the next process.\n");
+            uihandle->confirm_test_result_warning("磁盘异常，无法进入下道工序");
+            control->update_screen_log("磁盘异常，无法进入下道工序");
             pthread_mutex_unlock(&g_next_process_lock);
-			return;
-    	}
+            return;
+        }
     } 
     pthread_mutex_unlock(&g_next_process_lock);
     
@@ -464,12 +464,12 @@ void* InterfaceTest::test_all(void *arg)
     Control *control = Control::get_control();
 
     if (control->get_interface_run_status() == INF_RUNNING) {
-		LOG_INFO("******************** stop interface test ********************");
+        LOG_INFO("******************** stop interface test ********************");
         control->set_interface_run_status(INF_BREAK);
         control->get_ui_handle()->ui_set_interface_test_state(INF_BREAK);
         return NULL;
     }
-	
+    
     FuncFinishStatus* funcFinishStatus = control->get_func_finish_status();
     if (funcFinishStatus->interface_finish) {
         LOG_INFO("interface test has finished, do not need test again");
@@ -482,7 +482,7 @@ void* InterfaceTest::test_all(void *arg)
     }
 
     if (control->get_interface_run_status() == INF_RUNEND) {
-		LOG_INFO("******************** start interface test ********************");
+        LOG_INFO("******************** start interface test ********************");
         control->set_interface_run_status(INF_RUNNING);
         control->get_ui_handle()->ui_set_interface_test_state(INF_RUNNING);
     }    
@@ -516,40 +516,40 @@ void* InterfaceTest::test_all(void *arg)
         string loop = "\n******************** LOOP: " + to_string(i + 1) + " ********************";
         control->update_screen_log(loop);
         if (interfaceSelectStatus->mem_select) {
-			LOG_INFO("---------- start mem test ----------\n");
+            LOG_INFO("---------- start mem test ----------\n");
             FuncBase[MEM]->start_test(baseInfo);
         }
         
         if (interfaceSelectStatus->usb_select) {
-			LOG_INFO("---------- start usb test ----------\n");
+            LOG_INFO("---------- start usb test ----------\n");
             FuncBase[USB]->start_test(baseInfo);
         }
 
         if (interfaceSelectStatus->net_select) {
-			LOG_INFO("---------- start net test ----------\n");
+            LOG_INFO("---------- start net test ----------\n");
             FuncBase[NET]->start_test(baseInfo);
         }
         
         if (interfaceSelectStatus->edid_select) {
-			LOG_INFO("---------- start edid test ----------\n");
+            LOG_INFO("---------- start edid test ----------\n");
             FuncBase[EDID]->start_test(baseInfo);
         }
         
         if (interfaceSelectStatus->cpu_select) {
-			LOG_INFO("---------- start cpu test ----------\n");
+            LOG_INFO("---------- start cpu test ----------\n");
             FuncBase[CPU]->start_test(baseInfo);
         }
 
         if (baseInfo->hdd_cap != "0" && baseInfo->hdd_cap != "") {
             if (interfaceSelectStatus->hdd_select) {
-				LOG_INFO("---------- start hdd test ----------\n");
+                LOG_INFO("---------- start hdd test ----------\n");
                 FuncBase[HDD]->start_test(baseInfo);
             }
         }
-		
+        
         if (baseInfo->fan_speed != "0" && baseInfo->fan_speed != "") {
             if (interfaceSelectStatus->fan_select) {
-				LOG_INFO("---------- start fan test ----------\n");
+                LOG_INFO("---------- start fan test ----------\n");
                 FuncBase[FAN]->start_test(baseInfo);
             }
         }
@@ -559,10 +559,10 @@ void* InterfaceTest::test_all(void *arg)
                 FuncBase[WIFI]->start_test(baseInfo);
             }
         }
-		
+        
         if (baseInfo->ssd_cap != "0" && baseInfo->ssd_cap != "") {
             if (interfaceSelectStatus->ssd_select) {
-				LOG_INFO("---------- start ssd test ----------\n");
+                LOG_INFO("---------- start ssd test ----------\n");
                 FuncBase[SSD]->start_test(baseInfo);
             }
         }
@@ -610,7 +610,7 @@ void* InterfaceTest::test_all(void *arg)
                 if (!interfaceTestResult->wifi_test_result) {
                    interfaceTestFailNum->wifi_test_fail_num++;
                 }
-				
+                
                 if (!interfaceTestResult->ssd_test_result) {
                    interfaceTestFailNum->ssd_test_fail_num++;
                 }
@@ -662,7 +662,7 @@ void* InterfaceTest::test_all(void *arg)
             net_total_result = net_total_result + "PASS (Time:" + to_string(real_test_num) + ",ERROR:0)";
         } else {
             control->update_mes_log("NET", "FAIL");
-            control->set_func_test_result(NET_TEST_NAME,"FAIL");
+            control->set_func_test_result(NET_TEST_NAME, "FAIL");
             net_total_result = net_total_result + "FAIL (Time:" + to_string(real_test_num) + ",ERROR:" 
                                + to_string(interfaceTestFailNum->net_test_fail_num) + ")";
         }
@@ -754,7 +754,7 @@ void* InterfaceTest::test_all(void *arg)
             control->update_screen_log(wifi_total_result);
         }
     }
-	
+    
     if (baseInfo->ssd_cap != "0" && baseInfo->ssd_cap != "") {
         if (interfaceSelectStatus->ssd_select) {
             string ssd_total_result = "SSD\t";

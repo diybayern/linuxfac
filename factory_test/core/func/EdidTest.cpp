@@ -67,7 +67,7 @@ bool EdidTest::do_vbe_ddc_service(unsigned BX, reg_frame* regs)
 
     if (service > SERVICE_LAST) {
         LOG_ERROR("Unknown VBE/DDC service\n");
-		return false;
+        return false;
     }
 
     return do_vbe_service(AX, BX, regs);
@@ -113,9 +113,9 @@ bool EdidTest::read_edid(unsigned int controller, char* output)
     }
 
     memcpy(output, block, EDID_BLOCK_SIZE);
-	if (output == 0) {
-		return false;
-	}
+    if (output == 0) {
+        return false;
+    }
 
     LRMI_free_real(block);
 
@@ -145,7 +145,7 @@ bool EdidTest::edid_test_all(unsigned int num)
     int failed = 0;
     bool read_ret = true;
     bool parse_ret = true;
-	bool result = true;
+    bool result = true;
     char edid_buf[EDID_BLOCK_SIZE] = {0, };
     int edid_num = num;
 
@@ -159,7 +159,7 @@ i2c_test:
     screen_log_red += get_edid_i2c_screen_red();
     if (ret == SUCCESS) {
         pthread_mutex_unlock(&g_reg_mutex);
-		result = true;
+        result = true;
         goto print;
     } else {
         if (ret == AGAIN && failed++ < 5) {
@@ -240,18 +240,18 @@ int EdidTest::get_edid_num(BaseInfo* baseInfo)
 }
 
 void* EdidTest::test_all(void *arg)
-{	
+{   
     Control *control = Control::get_control();
     BaseInfo* baseInfo = (BaseInfo *)arg;
-	
+    
     control->set_interface_test_status(EDID_TEST_NAME, false);
     screen_log_black = "";
-	screen_log_red = "";
-	
+    screen_log_red = "";
+    
     screen_log_black += "==================== " + EDID_TEST_NAME + " ====================\n";
     int edid_num = get_edid_num(baseInfo);
     LOG_INFO("edid num: %d", edid_num);
-	
+    
     bool is_pass = edid_test_all(edid_num);
     if (is_pass) {
         screen_log_black += EDID_TEST_NAME + "结果:\t\t\t成功\n\n";

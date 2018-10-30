@@ -20,13 +20,14 @@ struct NetInfo {
 class NetTest : public FuncBase
 {
 public:
+    static NetInfo* g_net_info;
     bool init();
-    static bool net_test_all();
+    static bool net_test_all(bool test_flag);
     static void* test_all(void*);
     void start_test(BaseInfo* baseInfo);
+    static string net_get_duplex_desc(char duplex);
 
 private:
-    static NetInfo* g_net_info;
     static string screen_log_black;
     static string screen_log_red;
     bool net_get_eth_name(char* eth_name, int size);
@@ -38,7 +39,6 @@ private:
     static int net_eth_no(char *eth_name);
     static bool net_get_eth_status(int fd, char *eth_name, unsigned int *status);
     static int net_test_ioctl(int fd, char *eth_name, void *cmd);
-    static string net_get_duplex_desc(char duplex);
     static bool net_send_broadcast_msg(NetInfo* info, int num);
     static bool net_send_msg(char* src_mac, char* dst_mac, unsigned int index, unsigned int seq);
 };

@@ -19,7 +19,7 @@ IP_SUCCESS=0
 IS_WEP_PASSWD=0
 IS_WPA_PASSWD=0
 
-WHOLE_TEST=$1
+WHOLE_TEST="/tmp/whole_test"
 SSID=$2
 PASSWD=$3
 ENP=$4
@@ -33,7 +33,7 @@ WIFI_SSID_MAC=/tmp/ssid.mac
 
 FACTORY_SHELL_LOG=/var/log/factory_test_bash.log
 WPA_CONFIG=/tmp/wpa.conf
-WPA_SUPPLICANT_EXIST=0
+WPA_SUPPLICANT_EXIST=1
 FACTORY_WIFI_TEST_LOCK=/tmp/.wifi_test.lock
 
 SCAN_CONNECT_TIME=3
@@ -124,11 +124,11 @@ done
 # try to find wifi config ini and parse ssid & passwd
 # write wifi test config info to tmp file for factory test could show them on screan
 
-if [[ $WHOLE_TEST = "1" ]]; then
-    TEST_WIFI="sfc-whole"
-fi
-    
 if [[ -z "$SSID" || -z "$ENP" || -z "$PASSWD" ]]; then
+    if [ -f "$WHOLE_TEST" ];then
+        TEST_WIFI="sfc-whole"
+    fi
+
     echo "NOT FOUNT WIFI CONFIG FILE. USE THE DEFAULT CONFIG INFO. SSID : $TEST_WIFI ." | tee $WIFI_TEST_CONFIG_INFO
 else
     if [ -n "$SSID" ]; then
@@ -222,7 +222,7 @@ touch $FACTORY_WIFI_TEST_LOCK
 echo "start wlan connect $TEST_WIFI...." | tee -a $FACTORY_SHELL_LOG
 for i in `seq 1 $SCAN_CONNECT_TIME`
 do
-    sudo iw wlan0 disconnect
+    #sudo iw wlan0 disconnect
     wpa_cli -i wlan0 disconnect
 
     sleep 1

@@ -40,17 +40,17 @@ void* MemTest::test_all(void *arg)
 {
     Control *control = Control::get_control();
     BaseInfo* baseInfo = (BaseInfo*)arg;
-    bool is_pass;
-	
+    bool is_pass = true;
+    
     control->set_interface_test_status(MEM_TEST_NAME, false);
     screen_log_black = "";
-	screen_log_red = "";
+    screen_log_red = "";
     screen_log_black += "==================== " + MEM_TEST_NAME + " ====================\n";
-	
-	if (1) {  //TODO:third
-    	is_pass = compare_men_cap(get_int_value(baseInfo->mem_cap));
-	}
-	
+    
+    if (!control->get_third_product_state()) {  //TODO:third
+        is_pass = compare_men_cap(get_int_value(baseInfo->mem_cap));
+    }
+    
     is_pass &= mem_stability_test();
     string stability_result = execute_command("cat " + MEM_UI_LOG);
     screen_log_black += stability_result + "\n\n";
