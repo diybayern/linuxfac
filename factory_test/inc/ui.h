@@ -164,7 +164,7 @@ class MainTestWindow : public QDialog
         //lab of complete test or single board test
         QLabel *_lab_complete_or_single_test;
 
-        void _create_main_label_layout();
+        void _create_main_label_layout(bool is_third_product);
         void _create_main_test_layout();
         void _create_screen_log_layout();
         void _create_test_count_and_upload_layout();
@@ -200,7 +200,7 @@ class MainTestWindow : public QDialog
         void sig_factory_delete_event();
 
     public slots:
-        void draw_main_test_window();
+        void draw_main_test_window(bool is_third_product);
         void show_main_test_window();
         void compute_result();
         void get_result_string(QString func, QString result);

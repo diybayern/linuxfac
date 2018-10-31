@@ -29,7 +29,7 @@ class UiHandle: public QObject
         void update_screen_log(string textInfo);
         void update_color_screen_log(string textInfo, string color);
         void update_stress_label_value(string item, string result);
-        void sync_main_test_ui();
+        void sync_main_test_ui(bool is_third_product);
         void to_show_main_test_ui();
         void add_complete_or_single_test_label(string config);
         void show_sn_mac_message_box(string sn_mac);
@@ -51,7 +51,7 @@ class UiHandle: public QObject
         bool _g_decode_status = true;
 
     signals:
-        void to_draw_main_test_window();
+        void to_draw_main_test_window(bool is_third_product);
         void need_to_show_main_test();
         void print_result(QString func, QString result);
         void to_update_stress_label_value(QString item, QString result);

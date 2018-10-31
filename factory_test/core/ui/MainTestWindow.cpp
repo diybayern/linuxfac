@@ -323,7 +323,7 @@ void MainTestWindow::setupUI()
     _grid_main_test_window_layout->setColumnStretch(1, 4);
 }
 
-void MainTestWindow::_create_main_label_layout()
+void MainTestWindow::_create_main_label_layout(bool is_third_product)
 {
     int i;
 
@@ -350,15 +350,19 @@ void MainTestWindow::_create_main_label_layout()
         _grid_main_label_layout->addWidget(_lab_complete_or_single_test, i , 1);
     }
 
-    _hbox_checkbox_auto_upload_log = new QHBoxLayout;
-    _checkbox_auto_upload_log = new QCheckBox(tr("自动上传"));
-    _checkbox_auto_upload_log->setChecked(true);
-    connect(_checkbox_auto_upload_log, SIGNAL(stateChanged(int)), this, SLOT(_auto_upload_state_changed(int)));
+    if (is_third_product == false) {
+        _hbox_checkbox_auto_upload_log = new QHBoxLayout;
+        _checkbox_auto_upload_log = new QCheckBox(tr("自动上传"));
+        _checkbox_auto_upload_log->setChecked(true);
+        connect(_checkbox_auto_upload_log, SIGNAL(stateChanged(int)), this, SLOT(_auto_upload_state_changed(int)));
+        _hbox_checkbox_auto_upload_log->addWidget(_checkbox_auto_upload_log);
+    }
 
-    _hbox_checkbox_auto_upload_log->addWidget(_checkbox_auto_upload_log);
     _hbox_main_label_layout->addLayout(_grid_main_label_layout);
     _hbox_main_label_layout->addStretch();
-    _hbox_main_label_layout->addLayout(_hbox_checkbox_auto_upload_log);
+    if (is_third_product == false) {
+        _hbox_main_label_layout->addLayout(_hbox_checkbox_auto_upload_log);
+    }
 }
 
 void MainTestWindow::update_sn_mac_state(QString sn_mac, QString result)
@@ -624,12 +628,12 @@ void MainTestWindow::_insert_item_record(ItemCheck &record)
     itemlist.append(record);
 }
 
-void MainTestWindow::draw_main_test_window()
+void MainTestWindow::draw_main_test_window(bool is_third_product)
 {
     _create_screen_log_layout();
     _create_test_count_and_upload_layout();
     _create_main_test_layout();
-    _create_main_label_layout();
+    _create_main_label_layout(is_third_product);
     _create_spilter_line_layout();
 }
 

@@ -2,7 +2,7 @@
 
 UiHandle::UiHandle()
 {
-    connect(this, SIGNAL(to_draw_main_test_window()), MainTestWindow::get_main_test_window(), SLOT(draw_main_test_window()));
+    connect(this, SIGNAL(to_draw_main_test_window(bool)), MainTestWindow::get_main_test_window(), SLOT(draw_main_test_window(bool)));
     connect(this, SIGNAL(need_to_show_main_test()), MainTestWindow::get_main_test_window(), SLOT(show_main_test_window()));
     connect(this, SIGNAL(print_result(QString,QString)), MainTestWindow::get_main_test_window(), SLOT(get_result_string(QString,QString)));
     connect(this, SIGNAL(to_show_stress_test_window()), MainTestWindow::get_main_test_window(), SLOT(show_stress_test_window()));
@@ -104,9 +104,9 @@ void UiHandle::start_audio_progress_dialog()
     emit to_start_audio_progress_dialog();
 }
 
-void UiHandle::sync_main_test_ui()
+void UiHandle::sync_main_test_ui(bool is_third_product)
 {
-    emit to_draw_main_test_window();
+    emit to_draw_main_test_window(is_third_product);
 }
 
 void UiHandle::to_show_main_test_ui()
