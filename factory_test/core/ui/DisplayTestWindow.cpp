@@ -93,26 +93,26 @@ void DisplayTestWindow::start_exec()
 
 void DisplayTestWindow::mousePressEvent(QMouseEvent* event)
 {
-	if (event->button() == Qt::LeftButton) {
-    	switch(_state) {
-        	case 0: {
-            	_state = RGB;
+    if (event->button() == Qt::LeftButton) {
+        switch(_state) {
+            case 0: {
+                _state = RGB;
                 update();
                 break;
-           	}
-           	case 1: {
+            }
+            case 1: {
                 _state = BLACK;
                 update();
                 break;
-           	}
-           	case 2: {
+            }
+            case 2: {
                 if (_display_test_window != NULL) {
                     emit sig_finish_show_display_window(true);
                 }
                 break;
-           	}
-           	default:
-           		break;
+            }
+            default:
+                break;
         }
 
     } else if (event->button() == Qt::RightButton) {
@@ -128,23 +128,23 @@ void DisplayTestWindow::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
         switch(_state) {
             case 0: {
-            	_state = RGB;
+                _state = RGB;
                 update();
-				break;
+                break;
             }
             case 1: {
                 _state = BLACK;
                 update();
                 break;
             }
-			case 2: {
-            	if (NULL != _display_test_window) {
-                	emit sig_finish_show_display_window(true);
+            case 2: {
+                if (NULL != _display_test_window) {
+                    emit sig_finish_show_display_window(true);
                 }
                 break;
             }
             default:
-            	break;
+                break;
         }
 
     } else if (event->key() == Qt::Key_Escape) {
@@ -158,33 +158,33 @@ void DisplayTestWindow::keyPressEvent(QKeyEvent *event)
 void DisplayTestWindow::paintEvent(QPaintEvent* event)
 {
     if (event->type() == QEvent::Paint) {
-		QPainter painter(this);
+        QPainter painter(this);
         switch(_state) {
-        	case 0: {
-            	painter.setBrush(QColor(255, 0, 0)); //red
-            	painter.drawRect(0, 0, _st_w/3, _st_h);
-              	painter.setBrush(QColor(0, 255, 0));//green
-              	painter.drawRect(_st_w/3, 0, _st_w/3, _st_h);
-              	painter.setBrush(QColor(0, 0, 255));//blue
-              	painter.drawRect(_st_w/3*2, 0, _st_w/3, _st_h);
-              	_lb_red->setPixmap(_pm_red);
-              	_lb_green->setPixmap(_pm_green);
-              	_lb_blue->setPixmap(_pm_blue);
-              	break;
-          	}
-          	case 1: {
-             	 painter.setBrush(QColor(0, 0, 0)); //black
-              	painter.drawRect(0, 0, _st_w, _st_h);
-              	_lb_red->hide();
-              	_lb_green->hide();
-              	_lb_blue->hide();
-              	break;
-          	}
-          	case 2: {
-              	painter.setBrush(QColor(255, 255, 255)); //white
-              	painter.drawRect(0, 0, _st_w, _st_h);
-              	break;
-          	}
+            case 0: {
+                painter.setBrush(QColor(255, 0, 0)); //red
+                painter.drawRect(0, 0, _st_w/3, _st_h);
+                painter.setBrush(QColor(0, 255, 0));//green
+                painter.drawRect(_st_w/3, 0, _st_w/3, _st_h);
+                painter.setBrush(QColor(0, 0, 255));//blue
+                painter.drawRect(_st_w/3*2, 0, _st_w/3, _st_h);
+                _lb_red->setPixmap(_pm_red);
+                _lb_green->setPixmap(_pm_green);
+                _lb_blue->setPixmap(_pm_blue);
+                break;
+            }
+            case 1: {
+                 painter.setBrush(QColor(0, 0, 0)); //black
+                painter.drawRect(0, 0, _st_w, _st_h);
+                _lb_red->hide();
+                _lb_green->hide();
+                _lb_blue->hide();
+                break;
+            }
+            case 2: {
+                painter.setBrush(QColor(255, 255, 255)); //white
+                painter.drawRect(0, 0, _st_w, _st_h);
+                break;
+            }
         }
     }
 }

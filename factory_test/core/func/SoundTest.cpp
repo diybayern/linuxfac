@@ -66,7 +66,7 @@ void SoundTest::init_volume()
         LOG_INFO("name=%s \n", name);
 
         if ((strcmp(name, "Master") == 0) || (strcmp(name, "Headphone") == 0) || (strcmp(name, "Speaker") == 0)
-				|| (strcmp(name, "PCM") == 0) || (strcmp(name, "Mic") == 0)) {
+                || (strcmp(name, "PCM") == 0) || (strcmp(name, "Mic") == 0)) {
             //set maxvolume
             ret = snd_mixer_selem_get_playback_volume_range(elem, &minVolume, &maxVolume);
             LOG_INFO("name=%s get_playback_volume_range min=%ld max=%ld\n", name, minVolume, maxVolume);

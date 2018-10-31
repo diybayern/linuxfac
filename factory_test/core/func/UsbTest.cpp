@@ -276,7 +276,7 @@ bool UsbTest::usb_test_all(int num)
     if (num == info.dev_num) {
         ret = usb_test_write_read(&info);
     } else {
-	    udev_unref(info.udev);
+        udev_unref(info.udev);
         return false;
     }
 

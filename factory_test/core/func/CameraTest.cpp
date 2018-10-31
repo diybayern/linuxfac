@@ -21,7 +21,7 @@ unsigned long CameraTest::get_window_id(const char *winid_file)
     if (!read_local_data(winid_file, winidbuf, size)) {
         return 0;
     }
-	
+
     winid = strtoul(winidbuf, NULL, 16);
     LOG_INFO("%s: xawtv window ID: [0x%x]\n", winid_file, winid);
 
@@ -83,7 +83,7 @@ void CameraTest::start_camera_xawtv()
         return ;
     }
     usleep(5000);
-	
+
     move_xawtv_window_on_func_test();
 }
 
@@ -139,7 +139,7 @@ bool CameraTest::camera_test_all()
         LOG_ERROR("ERROR: Failed to start xawtv, GPU fault may be detected!\n");
         control->update_screen_log("ERROR: Failed to start xawtv, GPU fault may be detected!\n");
     }
-	
+
     return false;
 }
 

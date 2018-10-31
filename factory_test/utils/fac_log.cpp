@@ -1,10 +1,6 @@
 #include "../inc/fac_log.h"
 #include "../inc/fac_utils.h"
 
-#define LOG_MAX_SIZE    (5<<20)
-#define LOG_MAX_LEN     (1024)
-#define LINE_SZ         (1024)
-
 typedef void (*write_log_callback)(const char*, va_list);
 
 static const char *log_level[LEVEL_MAX] = {(char*)"DEBUG", (char*)"INFO ", \

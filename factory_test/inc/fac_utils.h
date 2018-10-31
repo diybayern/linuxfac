@@ -61,6 +61,10 @@ const int BRIGHTNESS_VALUE[6] =
     7, 17, 27, 37, 47, 57,
 };
 
+#define LOG_MAX_SIZE            (5 << 20)
+#define LOG_MAX_LEN             (1024)
+#define LINE_SZ                 (1024)
+
 #define DEFAULT_FTP_IP          ("172.21.5.48")
 #define DEFAULT_FTP_USER        ("test")
 #define DEFAULT_FTP_PASSWD      ("test")

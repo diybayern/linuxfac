@@ -30,7 +30,7 @@ void BrightTest::bright_test_all(string bright_level)
     int ret = 0;
     
     pthread_detach(pthread_self());
-	
+    
     inotify_fd = inotify_init();
     wd = inotify_add_watch(inotify_fd, "/sys/class/backlight/intel_backlight/actual_brightness", IN_MODIFY);
     
@@ -39,7 +39,7 @@ void BrightTest::bright_test_all(string bright_level)
     }
     LOG_INFO("begin inotify brightness trigger\n");
     control->update_screen_log("begin inotify brightness trigger\n");
-	
+    
     bright_set = 0;
     for(bright_cnt = 0; bright_cnt < bright_num; bright_cnt++) {
         bright_value = 0;
@@ -49,18 +49,18 @@ void BrightTest::bright_test_all(string bright_level)
             goto error_return;
         }
         memset(buf, 0, 4096);
-		
+        
         if((actual_brightness_fd = open("/sys/class/backlight/intel_backlight/actual_brightness", O_RDONLY)) <= 0) {
             LOG_ERROR("actual_brightness_fd open error\n");
             goto error_return;
         }
         if (read(actual_brightness_fd, buf, 4096) < 0) {
             LOG_ERROR("actual_brightness_fd read error\n");
-			close(actual_brightness_fd);
+            close(actual_brightness_fd);
             goto error_return;
         }
         close(actual_brightness_fd);
-		
+        
         bright_value = atoi(buf);
         ret = brightness_is_set(BRIGHTNESS_VALUE, bright_num, bright_value);
         if(ret != -1) {

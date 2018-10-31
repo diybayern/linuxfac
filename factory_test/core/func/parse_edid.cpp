@@ -77,7 +77,7 @@ int parseedid()
     char modelname[13];
     char modetmp[128];
     //int ptm;
-	//int compsync = 0;
+    //int compsync = 0;
     int hres;
     int vres;
     int ret;
@@ -159,10 +159,10 @@ int parseedid()
         LOG_INFO("\t# Analog Display\n");
         if (edid[0x14] & 0x02) {    //sync on green.
             LOG_INFO("\tOption \"SyncOnGreen\" \"true\"\n");
-		}
+        }
 //        if (edid[0x14] & 0x04)
 //            compsync = 1; //Composite sync. Save for modelines.
-	}
+    }
     /* Ignore video input definitions, because X doesn't care. */
 
     /* Size parameters: H and V, in centimeters. Projectors put 0 here. 
@@ -194,9 +194,9 @@ int parseedid()
         if (edid[i] == 0x00) { //not a timing descriptor
             if (edid[i+3] == 0xfd) { //monitor limits tag
                 LOG_INFO("\tHorizsync %i-%i\n", (int)edid[i + 7] + (((edid[i + 4] & 0x0c) & 0x04) ? 255 : 0),
-							(int)edid[i + 8] + ((edid[i + 4] & 0x08) ? 255 : 0));
+                            (int)edid[i + 8] + ((edid[i + 4] & 0x08) ? 255 : 0));
                 LOG_INFO("\tVertRefresh %i-%i\n", (int)edid[i + 5] + (((edid[i + 4] & 0x03) & 0x01) ? 255 : 0),
-							(int)edid[i + 6] + ((edid[i + 4] & 0x02) ? 255 : 0));
+                            (int)edid[i + 6] + ((edid[i + 4] & 0x02) ? 255 : 0));
                 LOG_INFO("\t# Maximum pixel clock is %iMHz\n", (int)edid[i + 9] * 10);
             }
         }
@@ -235,7 +235,7 @@ int parseedid()
 
             if ((edid[i + 17] & 0x80) || ((edid[i + 17] & 0x18) == 0x18) ) {
                 sprintf(modetmp, "%s%shsync %svsync %s", modearray[currentmode], ((edid[i + 17] & 0x10) && (edid[i + 17] & 0x02)) ? "+": "-",
-					((edid[i + 17] & 0x10) && (edid[i + 17] & 0x04)) ? "+": "-", (edid[i + 17] & 0x80) ? "interlace": "");
+                        ((edid[i + 17] & 0x10) && (edid[i + 17] & 0x04)) ? "+": "-", (edid[i + 17] & 0x80) ? "interlace": "");
                 strcpy(modearray[currentmode], modetmp);
 
             //hehe... there's been at least 2 bugs in the old parse-edid the whole time - somebody caught the htimings one, and I just caught two problems right here - lack of checking for analog sync and getting hsync and vsync backwards... yes, vsync and hsync have been flipped this whole time. Glad I'm rewriting
@@ -296,7 +296,7 @@ int parseextb()
     if (extb[0] != 0x02) {
         LOG_INFO("I only know about extension blocks of type 02h. PLEASE email me!\n");
     }
-	curloc = extb[2];
+    curloc = extb[2];
     if (curloc == 0) {
         LOG_INFO("#No data in the extension block\n");
         return 0;
@@ -370,7 +370,7 @@ int parseextb()
 
             if ((extb[i + 17] & 0x80) || ((extb[i + 17] & 0x18) == 0x18)) {
                 sprintf(modetmp, "%s%shsync %svsync %s", modearray[currentmode], ((extb[i + 17] & 0x10) && (extb[i + 17] & 0x02)) ? "+" : "-",
-					((extb[i + 17] & 0x10) && (extb[i + 17] & 0x04)) ? "+" : "-", (extb[i + 17] & 0x80) ? "interlace" : "");
+                        ((extb[i + 17] & 0x10) && (extb[i + 17] & 0x04)) ? "+" : "-", (extb[i + 17] & 0x80) ? "interlace" : "");
                 strcpy(modearray[currentmode], modetmp);
             //hehe... there's been at least 2 bugs in the old parse-edid the whole time - somebody caught the htimings one, and I just caught two problems right here - lack of checking for analog sync and getting hsync and vsync backwards... yes, vsync and hsync have been flipped this whole time. Glad I'm rewriting
 
@@ -396,8 +396,8 @@ int dofooter()
     if (native != -1) {
         LOG_INFO("\tOption \"PreferredMode\" \"Mode %i\"\n", native); //half a chance of giving us the native default... The preferred mode is already in front.
     }
-	LOG_INFO("EndSection\n");
-	
+    LOG_INFO("EndSection\n");
+
     return 0;
 }
 

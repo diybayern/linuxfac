@@ -102,13 +102,13 @@ bool WifiTest::wifi_get_wlan_index(char* wlan_name, unsigned int* index)
 bool WifiTest::wifi_sprintf_mac_addr(unsigned char* src, char* dst)
 {
     int ret = 0;
-	if (src == NULL || dst == NULL) {
-		LOG_ERROR("sprintf src or dst mac is null\n");
-		return false;
-	}
-	ret = sprintf((char*)dst, "%02x:%02x:%02x:%02x:%02x:%02x", src[0], src[1], src[2], src[3], src[4], src[5]);
+    if (src == NULL || dst == NULL) {
+        LOG_ERROR("sprintf src or dst mac is null\n");
+        return false;
+    }
+    ret = sprintf((char*)dst, "%02x:%02x:%02x:%02x:%02x:%02x", src[0], src[1], src[2], src[3], src[4], src[5]);
     if (ret < 0) {
-		LOG_ERROR("sprintf mac addr failed\n");
+        LOG_ERROR("sprintf mac addr failed\n");
         return false;
     }
 
@@ -437,10 +437,10 @@ void* WifiTest::test_all(void*)
         }
         sleep(1);
     }
-	
-	LOG_INFO("---------- start wifi test ----------\n");
+
+    LOG_INFO("---------- start wifi test ----------\n");
     screen_log_black = "";
-	screen_log_red = "";
+    screen_log_red = "";
     screen_log_black += "==================== " + WIFI_TEST_NAME + " ====================\n";
     bool is_pass = false;
     FacArg* _facArg = control->get_fac_arg();
@@ -468,7 +468,7 @@ void* WifiTest::test_all(void*)
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");
     }
-	control->set_interface_test_status(WIFI_TEST_NAME, true);
+    control->set_interface_test_status(WIFI_TEST_NAME, true);
     return NULL;
 }
 

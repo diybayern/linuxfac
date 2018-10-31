@@ -30,7 +30,7 @@ bool SsdTest::check_if_ssd_pass()   //TODO
         screen_log_red += "\t错误：HDD状态获取失败\n";
         return false;
     }
-    if (!read_local_data("/tmp/hdd.status", ssd_status, size)) {
+    if (!read_local_data("/tmp/ssd.status", ssd_status, size)) {
         LOG_ERROR("/tmp/ssd.status read failed\n");
         screen_log_black += "ERROR:get ssd status error\n\n";
         screen_log_red += "\t错误：HDD状态获取失败\n";
@@ -51,9 +51,9 @@ void* SsdTest::test_all(void *arg)
 {
     Control *control = Control::get_control();
     control->set_interface_test_status(SSD_TEST_NAME, false);
-	
+
     screen_log_black = "";
-	screen_log_red = "";
+    screen_log_red = "";
     screen_log_black += "==================== " + SSD_TEST_NAME + " ====================\n";
     BaseInfo* baseInfo = (BaseInfo *)arg;
     bool result = ssd_test_all(baseInfo->ssd_cap);

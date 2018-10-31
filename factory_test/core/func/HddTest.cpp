@@ -51,9 +51,9 @@ void* HddTest::test_all(void *arg)
 {
     Control *control = Control::get_control();
     control->set_interface_test_status(HDD_TEST_NAME, false);
-	
+
     screen_log_black = "";
-	screen_log_red = "";
+    screen_log_red = "";
     screen_log_black += "==================== " + HDD_TEST_NAME + " ====================\n";
     BaseInfo* baseInfo = (BaseInfo *)arg;
     bool result = hdd_test_all(baseInfo->hdd_cap);
