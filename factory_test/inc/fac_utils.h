@@ -69,6 +69,8 @@ const int BRIGHTNESS_VALUE[6] =
 
 #define TIME_MAX_LEN            (50)
 
+#define USB_MOU_KEY_NUM         (2)     /* mouse and keyboard */
+#define USB_SCANNER_NUM         (1)     /* scanner */
 #define USB_MAX_NUM             (10)
 #define USB_BLOCK_LEN           (16)
 #define USB_VENDOR_LEN          (64)

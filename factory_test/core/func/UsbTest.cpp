@@ -289,15 +289,20 @@ void* UsbTest::test_all(void *arg)
 {
     Control *control = Control::get_control();
     control->set_interface_test_status(USB_TEST_NAME, false);
-    BaseInfo* baseInfo = (BaseInfo *)arg;
+    BaseInfo* baseInfo = (BaseInfo*)arg;
 
     screen_log_black = "";
     screen_log_red = "";
     screen_log_black += "==================== " + USB_TEST_NAME + " ====================\n";
-    int num = get_int_value(baseInfo->usb_total_num);
+    
     bool result_num_test = true;
-    if (!control->get_third_product_state()) {
-        result_num_test = usb_num_test(baseInfo->usb_total_num, baseInfo->usb_3_num);
+    int num;
+    if (control->get_third_product_state()) {
+        num = get_int_value(baseInfo->usb_total_num);
+    } else {
+        num = get_int_value(baseInfo->usb_total_num) + get_int_value(baseInfo->usb_3_num)
+                - USB_MOU_KEY_NUM - USB_SCANNER_NUM;
+        result_num_test = usb_num_test(to_string(num), baseInfo->usb_3_num);
     }
     if (result_num_test) {
         bool result_write_read = usb_test_all(num);
