@@ -1,5 +1,5 @@
-#include "../../inc/FuncTest.h"
-#include "../../inc/fac_log.h"
+#include "FuncTest.h"
+#include "fac_log.h"
 
 pthread_mutex_t g_next_process_lock;
 

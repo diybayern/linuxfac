@@ -1,6 +1,6 @@
-#include "../../inc/BrightTest.h"
-#include "../../inc/fac_log.h"
-#include "../../inc/fac_utils.h"
+#include "BrightTest.h"
+#include "fac_log.h"
+#include "fac_utils.h"
 
 #include <sys/inotify.h>
 

@@ -13,7 +13,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <QGraphicsDropShadowEffect>
-#include "../inc/ui.h"
+#include "ui.h"
 
 class MessageForm : public QDialog
 {

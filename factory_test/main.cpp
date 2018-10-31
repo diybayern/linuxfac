@@ -1,7 +1,7 @@
 #include <QApplication>
-#include "inc/Control.h"
-#include "inc/fac_utils.h"
-#include "inc/fac_log.h"
+#include "Control.h"
+#include "fac_utils.h"
+#include "fac_log.h"
 
 void* semi_auto_test_control(void*)
 {

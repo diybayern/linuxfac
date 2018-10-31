@@ -1,4 +1,4 @@
-#include "inc/messageform.h"
+#include "messageform.h"
 
 QPointer<MessageForm> g_form = NULL;
 QString g_sn_mac_message;

@@ -1,6 +1,6 @@
-#include "../../inc/CameraTest.h"
-#include "../../inc/fac_log.h"
-#include "../../inc/fac_utils.h"
+#include "CameraTest.h"
+#include "fac_log.h"
+#include "fac_utils.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>

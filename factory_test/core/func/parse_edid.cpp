@@ -15,9 +15,9 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
-#include "../../inc/modes.h"
-#include "../../inc/fac_utils.h"
-#include "../../inc/fac_log.h"
+#include "modes.h"
+#include "fac_utils.h"
+#include "fac_log.h"
 
 
 typedef unsigned char byte;

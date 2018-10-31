@@ -13,9 +13,9 @@
 #include <linux/ethtool.h>
 #include <linux/sockios.h>
 
-#include "../../inc/WifiTest.h"
-#include "../../inc/fac_log.h"
-#include "../../inc/fac_utils.h"
+#include "WifiTest.h"
+#include "fac_log.h"
+#include "fac_utils.h"
 
 
 WifiInfo* WifiTest::g_wifi_info = NULL;

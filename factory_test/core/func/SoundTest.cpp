@@ -2,9 +2,9 @@
 #include <alsa/asoundlib.h>
 #include <pthread.h>
 
-#include "../../inc/SoundTest.h"
-#include "../../inc/fac_log.h"
-#include "../../inc/fac_utils.h"
+#include "SoundTest.h"
+#include "fac_log.h"
+#include "fac_utils.h"
 
 #define DEFAULT_SAMPLERATE     (44100)
 #define DEFAULT_CHANNEL        (2)

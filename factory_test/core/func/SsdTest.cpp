@@ -1,5 +1,5 @@
-#include "../../inc/SsdTest.h"
-#include "../../inc/fac_log.h"
+#include "SsdTest.h"
+#include "fac_log.h"
 
 string SsdTest::screen_log_black = "";
 string SsdTest::screen_log_red = "";

@@ -1,4 +1,4 @@
-#include "../../inc/ui.h"
+#include "ui.h"
 
 StressTestWindow* StressTestWindow::_stress_test_window = NULL;
 StressTestWindow* StressTestWindow::get_stress_test_window()

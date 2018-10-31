@@ -1,4 +1,4 @@
-#include "../../inc/ui.h"
+#include "ui.h"
 
 MainTestWindow::MainTestWindow(QWidget *parent)
         : QDialog(parent)

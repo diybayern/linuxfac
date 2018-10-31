@@ -1,4 +1,4 @@
-#include "../../inc/ImageTestThread.h"
+#include "ImageTestThread.h"
 
 ImageTestThread* ImageTestThread::_image_test_thread = NULL;
 ImageTestThread* ImageTestThread::get_image_test_thread()

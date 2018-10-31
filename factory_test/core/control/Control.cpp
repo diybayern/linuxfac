@@ -1,5 +1,5 @@
-#include "../../inc/Control.h"
-#include "../../inc/fac_log.h"
+#include "Control.h"
+#include "fac_log.h"
 
 #include <algorithm>
 

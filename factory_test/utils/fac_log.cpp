@@ -1,5 +1,5 @@
-#include "../inc/fac_log.h"
-#include "../inc/fac_utils.h"
+#include "fac_log.h"
+#include "fac_utils.h"
 
 typedef void (*write_log_callback)(const char*, va_list);
 

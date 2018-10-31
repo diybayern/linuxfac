@@ -14,9 +14,9 @@
 #include <errno.h>
 #include <string.h>
 
-#include "../../inc/i2c_dev.h" //use ours 'cuz it's betterer.
-#include "../../inc/fac_utils.h"
-#include "../../inc/fac_log.h"
+#include "i2c_dev.h" //use ours 'cuz it's betterer.
+#include "fac_utils.h"
+#include "fac_log.h"
 
 
 #define EDID_INFO_FILE  "/var/tmp/edid.info"

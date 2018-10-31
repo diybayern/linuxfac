@@ -1,5 +1,5 @@
-#include "../../inc/FuncTest.h"
-#include "../../inc/fac_log.h"
+#include "FuncTest.h"
+#include "fac_log.h"
 
 string UsbTest::screen_log_black = "";
 string UsbTest::screen_log_red = "";

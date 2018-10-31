@@ -1,6 +1,6 @@
-#include "../../inc/MemTest.h"
-#include "../../inc/fac_log.h"
-#include "../../inc/fac_utils.h"
+#include "MemTest.h"
+#include "fac_log.h"
+#include "fac_utils.h"
 #include <math.h>
 
 string MemTest::screen_log_black = "";

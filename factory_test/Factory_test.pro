@@ -63,6 +63,7 @@ HEADERS  += \
     inc/libx86.h \
     inc/modes.h \
 
+INCLUDEPATH += ./inc/
 INCLUDEPATH += /usr/local/include/
 
 #QMAKE_CFLAGS = `pkg-config --cflags --libs gstreamer-video-1.0 gstreamer-1.0 glib-2.0`

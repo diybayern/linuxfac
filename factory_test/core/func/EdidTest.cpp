@@ -1,7 +1,7 @@
-﻿#include "../../inc/EdidTest.h"
-#include "../../inc/fac_log.h"
-#include "../../inc/fac_utils.h"
-#include "../../inc/libx86.h"
+﻿#include "EdidTest.h"
+#include "fac_log.h"
+#include "fac_utils.h"
+#include "libx86.h"
 
 #include <sys/types.h>
 #include <sys/io.h>

@@ -1,4 +1,4 @@
-#include "../../inc/VideoTestThread.h"
+#include "VideoTestThread.h"
 
 VideoTestThread* VideoTestThread::_video_test_thread = NULL;
 VideoTestThread* VideoTestThread::get_video_test_thread()

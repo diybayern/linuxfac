@@ -13,9 +13,9 @@
 #include <linux/ethtool.h>
 #include <linux/sockios.h>
 
-#include "../../inc/NetTest.h"
-#include "../../inc/fac_log.h"
-#include "../../inc/fac_utils.h"
+#include "NetTest.h"
+#include "fac_log.h"
+#include "fac_utils.h"
 
 
 NetInfo* NetTest::g_net_info = NULL;

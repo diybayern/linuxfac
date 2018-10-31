@@ -1,4 +1,4 @@
-#include "../../inc/ui.h"
+#include "ui.h"
 
 DisplayTestWindow* DisplayTestWindow::_display_test_window = NULL;
 DisplayTestWindow* DisplayTestWindow::get_display_test_window()
