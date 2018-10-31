@@ -201,8 +201,12 @@ void Control::init_ui()
         _uiHandle->add_complete_or_single_test_label("单板测试");
     }
     
-    _uiHandle->sync_main_test_ui();
-    
+    if (_is_third_product) {
+        _uiHandle->sync_main_test_ui(true);
+    } else {
+        _uiHandle->sync_main_test_ui(false);
+    }
+ 
     _uiHandle->add_stress_test_label("运行时间");
     _uiHandle->add_stress_test_label("CPU温度");
     _uiHandle->add_stress_test_label("编码状态");
@@ -228,7 +232,9 @@ void Control::init_ui()
     connect(_uiHandle->get_qobject(DISPLAY_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_display_test()));
 
     connect(_uiHandle->get_qobject(STRESS_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_stress_test()));
-    connect(_uiHandle->get_qobject(UPLOAD_LOG_NAME), SIGNAL(clicked()), this, SLOT(start_upload_log()));
+    if (!_is_third_product) {	
+        connect(_uiHandle->get_qobject(UPLOAD_LOG_NAME), SIGNAL(clicked()), this, SLOT(start_upload_log()));
+    }
 
     if (!_is_third_product && !check_file_exit(WHOLE_TEST_FILE)) {
         connect(_uiHandle->get_qobject(NEXT_PROCESS_NAME), SIGNAL(clicked()), this, SLOT(start_next_process()));
