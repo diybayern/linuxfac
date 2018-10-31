@@ -476,11 +476,13 @@ void* InterfaceTest::test_all(void *arg)
         return NULL;
     }
 
-    if (control->get_auto_upload_mes_status() && control->get_fac_config_status() != 0) {
-        control->get_ui_handle()->confirm_test_result_warning("配置文件有误");
-        return NULL;
+    if (!control->get_third_product_state()) {
+        if (control->get_auto_upload_mes_status() && control->get_fac_config_status() != 0) {
+            control->get_ui_handle()->confirm_test_result_warning("配置文件有误");
+            return NULL;
+        }
     }
-
+    
     if (control->get_interface_run_status() == INF_RUNEND) {
         LOG_INFO("******************** start interface test ********************");
         control->set_interface_run_status(INF_RUNNING);
@@ -519,27 +521,30 @@ void* InterfaceTest::test_all(void *arg)
             LOG_INFO("---------- start mem test ----------\n");
             FuncBase[MEM]->start_test(baseInfo);
         }
-        
-        if (interfaceSelectStatus->usb_select) {
-            LOG_INFO("---------- start usb test ----------\n");
-            FuncBase[USB]->start_test(baseInfo);
-        }
 
+        if (!control->get_third_product_state() || baseInfo->usb_total_num != "0"){
+            if (interfaceSelectStatus->usb_select) {
+                LOG_INFO("---------- start usb test ----------\n");
+                FuncBase[USB]->start_test(baseInfo);
+            }
+        }
+        
         if (interfaceSelectStatus->net_select) {
             LOG_INFO("---------- start net test ----------\n");
             FuncBase[NET]->start_test(baseInfo);
         }
-        
-        if (interfaceSelectStatus->edid_select) {
-            LOG_INFO("---------- start edid test ----------\n");
-            FuncBase[EDID]->start_test(baseInfo);
-        }
-        
-        if (interfaceSelectStatus->cpu_select) {
-            LOG_INFO("---------- start cpu test ----------\n");
-            FuncBase[CPU]->start_test(baseInfo);
-        }
 
+        if (!control->get_third_product_state()) {
+            if (interfaceSelectStatus->edid_select) {
+                LOG_INFO("---------- start edid test ----------\n");
+                FuncBase[EDID]->start_test(baseInfo);
+            }
+            if (interfaceSelectStatus->cpu_select) {
+                LOG_INFO("---------- start cpu test ----------\n");
+                FuncBase[CPU]->start_test(baseInfo);
+            }
+        }
+        
         if (baseInfo->hdd_cap != "0" && baseInfo->hdd_cap != "") {
             if (interfaceSelectStatus->hdd_select) {
                 LOG_INFO("---------- start hdd test ----------\n");
@@ -554,7 +559,7 @@ void* InterfaceTest::test_all(void *arg)
             }
         }
         
-        if (baseInfo->wifi_exist != "0" && baseInfo->wifi_exist != "") {
+        if (!control->get_third_product_state() && baseInfo->wifi_exist != "0" && baseInfo->wifi_exist != "") {
             if (interfaceSelectStatus->wifi_select) {
                 FuncBase[WIFI]->start_test(baseInfo);
             }
@@ -636,21 +641,23 @@ void* InterfaceTest::test_all(void *arg)
         }
         control->update_screen_log(mem_total_result);
     }
-        
-    if (interfaceSelectStatus->usb_select) {
-        string usb_total_result = "USB\t";
-        if (interfaceTestFailNum->usb_test_fail_num == 0) {
-            usb_total_result = usb_total_result + "PASS (Time:" + to_string(real_test_num) + ",ERROR:0)";
-            control->update_mes_log("USB", "PASS");
-            control->set_func_test_result(USB_TEST_NAME, "PASS");
-            control->set_interface_test_finish(USB_TEST_NAME);
-        } else {
-            control->update_mes_log("USB", "FAIL");
-            control->set_func_test_result(USB_TEST_NAME, "FAIL");
-            usb_total_result = usb_total_result + "FAIL (Time:" + to_string(real_test_num) + ",ERROR:" 
+
+    if (!control->get_third_product_state() || baseInfo->usb_total_num != "0"){
+        if (interfaceSelectStatus->usb_select) {
+            string usb_total_result = "USB\t";
+            if (interfaceTestFailNum->usb_test_fail_num == 0) {
+                usb_total_result = usb_total_result + "PASS (Time:" + to_string(real_test_num) + ",ERROR:0)";
+                control->update_mes_log("USB", "PASS");
+                control->set_func_test_result(USB_TEST_NAME, "PASS");
+                control->set_interface_test_finish(USB_TEST_NAME);
+            } else {
+                control->update_mes_log("USB", "FAIL");
+                control->set_func_test_result(USB_TEST_NAME, "FAIL");
+                usb_total_result = usb_total_result + "FAIL (Time:" + to_string(real_test_num) + ",ERROR:" 
                                + to_string(interfaceTestFailNum->usb_test_fail_num) + ")";
+            }
+            control->update_screen_log(usb_total_result);
         }
-        control->update_screen_log(usb_total_result);
     }
     
     if (interfaceSelectStatus->net_select) {
@@ -669,36 +676,38 @@ void* InterfaceTest::test_all(void *arg)
         control->update_screen_log(net_total_result);
     }
     
-    if (interfaceSelectStatus->edid_select) {
-        string edid_total_result = "EDID\t";
-        if (interfaceTestFailNum->edid_test_fail_num == 0) {
-            control->update_mes_log("EDID", "PASS");
-            control->set_func_test_result(EDID_TEST_NAME, "PASS");
-            control->set_interface_test_finish(EDID_TEST_NAME);
-            edid_total_result = edid_total_result + "PASS (Time:" + to_string(real_test_num) + ",ERROR:0)";
-        } else {
-            control->update_mes_log("EDID", "FAIL");
-            control->set_func_test_result(EDID_TEST_NAME, "FAIL");
-            edid_total_result = edid_total_result + "FAIL (Time:" + to_string(real_test_num) + ",ERROR:" 
+    if (!control->get_third_product_state()) {
+        if (interfaceSelectStatus->edid_select) {
+            string edid_total_result = "EDID\t";
+            if (interfaceTestFailNum->edid_test_fail_num == 0) {
+                control->update_mes_log("EDID", "PASS");
+                control->set_func_test_result(EDID_TEST_NAME, "PASS");
+                control->set_interface_test_finish(EDID_TEST_NAME);
+                edid_total_result = edid_total_result + "PASS (Time:" + to_string(real_test_num) + ",ERROR:0)";
+            } else {
+                control->update_mes_log("EDID", "FAIL");
+                control->set_func_test_result(EDID_TEST_NAME, "FAIL");
+                edid_total_result = edid_total_result + "FAIL (Time:" + to_string(real_test_num) + ",ERROR:" 
                                + to_string(interfaceTestFailNum->edid_test_fail_num) + ")";
+            }
+            control->update_screen_log(edid_total_result);
         }
-        control->update_screen_log(edid_total_result);
-    }
     
-    if (interfaceSelectStatus->cpu_select) {
-        string cpu_total_result = "CPU\t";
-        if (interfaceTestFailNum->cpu_test_fail_num == 0) {
-            control->update_mes_log("CPU", "PASS");
-            control->set_func_test_result(CPU_TEST_NAME, "PASS");
-            control->set_interface_test_finish(CPU_TEST_NAME);
-            cpu_total_result = cpu_total_result + "PASS (Time:" + to_string(real_test_num) + ",ERROR:0)";
-        } else {
-            control->update_mes_log("CPU", "FAIL");
-            control->set_func_test_result(CPU_TEST_NAME, "FAIL");
-            cpu_total_result = cpu_total_result + "FAIL (Time:" + to_string(real_test_num) + ",ERROR:" 
+        if (interfaceSelectStatus->cpu_select) {
+            string cpu_total_result = "CPU\t";
+            if (interfaceTestFailNum->cpu_test_fail_num == 0) {
+                control->update_mes_log("CPU", "PASS");
+                control->set_func_test_result(CPU_TEST_NAME, "PASS");
+                control->set_interface_test_finish(CPU_TEST_NAME);
+                cpu_total_result = cpu_total_result + "PASS (Time:" + to_string(real_test_num) + ",ERROR:0)";
+            } else {
+                control->update_mes_log("CPU", "FAIL");
+                control->set_func_test_result(CPU_TEST_NAME, "FAIL");
+                cpu_total_result = cpu_total_result + "FAIL (Time:" + to_string(real_test_num) + ",ERROR:" 
                                + to_string(interfaceTestFailNum->cpu_test_fail_num) + ")";
+            }
+            control->update_screen_log(cpu_total_result);
         }
-        control->update_screen_log(cpu_total_result);
     }
     
     if (baseInfo->hdd_cap != "0" && baseInfo->hdd_cap != "") {
@@ -737,7 +746,7 @@ void* InterfaceTest::test_all(void *arg)
         }
     }
     
-    if (baseInfo->wifi_exist != "0" && baseInfo->wifi_exist != "") {
+    if (!control->get_third_product_state() && baseInfo->wifi_exist != "0" && baseInfo->wifi_exist != "") {
         if (interfaceSelectStatus->wifi_select) {
             string wifi_total_result = "WIFI\t";
             if (interfaceTestFailNum->wifi_test_fail_num == 0) {

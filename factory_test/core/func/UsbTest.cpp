@@ -292,12 +292,13 @@ void* UsbTest::test_all(void *arg)
     BaseInfo* baseInfo = (BaseInfo *)arg;
 
     screen_log_black = "";
-	screen_log_red = "";
-	screen_log_black += "==================== " + USB_TEST_NAME + " ====================\n";
+    screen_log_red = "";
+    screen_log_black += "==================== " + USB_TEST_NAME + " ====================\n";
     int num = get_int_value(baseInfo->usb_total_num);
-    bool result_num_test = false;
-    result_num_test = usb_num_test(baseInfo->usb_total_num, baseInfo->usb_3_num);
-    
+    bool result_num_test = true;
+    if (!control->get_third_product_state()) {
+        result_num_test = usb_num_test(baseInfo->usb_total_num, baseInfo->usb_3_num);
+    }
     if (result_num_test) {
         bool result_write_read = usb_test_all(num);
         if (result_write_read) {

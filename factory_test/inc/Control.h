@@ -46,7 +46,6 @@ enum InterfaceRunStatus {
 
 enum TestStep {
     STEP_IDLE = 0,
-    STEP_THIRD_NET,
     STEP_INTERFACE,
     STEP_SOUND,
     STEP_DISPLAY,
@@ -339,7 +338,6 @@ private:
 signals:
 
 public slots:
-    void start_third_net_test();
     void start_interface_test();
     void start_sound_test();
     void start_display_test();

@@ -30,7 +30,6 @@ const string FAN_TEST_NAME  = "FAN测试";
 const string WIFI_TEST_NAME = "WIFI测试";
 const string SSD_TEST_NAME  = "SSD测试";
 
-const string THIRD_NET_TEST_NAME = "网口收发包";
 const string INTERFACE_TEST_NAME = "接口测试";
 const string SOUND_TEST_NAME     = "音频测试";
 const string DISPLAY_TEST_NAME   = "显示测试";
@@ -65,6 +64,8 @@ const int BRIGHTNESS_VALUE[6] =
 #define DEFAULT_FTP_IP          ("172.21.5.48")
 #define DEFAULT_FTP_USER        ("test")
 #define DEFAULT_FTP_PASSWD      ("test")
+
+#define MEM_TEST_CAP            ("10M")
 
 #define TIME_MAX_LEN            (50)
 
@@ -103,7 +104,7 @@ const int BRIGHTNESS_VALUE[6] =
 #define XAWTV_MAX_FAIL_COUNT    (5)
 
 #define STRESS_RECORD_NUM       (10)
-#define STRESS_MEM_CAP_MAX      (100)
+#define STRESS_MEM_CAP_MAX      (100)   /* M */
 #define STRESS_MEM_PERCENT      (0.7)
 
 #define STRESS_TIME_ENOUGH(x)   ((x).day == 0 && (x).hour == 4 && (x).minute == 0 && (x).second >= 0 && (x).second <= 1)

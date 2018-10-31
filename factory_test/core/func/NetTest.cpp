@@ -537,25 +537,16 @@ void* NetTest::test_all(void*)
     
     screen_log_black = "";
     screen_log_red = "";
-    if (!control->get_third_product_state()) {
-        screen_log_black += "==================== " + NET_TEST_NAME + " ====================\n";
-    }
+    screen_log_black += "==================== " + NET_TEST_NAME + " ====================\n";
     bool is_pass = net_test_all(true);
     if (is_pass) {
         LOG_INFO("net test result:\tPASS\n");
         screen_log_black += NET_TEST_NAME + "结果：\t\t\t成功\n\n";
         control->set_interface_test_result(NET_TEST_NAME, true);
-        if (control->get_third_product_state()) {
-            control->set_func_test_result(THIRD_NET_TEST_NAME, "PASS");
-            control->set_interface_test_finish(NET_TEST_NAME);
-        }
     } else {
         LOG_INFO("net test result:\tFAIL\n");
         screen_log_red = NET_TEST_NAME + "结果：\t\t\t失败\n\n" + screen_log_red;
         control->set_interface_test_result(NET_TEST_NAME, false);
-        if (control->get_third_product_state()) {
-            control->set_func_test_result(THIRD_NET_TEST_NAME, "FAIL");
-        }
     }
     control->update_screen_log(screen_log_black);
     if (screen_log_red != "") {

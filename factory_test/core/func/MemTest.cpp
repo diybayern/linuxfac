@@ -26,7 +26,7 @@ bool MemTest::compare_men_cap(int mem_cap)
 bool MemTest::mem_stability_test()
 {
     string stable_result;
-    stable_result = execute_command("sh " + MEM_TEST_SCRIPT + " 10M");
+    stable_result = execute_command("sh " + MEM_TEST_SCRIPT + " " + MEM_TEST_CAP);
     LOG_INFO("stable_result is:%s",stable_result.c_str());
     if (stable_result == "SUCCESS") {
         return true;
@@ -47,7 +47,7 @@ void* MemTest::test_all(void *arg)
     screen_log_red = "";
     screen_log_black += "==================== " + MEM_TEST_NAME + " ====================\n";
     
-    if (!control->get_third_product_state()) {  //TODO:third
+    if (!control->get_third_product_state()) {
         is_pass = compare_men_cap(get_int_value(baseInfo->mem_cap));
     }
     

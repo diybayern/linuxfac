@@ -12,8 +12,7 @@ void* semi_auto_test_control(void*)
         usleep(500000);
         
         if (testStep != STEP_IDLE) {
-            if (funcFinishStatus->net_finish
-                && funcFinishStatus->interface_finish 
+            if (funcFinishStatus->interface_finish 
                 && funcFinishStatus->sound_finish 
                 && funcFinishStatus->display_finish
                 && funcFinishStatus->bright_finish
@@ -24,14 +23,6 @@ void* semi_auto_test_control(void*)
             }
             
             switch (testStep){
-                case STEP_THIRD_NET: {
-                    if (funcFinishStatus->net_finish && !funcFinishStatus->sound_finish) {                
-                        LOG_INFO("third_net_finish OK.\n");
-                        control->set_test_step(STEP_SOUND);
-                        control->start_sound_test();
-                    }
-                } break;
-
                 case STEP_INTERFACE: {
                     if (funcFinishStatus->interface_finish && !funcFinishStatus->sound_finish) {                
                         LOG_INFO("interface_finish OK.\n");

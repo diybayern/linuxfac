@@ -101,83 +101,89 @@ void Control::init_ui()
         
         string real_total_num = execute_command("lsusb -t | grep \"Mass Storage\" | wc -l");
         string real_num_3 = execute_command("lsusb -t | grep \"Mass Storage\" | grep \"5000M\" | wc -l");
+        _baseInfo->usb_total_num = real_total_num;
+        _baseInfo->usb_3_num = real_num_3;
         _uiHandle->add_main_label("USB信息:", real_num_3 + "/" + real_total_num);
         _uiHandle->add_main_label("网卡信息:", get_third_net_info());
 
         string wifi_exist = execute_command("ifconfig -a | grep wlan0");
         if (wifi_exist != "error" && wifi_exist != "") {
+            _baseInfo->wifi_exist = "1";
             _uiHandle->add_main_label("WIFI信息:", "存在");
         }
     
         string camera_exist = execute_command("xawtv -hwscan 2>&1 | grep OK");
         if ( camera_exist != "error" && camera_exist != "") {
-            _uiHandle->add_main_label("摄像头信息:", "存在");
             _baseInfo->camera_exist = "1";
+            _uiHandle->add_main_label("摄像头信息:", "存在");
         }
+    }
     
-        _uiHandle->add_main_test_button(THIRD_NET_TEST_NAME);
-        
-        _funcFinishStatus->interface_finish = true;
-
-    } else {
+    _uiHandle->add_main_test_button(INTERFACE_TEST_NAME);
     
-        _uiHandle->add_main_test_button(INTERFACE_TEST_NAME);
+    _uiHandle->add_interface_test_button(MEM_TEST_NAME);
     
-        _uiHandle->add_interface_test_button(MEM_TEST_NAME);
+    if (!_is_third_product || _baseInfo->usb_total_num != "0") {
         _uiHandle->add_interface_test_button(USB_TEST_NAME);
-        _uiHandle->add_interface_test_button(NET_TEST_NAME);
+    } else {
+        _funcFinishStatus->usb_finish = true;
+        _interfaceTestStatus->usb_test_over = true;
+    }
+    _uiHandle->add_interface_test_button(NET_TEST_NAME);
+    
+    if (_is_third_product) {
+        _funcFinishStatus->edid_finish = true;
+        _interfaceTestStatus->edid_test_over = true;
+        _funcFinishStatus->cpu_finish = true;
+        _interfaceTestStatus->cpu_test_over = true;
+    } else {
         _uiHandle->add_interface_test_button(EDID_TEST_NAME);
         _uiHandle->add_interface_test_button(CPU_TEST_NAME);
+    }
     
-        if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
-            _uiHandle->add_interface_test_button(HDD_TEST_NAME);
-        } else {
-            _funcFinishStatus->hdd_finish = true;
-            _interfaceTestStatus->hdd_test_over = true;
-        }
+    if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
+        _uiHandle->add_interface_test_button(HDD_TEST_NAME);
+    } else {
+        _funcFinishStatus->hdd_finish = true;
+        _interfaceTestStatus->hdd_test_over = true;
+    }
     
-        if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
-            _uiHandle->add_interface_test_button(SSD_TEST_NAME);
-        } else {
-            _funcFinishStatus->ssd_finish = true;
-            _interfaceTestStatus->ssd_test_over = true;
-        }
+    if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
+        _uiHandle->add_interface_test_button(SSD_TEST_NAME);
+    } else {
+        _funcFinishStatus->ssd_finish = true;
+        _interfaceTestStatus->ssd_test_over = true;
+    }
     
-        if (_baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") {
-            _uiHandle->add_interface_test_button(FAN_TEST_NAME);
-        } else {
-            _funcFinishStatus->fan_finish = true;
-            _interfaceTestStatus->fan_test_over = true;
-        }
-
-        if (_baseInfo->wifi_exist != "0" && _baseInfo->wifi_exist != "") {
-            _uiHandle->add_interface_test_button(WIFI_TEST_NAME);
-        } else {
-            _funcFinishStatus->wifi_finish = true;
-            _interfaceTestStatus->wifi_test_over = true;
-        }
+    if (_baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") {
+        _uiHandle->add_interface_test_button(FAN_TEST_NAME);
+    } else {
+        _funcFinishStatus->fan_finish = true;
+        _interfaceTestStatus->fan_test_over = true;
+    }
+    
+    if (!_is_third_product && _baseInfo->wifi_exist != "0" && _baseInfo->wifi_exist != "") {
+        _uiHandle->add_interface_test_button(WIFI_TEST_NAME);
+    } else {
+        _funcFinishStatus->wifi_finish = true;
+        _interfaceTestStatus->wifi_test_over = true;
     }
     
     _uiHandle->add_main_test_button(SOUND_TEST_NAME);
     _uiHandle->add_main_test_button(DISPLAY_TEST_NAME);
 
-    if (!_is_third_product) {
-        if (_baseInfo->bright_level != "0" && _baseInfo->bright_level != ""){
-            _uiHandle->add_main_test_button(BRIGHT_TEST_NAME);
-        } else {
-            _funcFinishStatus->bright_finish = true;
-        }
-    
-        if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
-            _uiHandle->add_main_test_button(CAMERA_TEST_NAME);
-        } else {
-            _funcFinishStatus->camera_finish = true;
-        }
-    } else {//TODO:camera test
+    if (!_is_third_product && _baseInfo->bright_level != "0" && _baseInfo->bright_level != ""){
+        _uiHandle->add_main_test_button(BRIGHT_TEST_NAME);
+    } else {
         _funcFinishStatus->bright_finish = true;
-        _funcFinishStatus->camera_finish = true;
     }
     
+    if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
+        _uiHandle->add_main_test_button(CAMERA_TEST_NAME);
+    } else {
+        _funcFinishStatus->camera_finish = true;
+    }
+
     _uiHandle->add_main_test_button(STRESS_TEST_NAME);
     if (!_is_third_product) {
         _uiHandle->add_main_test_button(UPLOAD_LOG_NAME);
@@ -210,10 +216,9 @@ void Control::init_ui()
     _uiHandle->add_stress_test_label("产品型号");
     _uiHandle->add_stress_test_label("硬件版本");
 
-    connect(_uiHandle->get_qobject(THIRD_NET_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_third_net_test()));
     connect(_uiHandle->get_qobject(INTERFACE_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_interface_test()));
         
-    if (_baseInfo->bright_level != "0" && _baseInfo->bright_level != ""){
+    if (!_is_third_product && _baseInfo->bright_level != "0" && _baseInfo->bright_level != ""){
         connect(_uiHandle->get_qobject(BRIGHT_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_bright_test()));
     }
     if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
@@ -226,7 +231,7 @@ void Control::init_ui()
     connect(_uiHandle->get_qobject(UPLOAD_LOG_NAME), SIGNAL(clicked()), this, SLOT(start_upload_log()));
 
     if (_baseInfo->platform == "IDV" && !check_file_exit(WHOLE_TEST_FILE)) {
-           connect(_uiHandle->get_qobject(NEXT_PROCESS_NAME), SIGNAL(clicked()), this, SLOT(start_next_process()));
+        connect(_uiHandle->get_qobject(NEXT_PROCESS_NAME), SIGNAL(clicked()), this, SLOT(start_next_process()));
     }
     connect(_uiHandle, SIGNAL(to_show_test_confirm_dialog(string)), this, SLOT(show_test_confirm_dialog(string)));
     connect(_uiHandle, SIGNAL(sig_ui_handled_test_result(string, string)), this, SLOT(set_test_result_pass_or_fail(string, string)));
@@ -338,13 +343,6 @@ void Control::init_fac_config()
         LOG_ERROR("init copy fac config error");
     }
     _fac_config_status = get_fac_config_from_conf(FAC_CONFIG_FILE, _facArg);
-}
-
-void Control::start_third_net_test()
-{
-    update_screen_log("==================== " + NET_TEST_NAME + " ====================\n");
-    _testStep = STEP_THIRD_NET;//TODO
-    _funcBase[NET]->start_test(_baseInfo);
 }
 
 void Control::start_interface_test()
