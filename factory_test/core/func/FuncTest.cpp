@@ -398,7 +398,7 @@ void NextProcess::next_process_handle(BaseInfo* baseInfo)
 
     uihandle->confirm_test_result_waiting("正在处理，请等待...");
 
-    if (baseInfo->emmc_cap != "0" && baseInfo->emmc_cap != "") {
+    if (baseInfo->platform == "IDV" && baseInfo->emmc_cap != "0" && baseInfo->emmc_cap != "") {
         next_process_f = system("bash /etc/diskstatus_mgr.bash --product-detach");
         usleep(1000000);
         LOG_INFO("bache check result value is %d\n", WEXITSTATUS(next_process_f));

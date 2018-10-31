@@ -187,11 +187,11 @@ void Control::init_ui()
     _uiHandle->add_main_test_button(STRESS_TEST_NAME);
     if (!_is_third_product) {
         _uiHandle->add_main_test_button(UPLOAD_LOG_NAME);
+        if (!check_file_exit(WHOLE_TEST_FILE)) {
+            _uiHandle->add_main_test_button(NEXT_PROCESS_NAME);
+        }    
     }
     
-    if (_baseInfo->platform == "IDV" && !check_file_exit(WHOLE_TEST_FILE)) {
-        _uiHandle->add_main_test_button(NEXT_PROCESS_NAME);
-    }    
     
     if (_is_third_product) {
         _uiHandle->add_complete_or_single_test_label("第三方终端");
@@ -230,7 +230,7 @@ void Control::init_ui()
     connect(_uiHandle->get_qobject(STRESS_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_stress_test()));
     connect(_uiHandle->get_qobject(UPLOAD_LOG_NAME), SIGNAL(clicked()), this, SLOT(start_upload_log()));
 
-    if (_baseInfo->platform == "IDV" && !check_file_exit(WHOLE_TEST_FILE)) {
+    if (!_is_third_product && !check_file_exit(WHOLE_TEST_FILE)) {
         connect(_uiHandle->get_qobject(NEXT_PROCESS_NAME), SIGNAL(clicked()), this, SLOT(start_next_process()));
     }
     connect(_uiHandle, SIGNAL(to_show_test_confirm_dialog(string)), this, SLOT(show_test_confirm_dialog(string)));
@@ -620,7 +620,7 @@ void Control::upload_mes_log() {
         response = response_to_chinese(response);
         LOG_INFO("upload %s", response);
         if (!strcmp(response, "上传成功")) {
-            if (check_file_exit(WHOLE_TEST_FILE) || _baseInfo->platform != "IDV") {
+            if (check_file_exit(WHOLE_TEST_FILE)) {
                 _uiHandle->confirm_test_result_success("上传成功", "关机");
             } else {
                 _uiHandle->confirm_test_result_success("上传成功", "下道工序");
