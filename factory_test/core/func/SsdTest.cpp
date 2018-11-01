@@ -36,7 +36,7 @@ bool SsdTest::check_if_ssd_pass()   //TODO
         screen_log_red += "\t错误：HDD状态获取失败\n";
         return false;
     }
-    if (!strcmp(delNL(ssd_status), "SUCCESS")) {
+    if (!(delNL(ssd_status).compare("SUCCESS"))) {
         LOG_INFO("SSD Test result: \tPASS\n");
         return true;
     } else {

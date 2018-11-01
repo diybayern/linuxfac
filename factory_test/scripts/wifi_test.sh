@@ -20,9 +20,9 @@ IS_WEP_PASSWD=0
 IS_WPA_PASSWD=0
 
 WHOLE_TEST="/tmp/whole_test"
-SSID=$2
-PASSWD=$3
-ENP=$4
+SSID=$1
+PASSWD=$2
+ENP=$3
 
 FACOTORY_DIR=/usr/local/bin/factory
 WIFI_SCAN_AWK=$FACOTORY_DIR/wifi_scan.sh
@@ -33,7 +33,7 @@ WIFI_SSID_MAC=/tmp/ssid.mac
 
 FACTORY_SHELL_LOG=/var/log/factory_test_bash.log
 WPA_CONFIG=/tmp/wpa.conf
-WPA_SUPPLICANT_EXIST=1
+WPA_SUPPLICANT_EXIST=0
 FACTORY_WIFI_TEST_LOCK=/tmp/.wifi_test.lock
 
 SCAN_CONNECT_TIME=3
@@ -226,19 +226,21 @@ do
     wpa_cli -i wlan0 disconnect
 
     sleep 1
+
+    connect_wifi_with_wpacli
         
     # check if wpa or wep enp mode,and connect wifi with different function
-    if [ $WPA_SUPPLICANT_EXIST -eq 1 ]; then
-        connect_wifi_with_wpacli
-    else
-        if [ $IS_WPA_PASSWD -eq 1 ]; then
-            connect_wifi_with_wpacli
-        elif [ $IS_WEP_PASSWD -eq 1 ]; then
-            sudo iw wlan0 connect $TEST_WIFI key 0:$PASSWD
-        else
-            sudo iw wlan0 connect $TEST_WIFI
-        fi
-    fi
+    #if [ $WPA_SUPPLICANT_EXIST -eq 1 ]; then
+     #   connect_wifi_with_wpacli
+    #else
+        #if [ $IS_WPA_PASSWD -eq 1 ]; then
+        #connect_wifi_with_wpacli
+        #elif [ $IS_WEP_PASSWD -eq 1 ]; then
+         #   sudo iw wlan0 connect $TEST_WIFI key 0:$PASSWD
+        #else
+         #   sudo iw wlan0 connect $TEST_WIFI
+        #fi
+    #fi
 
     for j in `seq 1 $CONNECT_WAIT_TIME`
     do
@@ -265,6 +267,7 @@ fi
 # get wlan ip address
 echo "get wifi ip address..."
 
+dhclient -r wlan0
 dhclient wlan0
 check_ip_addr
 

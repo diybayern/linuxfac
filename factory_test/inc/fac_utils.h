@@ -200,14 +200,24 @@ struct TimeInfo {
 };
 
 struct FacArg{
-    char* ftp_ip;
-    char* ftp_user;
-    char* ftp_passwd;
-    char* ftp_dest_path;
-    char* ftp_job_number;
-    char* wifi_ssid;
-    char* wifi_passwd;
-    char* wifi_enp;
+    FacArg():ftp_ip(""),
+        ftp_user(""),
+        ftp_passwd(""),
+        ftp_dest_path(""),
+        ftp_job_number(""),
+        wifi_ssid(""),
+        wifi_passwd(""),
+        wifi_enp("")
+        {
+        }
+    string ftp_ip;
+    string ftp_user;
+    string ftp_passwd;
+    string ftp_dest_path;
+    string ftp_job_number;
+    string wifi_ssid;
+    string wifi_passwd;
+    string wifi_enp;
 };
 
 struct MacPacket {
@@ -254,25 +264,25 @@ int get_int_value(const string str);
 void get_current_time(char tmp_buf[]);
 void get_current_open_time(TimeInfo* date);
 void diff_running_time(TimeInfo* dst, TimeInfo* src);
-bool check_file_exit(const char* filename);
-bool get_file_size(const char *filename, int *size);
-bool write_local_data(const char* filename, const char* mod, char* buf, int size);
-bool read_local_data(const char* filename, char* buf, int size);
-bool remove_local_file(const char* filename);
+bool check_file_exit(string filename);
+bool get_file_size(string filename, int *size);
+bool write_local_data(string filename, string mod, char* buf, int size);
+bool read_local_data(string filename, char* buf, int size);
+bool remove_local_file(string filename);
 void get_hwinfo(HwInfo* hwInfo);
 void get_baseinfo(BaseInfo* baseInfo,const string baseinfo);
 int get_fac_config_from_conf(const string conf_path, FacArg *fac);
-char* ftp_send_file(const char* local_file_path, FacArg* fac);
-char* response_to_chinese(const char* response);
+string ftp_send_file(string local_file_path, FacArg* fac);
+string response_to_chinese(string response);
 bool combine_fac_log_to_mes(string sendLogPath, string path);
 bool is_digit(string str);
-char* delNL(char *line);
-char* lower_to_capital(const char* lower_str, char* capital_str);
+string delNL(string line);
+string lower_to_capital(string lower_str);
 string get_current_cpu_freq();
 string get_mem_info();
 string get_cpu_info(CpuStatus* st_cpu);
 string change_float_to_string(float fla);
-void stop_gpu_stress_test(void);
+void stop_gpu_stress_test();
 void write_stress_record(vector<string> record);
 void read_stress_record(vector<string> *record);
 

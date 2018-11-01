@@ -390,7 +390,7 @@ bool WifiTest::check_if_wifi_connect_pass()
     }
 
 
-    if (!strcmp(delNL(wifi_status), "SUCCESS")) {
+    if (!(delNL(wifi_status).compare("SUCCESS"))) {
         LOG_INFO("WIFI is ready\n");
         screen_log_black += "WIFI is ready\n";
 
@@ -412,7 +412,7 @@ bool WifiTest::check_if_wifi_connect_pass()
         
         return true;
     } else {
-        if (!strcmp(delNL(wifi_status), "IP not available!")) {
+        if (!(delNL(wifi_status).compare("IP not available!"))) {
             LOG_ERROR("IP not available\n");
             screen_log_black += "IP not available\n";
             screen_log_red += "\t错误：IP不可用\n";

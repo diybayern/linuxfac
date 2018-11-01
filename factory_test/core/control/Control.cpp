@@ -66,7 +66,7 @@ void Control::init_base_info()
 
         baseinfo = baseinfo.substr(1, baseinfo.length() - 2);
         get_baseinfo(_baseInfo, baseinfo);
-        LOG_INFO("product is %s", (_baseInfo->platform).c_str());
+        LOG_INFO("product is %s", (_baseInfo->platform));
     } else {
         LOG_ERROR("get hwcfg.ini information error");
     }
@@ -449,7 +449,7 @@ void Control::print_stress_test_result(vector<string> record)
 }
 
 void Control::auto_test_mac_or_stress() {    
-    if (check_file_exit(STRESS_LOCK_FILE.c_str())) {
+    if (check_file_exit(STRESS_LOCK_FILE)) {
         LOG_INFO("******************** auto start stress test ********************");
         _funcBase[STRESS]->start_test(_baseInfo);
     } else if (!get_third_product_state()){
@@ -482,18 +482,18 @@ void Control::init_mes_log()
     }
 
     new_mac_name[j] = '\0';
-    char* mac_capital = (char*)malloc(128);
-    char* sn_capital = (char*)malloc(128);
+    string mac_capital = "";
+    string sn_capital = "";
     
-    mac_capital = lower_to_capital(new_mac_name, mac_capital);
-    sn_capital = lower_to_capital(_hwInfo->sn.c_str(), sn_capital);
+    mac_capital = lower_to_capital(new_mac_name);
+    sn_capital = lower_to_capital(_hwInfo->sn);
     
     if (access(MES_FILE, F_OK) == 0) {
         remove(MES_FILE);
     }
 
-    sprintf(tmp, "%s%s.txt", _facArg->ftp_dest_path, mac_capital);
-    strcpy(_facArg->ftp_dest_path, tmp);
+    sprintf(tmp, "%s%s.txt", _facArg->ftp_dest_path.c_str(), mac_capital.c_str());
+    _facArg->ftp_dest_path = tmp;
     LOG_INFO("_facArg->ftp_dest_path:%s", _facArg->ftp_dest_path);
     
     time(&timep);
@@ -503,7 +503,7 @@ void Control::init_mes_log()
 
 
     LOG_MES("---------------------Product infomation-----------------------\n");
-    LOG_MES("Model: \t%s\n", _hwInfo->product_name.c_str());
+    LOG_MES("Model: \t%s\n", _hwInfo->product_name);
     LOG_MES("SN: \t%s\n", sn_capital);
     LOG_MES("MAC: \t%s\n", mac_capital);
     LOG_MES("DATE: \t%s\n", date);
@@ -535,8 +535,6 @@ void Control::init_mes_log()
         LOG_MES("CAMERA:    NULL\n");
     }
     LOG_MES("---------------------Stress test result-----------------------\n");
-    free(mac_capital);
-    free(sn_capital);
 }
 
 void Control::update_mes_log(string tag, string value)
@@ -622,10 +620,10 @@ void Control::upload_mes_log() {
 
         _uiHandle->confirm_test_result_waiting("正在上传中...");
         sleep(1);
-        char* response = ftp_send_file(MES_FILE, _facArg);
+        string response = ftp_send_file(MES_FILE, _facArg);
         response = response_to_chinese(response);
-        LOG_INFO("upload %s", response);
-        if (!strcmp(response, "上传成功")) {
+        LOG_INFO("upload %s", response.c_str());
+        if (response.compare("上传成功") == 0) {
             if (check_file_exit(WHOLE_TEST_FILE)) {
                 _uiHandle->confirm_test_result_success("上传成功", "关机");
             } else {

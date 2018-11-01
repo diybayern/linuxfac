@@ -64,7 +64,7 @@ void* MemTest::test_all(void *arg)
         screen_log_red = MEM_TEST_NAME + "结果：\t\t\t失败\n\n" + screen_log_red;
         control->set_interface_test_result(MEM_TEST_NAME, false); 
     }
-    remove_local_file(MEM_UI_LOG.c_str());
+    remove_local_file(MEM_UI_LOG);
     control->update_screen_log(screen_log_black);
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");

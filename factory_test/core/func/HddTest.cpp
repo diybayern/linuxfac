@@ -36,7 +36,7 @@ bool HddTest::check_if_hdd_pass()
         screen_log_red += "\t错误：HDD状态获取失败\n";
         return false;
     }
-    if (!strcmp(delNL(hdd_status), "SUCCESS")) {
+    if (!(delNL(hdd_status).compare("SUCCESS"))) {
         LOG_INFO("HDD Test result: \tPASS\n");
         return true;
     } else {

@@ -72,7 +72,7 @@ void* FanTest::test_all(void *arg)
         control->set_interface_test_result(FAN_TEST_NAME, true);
     } else {
         screen_log_black += "fan speed should be " + baseInfo->fan_speed + "\tbut current is " + result + "\n\n";
-        LOG_ERROR("fan speed should be %s\tbut current is %s\n", (baseInfo->fan_speed).c_str(), result.c_str());
+        LOG_ERROR("fan speed should be %s\tbut current is %s\n", baseInfo->fan_speed, result);
         LOG_INFO("fan test result:\tFAIL\n");
         screen_log_red += "\t错误：风扇转速应达到" + baseInfo->fan_speed + "，但测试只达到" + result + "\n";
         screen_log_red = FAN_TEST_NAME + "结果:\t\t\t失败\n\n" + screen_log_red;
@@ -225,10 +225,10 @@ void* StressTest::test_all(void* arg)
     CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
 
     control->set_pcba_whole_lock_state(false);
-    if (check_file_exit(STRESS_LOCK_FILE.c_str())) {
+    if (check_file_exit(STRESS_LOCK_FILE)) {
         string stress_lock_state = execute_command("cat " + STRESS_LOCK_FILE);
         LOG_INFO("auto stress lock file is: %s", stress_lock_state.c_str());
-        remove_local_file(STRESS_LOCK_FILE.c_str());
+        remove_local_file(STRESS_LOCK_FILE);
         if (stress_lock_state == WHOLE_LOCK || stress_lock_state == PCBA_LOCK) {
             control->set_pcba_whole_lock_state(true);
             LOG_INFO("last stress test exit error\n");            
@@ -242,9 +242,9 @@ void* StressTest::test_all(void* arg)
     }
     
     if (check_file_exit(WHOLE_TEST_FILE)) {
-        write_local_data(STRESS_LOCK_FILE.c_str(), "w+", (char*)WHOLE_LOCK, sizeof(WHOLE_LOCK));
+        write_local_data(STRESS_LOCK_FILE, "w+", (char*)WHOLE_LOCK, sizeof(WHOLE_LOCK));
     } else {
-        write_local_data(STRESS_LOCK_FILE.c_str(), "w+", (char*)PCBA_LOCK, sizeof(PCBA_LOCK));
+        write_local_data(STRESS_LOCK_FILE, "w+", (char*)PCBA_LOCK, sizeof(PCBA_LOCK));
     }
 
     if (execute_command("sync") == "error") {
@@ -253,7 +253,7 @@ void* StressTest::test_all(void* arg)
         return NULL;
     }
     
-    if (!check_file_exit(STRESS_LOCK_FILE.c_str())) {
+    if (!check_file_exit(STRESS_LOCK_FILE)) {
         uihandle->confirm_test_result_warning("lock文件创建异常");
         LOG_ERROR("create stress test lock failed\n");
         return NULL;
@@ -289,8 +289,8 @@ void* StressTest::test_all(void* arg)
             if (get_int_value(baseInfo->camera_exist) == 1) {
                 camera->close_xawtv_window();
             }
-            if (check_file_exit(STRESS_LOCK_FILE.c_str())) {
-                remove_local_file(STRESS_LOCK_FILE.c_str());
+            if (check_file_exit(STRESS_LOCK_FILE)) {
+                remove_local_file(STRESS_LOCK_FILE);
             }
 
             break;
@@ -300,7 +300,7 @@ void* StressTest::test_all(void* arg)
         mem_dst = tmp_dst;
         diff_running_time(&tmp_dst, &init_time);
         if (STRESS_TIME_ENOUGH(tmp_dst)) {
-            remove_local_file(STRESS_LOCK_FILE.c_str());
+            remove_local_file(STRESS_LOCK_FILE);
             if (encode && decode && mem_stress_result) {
                 uihandle->set_stress_test_pass_or_fail("PASS");
             } else {
@@ -373,9 +373,9 @@ string StressTest::get_stress_result_record()
 bool NextProcess::create_stress_test_lock() 
 {
     LOG_INFO("start creating stress lock\n");
-    write_local_data(STRESS_LOCK_FILE.c_str(), "w+", (char*)NEXT_LOCK, sizeof(NEXT_LOCK));
+    write_local_data(STRESS_LOCK_FILE, "w+", (char*)NEXT_LOCK, sizeof(NEXT_LOCK));
 
-    if (check_file_exit(STRESS_LOCK_FILE.c_str())) {
+    if (check_file_exit(STRESS_LOCK_FILE)) {
         LOG_INFO("create stress test lock success\n");
         return true;
     } else {
