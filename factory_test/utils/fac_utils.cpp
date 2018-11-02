@@ -389,7 +389,6 @@ string response_to_chinese(string response)
     string str_res = "";
     if (response.find("226") != response.npos) {
         str_res = "上传成功";
-        LOG_DEBUG("response: %s", str_res.c_str());
         return str_res;
     } else if (response.find("530") != response.npos) {
         str_res = "错误！登录失败！";

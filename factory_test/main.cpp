@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     signal(SIGKILL, mmr_defalut_handle_signo);
     signal(SIGTERM, mmr_defalut_handle_signo);
     signal(SIGSEGV, mmr_defalut_handle_signo);
-    
+
     LOG_INFO("************************************************************");
     LOG_INFO("******************** start factory test ********************");
     LOG_INFO("************************************************************");
