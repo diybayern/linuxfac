@@ -6,10 +6,10 @@ string SsdTest::screen_log_red = "";
 
 bool SsdTest::ssd_test_all(string ssd_cap)
 {
-    string result = execute_command("bash " + SSD_TEST_SCRIPT + " " + ssd_cap);   //TODO: SSD_TEST_SCRIPT
+    string result = execute_command("bash " + SSD_TEST_SCRIPT + " " + ssd_cap, true);
     if (result == "error") {
-        LOG_ERROR("%s run error", SSD_TEST_SCRIPT.c_str());  //TODO: SSD_TEST_SCRIPT
-        screen_log_black += "ERROR:ssd_test.sh run error\n";     //TODO: ssd_test.sh
+        LOG_ERROR("%s run error", SSD_TEST_SCRIPT.c_str());
+        screen_log_black += "ERROR:ssd_test.sh run error\n";
         screen_log_red += "\t错误：HDD测试脚本运行失败\n";
     }
     if (check_if_ssd_pass()) {

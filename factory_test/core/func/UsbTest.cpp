@@ -6,8 +6,8 @@ string UsbTest::screen_log_red = "";
 
 bool UsbTest::usb_num_test(string total_num, string num_3)
 {
-    string real_total_num = execute_command("lsusb -t | grep \"Mass Storage\" | wc -l");
-    string real_num_3 = execute_command("lsusb -t | grep \"Mass Storage\" | grep \"5000M\" | wc -l");
+    string real_total_num = execute_command("lsusb -t | grep \"Mass Storage\" | wc -l", true);
+    string real_num_3 = execute_command("lsusb -t | grep \"Mass Storage\" | grep \"5000M\" | wc -l", true);
     if (real_total_num == total_num) {
         if (real_num_3 == num_3) {
             screen_log_black += "usb3.0 num is " + real_num_3 + ",total usb num is " + real_total_num + "\n";
@@ -22,7 +22,7 @@ bool UsbTest::usb_num_test(string total_num, string num_3)
     } else {
         screen_log_red += "\t错误：需要" + num_3 + "/" + total_num + " (usb3.0/usb总数) 个usb，但只检测到" + real_num_3+ "/" + real_total_num + "个\n";
         screen_log_black += "ERROR:current usb num is " + real_num_3 + "/" + real_total_num + ", which need " + num_3 + "/" + total_num + "\n";
-        LOG_ERROR("usb num is %s/%s,which need %s/%s\n!", real_num_3.c_str(), real_total_num.c_str(), num_3.c_str(), total_num.c_str());
+        LOG_ERROR("usb num is %s/%s,which need %s/%s\n!", real_num_3.c_str(), real_total_num.c_str(), num_3, total_num.c_str());
         return false;
     }
 }
@@ -350,7 +350,7 @@ bool UsbTest::usb_test_read_cfg(const char* dir)
     }
 
     sprintf(cmd, "sudo cp -r %s %s", name, FAC_CONFIG_FILE.c_str());
-    if (execute_command(cmd) == "error") {
+    if (execute_command(cmd, true) == "error") {
         LOG_ERROR("system cmd %s failed!", cmd);
         return false;
     }

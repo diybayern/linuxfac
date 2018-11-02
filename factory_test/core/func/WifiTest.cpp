@@ -416,7 +416,7 @@ bool WifiTest::check_if_wifi_connect_pass()
             LOG_ERROR("IP not available\n");
             screen_log_black += "IP not available\n";
             screen_log_red += "\t错误：IP不可用\n";
-            return true;
+            return false;
         } else {
             LOG_ERROR("WIFI fail reason: \t%s\n", wifi_status);
             screen_log_black += "WIFI fail reason: \t" + (string)wifi_status + "\n";

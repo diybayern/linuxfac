@@ -54,7 +54,7 @@ Control* Control::get_control()
 
 void Control::init_base_info()
 {
-    string baseinfo = execute_command("/usr/local/bin/system/getHWCfg");
+    string baseinfo = execute_command("/usr/local/bin/system/getHWCfg", true);
 
     if (baseinfo != "error") {
         int len = baseinfo.size();
@@ -66,7 +66,7 @@ void Control::init_base_info()
 
         baseinfo = baseinfo.substr(1, baseinfo.length() - 2);
         get_baseinfo(_baseInfo, baseinfo);
-        LOG_INFO("product is %s", (_baseInfo->platform));
+        LOG_INFO("product is %s", (_baseInfo->platform).c_str());
     } else {
         LOG_ERROR("get hwcfg.ini information error");
     }
@@ -94,25 +94,25 @@ void Control::init_ui()
 
     if (_is_third_product) {
         _uiHandle->add_main_label("CPU型号:", _hwInfo->cpu_type);
-        _uiHandle->add_main_label("内存容量:", execute_command("free -m | awk '/Mem/ {print $2}'") + "M");
+        _uiHandle->add_main_label("内存容量:", execute_command("free -m | awk '/Mem/ {print $2}'", true) + "M");
         _uiHandle->add_main_label("HDD容量:", "--");//TODO
         _uiHandle->add_main_label("SSD容量:", "--");//TODO
         _uiHandle->add_main_label("EDID信息:", to_string(edid_read_i2c_test(-1)));
         
-        string real_total_num = execute_command("lsusb -t | grep \"Mass Storage\" | wc -l");
-        string real_num_3 = execute_command("lsusb -t | grep \"Mass Storage\" | grep \"5000M\" | wc -l");
+        string real_total_num = execute_command("lsusb -t | grep \"Mass Storage\" | wc -l", true);
+        string real_num_3 = execute_command("lsusb -t | grep \"Mass Storage\" | grep \"5000M\" | wc -l", true);
         _baseInfo->usb_total_num = real_total_num;
         _baseInfo->usb_3_num = real_num_3;
         _uiHandle->add_main_label("USB信息:", real_num_3 + "/" + real_total_num);
         _uiHandle->add_main_label("网卡信息:", get_third_net_info());
 
-        string wifi_exist = execute_command("ifconfig -a | grep wlan0");
+        string wifi_exist = execute_command("ifconfig -a | grep wlan0", true);
         if (wifi_exist != "error" && wifi_exist != "") {
             _baseInfo->wifi_exist = "1";
             _uiHandle->add_main_label("WIFI信息:", "存在");
         }
     
-        string camera_exist = execute_command("xawtv -hwscan 2>&1 | grep OK");
+        string camera_exist = execute_command("xawtv -hwscan 2>&1 | grep OK", true);
         if ( camera_exist != "error" && camera_exist != "") {
             _baseInfo->camera_exist = "1";
             _uiHandle->add_main_label("摄像头信息:", "存在");
@@ -278,7 +278,7 @@ void Control::confirm_shut_down_or_next_process(string process)
     if (process == NEXT_PROCESS_NAME) {
         _funcBase[NEXT_PROCESS]->start_test(_baseInfo);
     } else if (process == "关机") {
-        if (execute_command("shutdown -h now") == "error"){
+        if (execute_command("shutdown -h now", true) == "error"){
             LOG_ERROR("shutdown cmd run error\n");            
             _uiHandle->confirm_test_result_warning("终端异常，无法关机！");
         }
@@ -494,7 +494,7 @@ void Control::init_mes_log()
 
     sprintf(tmp, "%s%s.txt", _facArg->ftp_dest_path.c_str(), mac_capital.c_str());
     _facArg->ftp_dest_path = tmp;
-    LOG_INFO("_facArg->ftp_dest_path:%s", _facArg->ftp_dest_path);
+    LOG_INFO("_facArg->ftp_dest_path:%s", (_facArg->ftp_dest_path).c_str());
     
     time(&timep);
     timenow = localtime(&timep);
@@ -622,7 +622,7 @@ void Control::upload_mes_log() {
         sleep(1);
         string response = ftp_send_file(MES_FILE, _facArg);
         response = response_to_chinese(response);
-        LOG_INFO("upload %s", response.c_str());
+        LOG_INFO("upload log: %s", response.c_str());
         if (response.compare("上传成功") == 0) {
             if (check_file_exit(WHOLE_TEST_FILE)) {
                 _uiHandle->confirm_test_result_success("上传成功", "关机");

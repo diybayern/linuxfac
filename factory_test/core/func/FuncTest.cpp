@@ -51,7 +51,7 @@ string FanTest::screen_log_red = "";
 
 string FanTest::fan_speed_test(string speed)
 {
-    string fan_result = execute_command("bash " + FACTORY_PATH + "fan_test.sh " + speed);
+    string fan_result = execute_command("bash " + FACTORY_PATH + "fan_test.sh " + speed, true);
     return fan_result;
 }
 
@@ -72,7 +72,7 @@ void* FanTest::test_all(void *arg)
         control->set_interface_test_result(FAN_TEST_NAME, true);
     } else {
         screen_log_black += "fan speed should be " + baseInfo->fan_speed + "\tbut current is " + result + "\n\n";
-        LOG_ERROR("fan speed should be %s\tbut current is %s\n", baseInfo->fan_speed, result);
+        LOG_ERROR("fan speed should be %s\tbut current is %s\n", (baseInfo->fan_speed).c_str(), result.c_str());
         LOG_INFO("fan test result:\tFAIL\n");
         screen_log_red += "\t错误：风扇转速应达到" + baseInfo->fan_speed + "，但测试只达到" + result + "\n";
         screen_log_red = FAN_TEST_NAME + "结果:\t\t\t失败\n\n" + screen_log_red;
@@ -122,7 +122,7 @@ bool StressTest::start_cpuburn_stress()
     int ret;
     int processornum = 0;
 
-    result = execute_command("cat /proc/cpuinfo| grep \"processor\"| wc -l");
+    result = execute_command("cat /proc/cpuinfo| grep \"processor\"| wc -l", true);
     if (result != "error") {
         LOG_INFO("cpuprocessor num is %s\n", result.c_str());
         processornum = strtoul(result.c_str(), NULL, 16);
@@ -165,7 +165,7 @@ void* StressTest::mem_stress_test(void*)
     LOG_INFO("---------- start stress mem test NO.%d ----------\n", mem_stress_num);
     stop_mem_stress_test();
     
-    string free_mem_cap = execute_command("free -m | awk '/Mem/ {print $4}'");
+    string free_mem_cap = execute_command("free -m | awk '/Mem/ {print $4}'", true);
     if (free_mem_cap == "error") {
         LOG_ERROR("get free mem cap error\n");
         mem_stress_result &= false;
@@ -178,7 +178,7 @@ void* StressTest::mem_stress_test(void*)
         test_mem_cap = STRESS_MEM_CAP_MAX;
     }
     
-    string result = execute_command("bash " + MEM_TEST_SCRIPT + " " + to_string(test_mem_cap) + "M");
+    string result = execute_command("bash " + MEM_TEST_SCRIPT + " " + to_string(test_mem_cap) + "M", true);
     if (result == "SUCCESS") {
         LOG_INFO("mem stress test result:\tPASS\n");
         mem_stress_result &= true;
@@ -226,7 +226,7 @@ void* StressTest::test_all(void* arg)
 
     control->set_pcba_whole_lock_state(false);
     if (check_file_exit(STRESS_LOCK_FILE)) {
-        string stress_lock_state = execute_command("cat " + STRESS_LOCK_FILE);
+        string stress_lock_state = execute_command("cat " + STRESS_LOCK_FILE, true);
         LOG_INFO("auto stress lock file is: %s", stress_lock_state.c_str());
         remove_local_file(STRESS_LOCK_FILE);
         if (stress_lock_state == WHOLE_LOCK || stress_lock_state == PCBA_LOCK) {
@@ -247,7 +247,7 @@ void* StressTest::test_all(void* arg)
         write_local_data(STRESS_LOCK_FILE, "w+", (char*)PCBA_LOCK, sizeof(PCBA_LOCK));
     }
 
-    if (execute_command("sync") == "error") {
+    if (execute_command("sync", true) == "error") {
         uihandle->confirm_test_result_warning("系统同步失败");
         LOG_ERROR("cmd sync error\n");
         return NULL;
@@ -348,7 +348,7 @@ void* StressTest::test_all(void* arg)
         snprintf(datebuf, CMD_BUF_SIZE, "%d天%d时%d分%d秒", tmp_dst.day, tmp_dst.hour, tmp_dst.minute, tmp_dst.second);
         uihandle->update_stress_label_value("运行时间", datebuf);
         
-        uihandle->update_stress_label_value("CPU温度", execute_command_err_log("bash " + GET_CPU_TEMP_SCRIPT));
+        uihandle->update_stress_label_value("CPU温度", execute_command("bash " + GET_CPU_TEMP_SCRIPT, false));
         uihandle->update_stress_label_value("CPU频率", get_current_cpu_freq());
         uihandle->update_stress_label_value("Mem", get_mem_info());
         uihandle->update_stress_label_value("Cpu", get_cpu_info(&st_cpu));
@@ -417,7 +417,7 @@ void NextProcess::next_process_handle(BaseInfo* baseInfo)
         LOG_ERROR("create stress test lock fail!\n");
         uihandle->confirm_test_result_warning("EMMC异常，无法关机！");
         control->update_screen_log("EMMC异常，无法关机！");
-    } else if (execute_command("shutdown -h now") == "error") {
+    } else if (execute_command("shutdown -h now", true) == "error") {
         LOG_ERROR("shutdown cmd run error\n");
         uihandle->confirm_test_result_warning("终端异常，无法关机！");
         control->update_screen_log("终端异常，无法关机！");

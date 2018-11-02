@@ -28,7 +28,7 @@ unsigned long CameraTest::get_window_id(const char *winid_file)
     /* check if the window exists */
     memset(winidbuf, 0, CMD_BUF_SIZE);
     snprintf(winidbuf, CMD_BUF_SIZE, "xwininfo -id 0x%lx 2>&1", winid);
-    string str = execute_command(winidbuf);
+    string str = execute_command(winidbuf, true);
     if (strstr(str.c_str(), "X Error")) {
         LOG_ERROR("%s: xawtv window does not exist!\n", winid_file);
         winid = 0;
@@ -111,7 +111,7 @@ bool CameraTest::camera_test_all()
     Control* control = Control::get_control();
 
     /* check if camera device exists */
-    string result = execute_command("sh " + CAMERA_CHECK_SCRIPT);
+    string result = execute_command("sh " + CAMERA_CHECK_SCRIPT, true);
     if (result == "error"){
         LOG_ERROR("system run error!\n");
     }
@@ -161,7 +161,7 @@ void CameraTest::start_test(BaseInfo* baseInfo)
 void CameraTest::start_camera_xawtv_on_stress()
 {
     /* check if camera device exists */
-    string result = execute_command("bash " + CAMERA_CHECK_SCRIPT);
+    string result = execute_command("bash " + CAMERA_CHECK_SCRIPT, true);
     if (result == "error"){
         LOG_ERROR("system run error!\n");
     }

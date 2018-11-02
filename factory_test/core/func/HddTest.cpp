@@ -6,7 +6,7 @@ string HddTest::screen_log_red = "";
 
 bool HddTest::hdd_test_all(string hdd_cap)
 {
-    string result = execute_command("bash " + HDD_TEST_SCRIPT + " " + hdd_cap);
+    string result = execute_command("bash " + HDD_TEST_SCRIPT + " " + hdd_cap, true);
     if (result == "error") {
         LOG_ERROR("%s run error", HDD_TEST_SCRIPT.c_str());
         screen_log_black += "ERROR:hdd_test.sh run error\n";

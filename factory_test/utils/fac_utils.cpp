@@ -9,7 +9,7 @@ netbuf* ftp_handle;
 /*
 **execute command and return output result
 */
-string execute_command(string cmd)
+string execute_command(string cmd, bool norm_print)
 {
     string cmd_result = "";
     char result[1024];
@@ -29,13 +29,17 @@ string execute_command(string cmd)
         LOG_ERROR("close fp fail.");
         return "error";
     } else {
-        LOG_INFO("command:%s, subprocess end status:%d, command end status:%d", cmd, rc, WEXITSTATUS(rc));
-
+        if (norm_print) {
+            LOG_INFO("command:%s, subprocess end status:%d, command end status:%d", cmd.c_str(), rc, WEXITSTATUS(rc));
+        }
         if (WEXITSTATUS(rc) != 0) {
+            if (!norm_print) {
+                LOG_INFO("command:%s, subprocess end status:%d, command end status:%d", cmd.c_str(), rc, WEXITSTATUS(rc));
+            }
             return "error";
         }
 
-        if (0 < cmd_result.length()) {
+        if (cmd_result.length() > 0) {
             string tmp = cmd_result.substr(cmd_result.length() - 1, cmd_result.length());
             if (tmp == "\n" || tmp == "\r") {
                 return cmd_result.substr(0, cmd_result.length() - 1) + "\0";
@@ -43,46 +47,6 @@ string execute_command(string cmd)
                 return cmd_result;
             }
         } else {
-            return cmd_result;
-        }
-       }
-}
-
-string execute_command_err_log(string cmd)
-{
-    string cmd_result = "";
-    char result[1024];
-    int rc = 0;
-    FILE *fp;
-    fp = popen(cmd.c_str(), "r");
-    if (fp == NULL) {
-        LOG_ERROR("popen execute fail.");
-        return "error";
-    }
-    while (fgets(result,sizeof(result), fp) != NULL) {
-        string tempResult = result;
-        cmd_result = cmd_result + tempResult;
-    }
-    rc = pclose(fp);
-    if (rc == -1) {
-        LOG_ERROR("close fp fail.");
-        return "error";
-    } else {
-        if (WEXITSTATUS(rc) != 0) {
-            LOG_ERROR("command:%s, subprocess end status:%d, command end status:%d", cmd, rc, WEXITSTATUS(rc));
-            return "error";
-        }
-
-        if (cmd_result.length() > 0)
-        {
-            string tmp = cmd_result.substr(cmd_result.length() - 1, cmd_result.length());
-            if (tmp == "\n" || tmp == "\r"){
-                return cmd_result.substr(0, cmd_result.length() - 1) + "\0";
-            } else {
-                return cmd_result;
-            }
-        } else {
-            LOG_ERROR("cmd result is null\n");
             return cmd_result;
         }
        }
@@ -106,8 +70,8 @@ void get_current_open_time(TimeInfo* date)
     
     clock_gettime(CLOCK_MONOTONIC, &time_space);
     
-    date->day = time_space.tv_sec / (24 *60 * 60);
-    date->hour = (time_space.tv_sec % (24 *60 * 60))/(60 * 60);
+    date->day    = time_space.tv_sec / (24 *60 * 60);
+    date->hour   = (time_space.tv_sec % (24 *60 * 60))/(60 * 60);
     date->minute = (time_space.tv_sec % (60 * 60))/60;
     date->second = time_space.tv_sec % 60;
 }
@@ -138,7 +102,8 @@ void diff_running_time(TimeInfo* dst, TimeInfo* src)
     dst->day -= src->day;
 }
 
-bool check_file_exit(string filename) { 
+bool check_file_exit(string filename)
+{ 
     if (filename == "") {
         return false;
     }
@@ -172,13 +137,13 @@ bool write_local_data(string filename, string mod, char* buf, int size)
     FILE * outfile = NULL;
 
     if ((outfile = fopen(filename.c_str(), mod.c_str())) == NULL) {
-        LOG_ERROR("Can't open %s\n", filename);
+        LOG_ERROR("Can't open %s\n", filename.c_str());
         return false;
     }
 
     count = fwrite(buf, size, 1, outfile);
     if (count != 1) {
-        LOG_ERROR("Write data failed: file=%s, count=%d, size=%d\n", filename, count, size);
+        LOG_ERROR("Write data failed: file=%s, count=%d, size=%d\n", filename.c_str(), count, size);
         fclose(outfile);
         return false;
     }
@@ -196,13 +161,13 @@ bool read_local_data(string filename, char* buf, int size)
 
     infile = fopen(filename.c_str(), "rb");
     if (infile == NULL) {
-        LOG_ERROR("Can't open %s\n", filename);
+        LOG_ERROR("Can't open %s\n", filename.c_str());
         return false;
     }
 
     ret = fread(buf, size, 1, infile);
     if (ret != 1) {
-        LOG_ERROR("Read file failed: file=%s, size=%d\n", filename, size);
+        LOG_ERROR("Read file failed: file=%s, size=%d\n", filename.c_str(), size);
         fclose(infile);
         return false;
     }
@@ -218,7 +183,7 @@ bool remove_local_file(string filename)
         return true;
     }
     ret = remove(filename.c_str());
-    if (execute_command("sync") == "error" ) {
+    if (execute_command("sync", true) == "error" ) {
         LOG_ERROR("system sync error\n");
     }
     
@@ -231,18 +196,18 @@ bool remove_local_file(string filename)
 
 void get_hwinfo(HwInfo* hwInfo)
 {
-    hwInfo->sn = execute_command("dmidecode -s system-serial-number");
+    hwInfo->sn = execute_command("dmidecode -s system-serial-number", true);
     
-    string mac = execute_command("ifconfig | grep HWaddr | awk '/eth0/ {print $5}'");
+    string mac = execute_command("ifconfig | grep HWaddr | awk '/eth0/ {print $5}'", true);
     mac = lower_to_capital(mac);
     hwInfo->mac = mac;
     
-    hwInfo->product_name       = execute_command("dmidecode -s system-product-name");
-    hwInfo->product_id         = execute_command("dmidecode -s baseboard-product-name");
-    hwInfo->product_hw_version = execute_command("dmidecode -s system-version");
-    hwInfo->cpu_type           = execute_command("dmidecode -s processor-version");
-    hwInfo->cpu_fre            = execute_command("cat /proc/cpuinfo | grep 'model name' |uniq | awk '/model name/ {print $NF}'");
-    hwInfo->mem_cap            = execute_command("free -m | awk '/Mem/ {print $2}'");
+    hwInfo->product_name       = execute_command("dmidecode -s system-product-name", true);
+    hwInfo->product_id         = execute_command("dmidecode -s baseboard-product-name", true);
+    hwInfo->product_hw_version = execute_command("dmidecode -s system-version", true);
+    hwInfo->cpu_type           = execute_command("dmidecode -s processor-version", true);
+    hwInfo->cpu_fre            = execute_command("cat /proc/cpuinfo | grep 'model name' |uniq | awk '/model name/ {print $NF}'", true);
+    hwInfo->mem_cap            = execute_command("free -m | awk '/Mem/ {print $2}'", true);
 }
 
 int get_int_value(const string str)
@@ -321,113 +286,100 @@ bool is_digit(string str)
     return true;
 }
 
-bool read_conf_line(const string conf_path, const char* tag,char* value)
+string read_conf_line(const string conf_path, const string tag)
 {
     FILE* conf_fp;
     if ((conf_fp = fopen(conf_path.c_str(), "r")) == NULL) {
         LOG_ERROR("ftp_config.conf open failed\n");
-        return false;
+        return "";
     } else {
         char match[128];
-        char line[256];
-        sprintf(match, "%s=%%s", tag);
-        
+        char line[CMD_BUF_SIZE];
+        char* value = (char*)malloc(128);
+        sprintf(match, "%s=%%s", tag.c_str());
         while (fgets(line, sizeof(line), conf_fp) != NULL) {
             string str = delNL(line);
             if (str[0] != '#') {//ignore the comment
                 if (str.find(tag) != str.npos) {
                     sscanf(str.c_str(), match, value);
-                    return true;
-                } 
+                    return value;
+                }
             }
         }
-        LOG_INFO("not find %s", tag);
+        LOG_INFO("not find %s", tag.c_str());
     }
     fclose(conf_fp);
-    return false;
+    return "";
 }
 
 int get_fac_config_from_conf(const string conf_path, FacArg *fac)
 {
     int ret = 0;
+    string str = "";
+    /* get wifi config */
+    str = read_conf_line(conf_path, "wifi_ssid");
+    if (str == "") {
+        LOG_INFO("no wifi_ssid config\n");
+    }
+    fac->wifi_ssid = str;
 
-    char* dest_path = (char*)malloc(128);
-    memset(dest_path, 0, 128);
-    if (read_conf_line(conf_path, "ftp_dest_path", dest_path) == false) {
+    str = read_conf_line(conf_path, "wifi_passwd");
+    if (str == "") {
+        LOG_INFO("no wifi_passwd config\n");
+    }
+    fac->wifi_passwd = str;
+
+    str = read_conf_line(conf_path, "wifi_enp");
+    if (str == "") {
+        LOG_INFO("no wifi_enp config\n");
+    }
+    fac->wifi_enp = str;
+
+    /* get ftp config */
+    str = read_conf_line(conf_path, "ftp_dest_path");
+    if (str == "") {
         LOG_ERROR("read dest_path failed\n");
         ret = NO_FTP_PATH;
-    } else if (*dest_path != '\\'){
+    } else if (str[0] != '\\'){
         LOG_ERROR("ftp dest_path is empty\n");
         ret = NO_FTP_PATH;
     }
-    
-    char* job_number = (char*)malloc(128);
-    memset(job_number, 0, 128);
-    if (read_conf_line(conf_path, "job_number", job_number) == false) {
+    fac->ftp_dest_path = str;
+
+    str = read_conf_line(conf_path, "job_number");
+    if (str == "") {
         LOG_ERROR("read job_number faild\n");
         if (ret == NO_FTP_PATH) {
             ret = NO_PATH_AND_NUM;
         } else {
             ret = NO_JOB_NUMBER;
         }
-    } else if (*job_number == 0){
-        LOG_ERROR("job_number is empty\n");
-        if (ret == NO_FTP_PATH) {
-            ret = NO_PATH_AND_NUM;
-        } else {
-            ret = NO_JOB_NUMBER;
-        }
     }
+    fac->ftp_job_number = str;
+/*    if (ret != 0) {
+        return ret;
+    }*/
 
-    char* IP = (char*)malloc(128);
-    memset(IP, 0, 128);
-    if (read_conf_line(conf_path, "ftp_ip", IP) == false) {
-        memcpy(IP, DEFAULT_FTP_IP, strlen(DEFAULT_FTP_IP));
+    str = read_conf_line(conf_path, "ftp_ip");
+    if (str == "") {
+        str = DEFAULT_FTP_IP;
         LOG_INFO("use default ftp_ip\n");
     }
+    fac->ftp_ip = str;
 
-    char* ftp_user = (char*)malloc(128); 
-    memset(ftp_user, 0, 128);
-    if (read_conf_line(conf_path, "ftp_username", ftp_user) == false) {
-        memcpy(ftp_user, DEFAULT_FTP_USER, strlen(DEFAULT_FTP_USER));
+    str = read_conf_line(conf_path, "ftp_username");
+    if (str == "") {
+        str = DEFAULT_FTP_USER;
         LOG_INFO("use default ftp_username\n");
     }
+    fac->ftp_user = str;
 
-    char* ftp_passwd = (char*)malloc(128);
-    memset(ftp_passwd, 0, 128);
-    if (read_conf_line(conf_path, "ftp_passwd",ftp_passwd) == false) {
-        memcpy(ftp_passwd, DEFAULT_FTP_PASSWD, strlen(DEFAULT_FTP_PASSWD));
+    str = read_conf_line(conf_path, "ftp_passwd");
+    if (str == "") {
+        str = DEFAULT_FTP_PASSWD;
         LOG_INFO("use default ftp_passwd\n");
     }
-
-    fac->ftp_ip         = IP;
-    fac->ftp_user       = ftp_user;
-    fac->ftp_passwd     = ftp_passwd;
-    fac->ftp_dest_path  = dest_path;
-    fac->ftp_job_number = job_number;
-
-
-    char* ssid = (char*)malloc(128);
-    memset(ssid, 0, 128);
-    if (read_conf_line(conf_path, "wifi_ssid",ssid) == false) {
-        LOG_INFO("no wifi_ssid config\n");
-    }
-          
-    char* wifi_passwd = (char*)malloc(128);
-    memset(wifi_passwd, 0, 128);
-    if (read_conf_line(conf_path, "wifi_passwd",wifi_passwd) == false) {
-        LOG_INFO("no wifi_passwd config\n");
-    }
-            
-    char* wifi_enp = (char*)malloc(128);            
-    memset(wifi_enp, 0, 128);
-    if (read_conf_line(conf_path, "wifi_enp", wifi_enp) == false) {
-        LOG_INFO("no wifi_enp config\n");
-    }
-
-    fac->wifi_ssid   = ssid;
-    fac->wifi_passwd = wifi_passwd;;
-    fac->wifi_enp    = wifi_enp;
+    fac->ftp_passwd = str;
 
     return ret;
 }
@@ -437,6 +389,7 @@ string response_to_chinese(string response)
     string str_res = "";
     if (response.find("226") != response.npos) {
         str_res = "上传成功";
+        LOG_DEBUG("response: %s", str_res.c_str());
         return str_res;
     } else if (response.find("530") != response.npos) {
         str_res = "错误！登录失败！";
@@ -489,7 +442,8 @@ string ftp_send_file(string local_file_path, FacArg* fac)
     LOG_INFO("send log start.\n");
     FtpInit();
     string ftp_rsp = "";
-    LOG_INFO("ftp_ip:%s, user:%s, passwd:%s, path:%s\n", fac->ftp_ip, fac->ftp_user, fac->ftp_passwd, fac->ftp_dest_path);
+    LOG_INFO("ftp_ip:%s, user:%s, passwd:%s, path:%s\n", (fac->ftp_ip).c_str(), (fac->ftp_user).c_str(),
+            (fac->ftp_passwd).c_str(), (fac->ftp_dest_path).c_str());
     
     if (FtpConnect(fac->ftp_ip.c_str(), &ftp_handle) != 1) {
         ftp_rsp = "connect faild";
@@ -516,6 +470,7 @@ string delNL(string line)
     int len = line.size();
 
     if (line[len - 1] == '\n') {
+        line[len - 1] = '\0';
         return line.substr(0, len - 1);
     }
     return line;
@@ -535,7 +490,7 @@ int get_cpu_freq_by_id(int id)
 {
     bool ret = false;
     string cmd = "cat /sys/devices/system/cpu/cpu" + to_string(id) + "/cpufreq/cpuinfo_cur_freq";
-    string str = execute_command_err_log(cmd);
+    string str = execute_command(cmd, false);
     if (str == "error") {
         return 0;
     }
@@ -554,7 +509,7 @@ string get_current_cpu_freq()
     int cpu_cur = 0;
     int cpu_max = 0;
     string cpu_freq = "";
-    string str = execute_command_err_log("cat /proc/cpuinfo| grep processor| wc -l");
+    string str = execute_command("cat /proc/cpuinfo| grep processor| wc -l", false);
     if(str == "error") {
         return cpu_freq + "\n";
     }
@@ -611,7 +566,7 @@ string get_cpu_info(CpuStatus* st_cpu)
     string str = "";
     
     if ((fp = fopen("/proc/stat", "r")) == NULL) {
-        LOG_ERROR("open %s failed\n", "/proc/stat");
+        LOG_ERROR("open /proc/stat failed\n");
         return cpu_str;
     }
 

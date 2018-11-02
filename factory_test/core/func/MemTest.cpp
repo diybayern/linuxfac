@@ -10,7 +10,7 @@ bool MemTest::compare_men_cap(int mem_cap)
 {
     float mem_cap_min = mem_cap * 1024 * 0.9;
     float mem_cap_max = mem_cap * 1024;
-    string real_mem_cap = execute_command("free -m | awk '/Mem/ {print $2}'");
+    string real_mem_cap = execute_command("free -m | awk '/Mem/ {print $2}'", true);
     if (get_int_value(real_mem_cap) > mem_cap_min  && get_int_value(real_mem_cap) < mem_cap_max){
         screen_log_black += "current mem cap is " + real_mem_cap + "M\n\n";
         LOG_INFO("current mem cap is %sM\n", real_mem_cap.c_str());
@@ -26,8 +26,8 @@ bool MemTest::compare_men_cap(int mem_cap)
 bool MemTest::mem_stability_test()
 {
     string stable_result;
-    stable_result = execute_command("sh " + MEM_TEST_SCRIPT + " " + MEM_TEST_CAP);
-    LOG_INFO("stable_result is:%s",stable_result.c_str());
+    stable_result = execute_command("sh " + MEM_TEST_SCRIPT + " " + MEM_TEST_CAP, true);
+    LOG_INFO("stable_result is:%s", stable_result.c_str());
     if (stable_result == "SUCCESS") {
         return true;
     } else {
@@ -52,7 +52,7 @@ void* MemTest::test_all(void *arg)
     }
     
     is_pass &= mem_stability_test();
-    string stability_result = execute_command("cat " + MEM_UI_LOG);
+    string stability_result = execute_command("cat " + MEM_UI_LOG, true);
     screen_log_black += stability_result + "\n\n";
     LOG_INFO("mem stability test result:%s\n", stability_result.c_str());
     if (is_pass) {

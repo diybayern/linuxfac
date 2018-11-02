@@ -493,12 +493,12 @@ bool NetTest::net_test_all(bool test_flag)
     }
 
     screen_log_black += "Network card duplex: \t\t" + net_get_duplex_desc(info->eth_duplex) + "\n";
-    LOG_INFO("Network card duplex: \t\t%s\n", net_get_duplex_desc(info->eth_duplex));
+    LOG_INFO("Network card duplex: \t\t%s\n", (net_get_duplex_desc(info->eth_duplex)).c_str());
     if (!control->get_third_product_state() && info->eth_duplex != DUPLEX_FULL) {
         screen_log_black += "\tERROR: Network duplex must be Full, but current is "
                     + net_get_duplex_desc(info->eth_duplex) + "\n";
         screen_log_red += "\t错误：网卡必须为Full全双工，但检测到网卡为" + net_get_duplex_desc(info->eth_duplex) + "\n";
-        LOG_ERROR("ERROR: Network duplex must be Full, but current is %s\n", net_get_duplex_desc(info->eth_duplex));
+        LOG_ERROR("ERROR: Network duplex must be Full, but current is %s\n", (net_get_duplex_desc(info->eth_duplex)).c_str());
         ret = false;
     }
     

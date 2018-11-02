@@ -56,6 +56,10 @@ const string GET_BASEINFO_INI    = FACTORY_PATH + "hwcfg.ini";
 const string MEM_UI_LOG          = FACTORY_PATH + "mem_ui_log";
 const string FAC_CONFIG_FILE     = "/tmp/fac_config.conf";
 
+const string DEFAULT_FTP_IP      = "172.21.5.48";
+const string DEFAULT_FTP_USER    = "test";
+const string DEFAULT_FTP_PASSWD  = "test";
+
 const int BRIGHTNESS_VALUE[6] = 
 {
     7, 17, 27, 37, 47, 57,
@@ -64,10 +68,6 @@ const int BRIGHTNESS_VALUE[6] =
 #define LOG_MAX_SIZE            (5 << 20)
 #define LOG_MAX_LEN             (1024)
 #define LINE_SZ                 (1024)
-
-#define DEFAULT_FTP_IP          ("172.21.5.48")
-#define DEFAULT_FTP_USER        ("test")
-#define DEFAULT_FTP_PASSWD      ("test")
 
 #define MEM_TEST_CAP            ("10M")
 
@@ -257,8 +257,7 @@ typedef struct tagUsbInfo {
 
 } USB_INFO_T;
 
-string execute_command(string cmd);
-string execute_command_err_log(string cmd);
+string execute_command(string cmd, bool norm_print);
 int get_random();
 int get_int_value(const string str);
 void get_current_time(char tmp_buf[]);
