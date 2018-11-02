@@ -134,11 +134,10 @@ bool StressTest::start_cpuburn_stress()
         processornum = 32;
     }
     while(processornum-- > 0) {
-        char cmd_burn[CMD_BUF_SIZE];
-        memset(cmd_burn, 0, CMD_BUF_SIZE);
-        sprintf (cmd_burn, "taskset 0x%d burnP6 &", (1 << (processornum)));
-        LOG_INFO("cmd:%s\n", cmd_burn);
-        ret = system(cmd_burn);
+        string cmd_burn = "";
+        cmd_burn = "taskset 0x" + to_string(1 << (processornum)) + " burnP6 &";
+        LOG_INFO("cmd:%s\n", cmd_burn.c_str());
+        ret = system(cmd_burn.c_str());
  
         if (ret < 0) {
             LOG_ERROR("cmd run \"burnP6 &\" error!!!\n");
@@ -209,7 +208,7 @@ void* StressTest::test_all(void* arg)
     TimeInfo mem_src   = {0,0,0,0};
     TimeInfo mem_dst   = {0,0,0,0};
     
-    char datebuf[CMD_BUF_SIZE] = {0};
+    string datebuf = "";
     CpuStatus st_cpu = {0,0,0,0,0,0,0,0,0,0,0};
     pthread_t pid_t1, pid_t2;
 
@@ -340,14 +339,12 @@ void* StressTest::test_all(void* arg)
             uihandle->set_stress_test_pass_or_fail("FAIL");
         }
 
-        stress_result = "运行时间:" + to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour)
-                        + "小时" + to_string(tmp_dst.minute) + "分" + to_string(tmp_dst.second)
-                        + "秒  编码状态:" + (string)PRINT_RESULT_STR(encode) + "  解码状态:"
-                        + (string)PRINT_RESULT_STR(decode) + "  Mem压力测试:" + mem_result_str + "\n";          
-
-        snprintf(datebuf, CMD_BUF_SIZE, "%d天%d时%d分%d秒", tmp_dst.day, tmp_dst.hour, tmp_dst.minute, tmp_dst.second);
+        datebuf = to_string(tmp_dst.day) + "天" + to_string(tmp_dst.hour) + "小时"
+                + to_string(tmp_dst.minute) + "分" + to_string(tmp_dst.second) + "秒";
+        stress_result = "运行时间:" + datebuf + "  编码状态:" + (string)PRINT_RESULT_STR(encode) + "  解码状态:"
+                + (string)PRINT_RESULT_STR(decode) + "  Mem压力测试:" + mem_result_str + "\n";
+                
         uihandle->update_stress_label_value("运行时间", datebuf);
-        
         uihandle->update_stress_label_value("CPU温度", execute_command("bash " + GET_CPU_TEMP_SCRIPT, false));
         uihandle->update_stress_label_value("CPU频率", get_current_cpu_freq());
         uihandle->update_stress_label_value("Mem", get_mem_info());

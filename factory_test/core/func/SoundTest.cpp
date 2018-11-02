@@ -28,7 +28,7 @@ SndStatus SoundTest::gStatus = SOUND_UNKNOW;
 void SoundTest::init_volume()
 {
     int ret = 0;
-    const char *name = NULL;
+    string name = "";
     long minVolume = 0;
     long maxVolume = 0;
     snd_mixer_t *mixer_fd = NULL;
@@ -63,32 +63,32 @@ void SoundTest::init_volume()
 
     for (elem = snd_mixer_first_elem(mixer_fd); elem; elem = snd_mixer_elem_next(elem)) {
         name = snd_mixer_selem_get_name(elem);
-        LOG_INFO("name=%s \n", name);
+        LOG_INFO("name=%s \n", name.c_str());
 
-        if ((strcmp(name, "Master") == 0) || (strcmp(name, "Headphone") == 0) || (strcmp(name, "Speaker") == 0)
-                || (strcmp(name, "PCM") == 0) || (strcmp(name, "Mic") == 0)) {
+        if ((name.compare("Master") == 0) || (name.compare("Headphone") == 0) || (name.compare("Speaker") == 0)
+                || (name.compare("PCM") == 0) || (name.compare("Mic") == 0)) {
             //set maxvolume
             ret = snd_mixer_selem_get_playback_volume_range(elem, &minVolume, &maxVolume);
-            LOG_INFO("name=%s get_playback_volume_range min=%ld max=%ld\n", name, minVolume, maxVolume);
+            LOG_INFO("name=%s get_playback_volume_range min=%ld max=%ld\n", name.c_str(), minVolume, maxVolume);
             snd_mixer_selem_set_playback_switch_all(elem, 1);
             if (ret == 0) {
                 snd_mixer_selem_set_playback_volume_all(elem, maxVolume);
             } else {
                 snd_mixer_selem_set_playback_volume_all(elem, 100);
             }
-        } else if (strcmp(name, "Mic Boost") == 0) {
+        } else if (name.compare("Mic Boost") == 0) {
             //set minvolume
             ret = snd_mixer_selem_get_playback_volume_range(elem, &minVolume, &maxVolume);
-            LOG_INFO("name=%s get_playback_volume_range min=%ld max=%ld\n", name, minVolume, maxVolume);
+            LOG_INFO("name=%s get_playback_volume_range min=%ld max=%ld\n", name.c_str(), minVolume, maxVolume);
             snd_mixer_selem_set_capture_switch_all(elem, 1);
             if (ret == 0) {
                 snd_mixer_selem_set_capture_volume_all(elem, minVolume);
             } else {
                 snd_mixer_selem_set_capture_volume_all(elem, 0);
             }
-        } else if (strcmp(name, "Capture") == 0) {
+        } else if (name.compare("Capture") == 0) {
             ret = snd_mixer_selem_get_capture_volume_range(elem, &minVolume, &maxVolume);
-            LOG_INFO("name=%s get_capture_volume_range min=%ld max=%ld\n", name, minVolume, maxVolume);
+            LOG_INFO("name=%s get_capture_volume_range min=%ld max=%ld\n", name.c_str(), minVolume, maxVolume);
             snd_mixer_selem_set_capture_switch_all(elem, 1);
 
             if (ret == 0) {
@@ -414,7 +414,7 @@ bool SoundTest::stop_record()
 
 bool SoundTest::start_playback()
 {
-    if (!g_record_info || SOUND_PLAYBACK_START == gStatus) {
+    if (!g_record_info || gStatus == SOUND_PLAYBACK_START) {
         LOG_ERROR("it is not ready to playback \n");
         return false;
     }
@@ -432,7 +432,7 @@ bool SoundTest::start_playback()
 
 bool SoundTest::stop_playback()
 {
-    if (SOUND_PLAYBACK_STOP == gStatus) {
+    if (gStatus == SOUND_PLAYBACK_STOP) {
         return false;
     }
 

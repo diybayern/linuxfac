@@ -6,7 +6,7 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-unsigned long CameraTest::get_window_id(const char *winid_file)
+unsigned long CameraTest::get_window_id(string winid_file)
 {
     char winidbuf[CMD_BUF_SIZE];
     unsigned long winid;
@@ -16,21 +16,21 @@ unsigned long CameraTest::get_window_id(const char *winid_file)
     if (!get_file_size(winid_file, &size)) {
         return 0;
     }
-    LOG_INFO("%s file size %d\n", winid_file, size);
+    LOG_INFO("%s file size %d\n", winid_file.c_str(), size);
     
     if (!read_local_data(winid_file, winidbuf, size)) {
         return 0;
     }
 
     winid = strtoul(winidbuf, NULL, 16);
-    LOG_INFO("%s: xawtv window ID: [0x%x]\n", winid_file, winid);
+    LOG_INFO("%s: xawtv window ID: [0x%x]\n", winid_file.c_str(), winid);
 
     /* check if the window exists */
     memset(winidbuf, 0, CMD_BUF_SIZE);
     snprintf(winidbuf, CMD_BUF_SIZE, "xwininfo -id 0x%lx 2>&1", winid);
     string str = execute_command(winidbuf, true);
     if (strstr(str.c_str(), "X Error")) {
-        LOG_ERROR("%s: xawtv window does not exist!\n", winid_file);
+        LOG_ERROR("%s: xawtv window does not exist!\n", winid_file.c_str());
         winid = 0;
     }
     
@@ -42,7 +42,7 @@ void CameraTest::move_xawtv_window(int new_x, int new_y)
     Display *display;
     unsigned long winid;
 
-    winid = get_window_id("/tmp/xawtv.winid");
+    winid = get_window_id(CAMERA_WINID_FILE);
     if (winid == 0) {
         LOG_ERROR("Failed to move xawtv window to right-top!\n");
         return;
@@ -72,13 +72,13 @@ void CameraTest::move_xawtv_window_on_func_test()
 
 void CameraTest::start_camera_xawtv()
 {
-    if (system("/usr/local/bin/factory/start_xawtv.sh") < 0) {
+    if (system(CAMERA_START_SCRIPT.c_str()) < 0) {
         LOG_ERROR("system run start_xawtv.sh error!\n");
         return ;
     }
     usleep(50000);
 
-    if (system("/usr/local/bin/factory/close_xawtv.sh") < 0) {
+    if (system(CAMERA_CLOSE_SCRIPT.c_str()) < 0) {
         LOG_ERROR("system run close_xawtv.sh error!\n");
         return ;
     }
@@ -92,7 +92,7 @@ bool CameraTest::check_if_xawtv_started()
     unsigned long winid;
     Control* control = Control::get_control();
 
-    winid = get_window_id("/tmp/xawtv.winid");
+    winid = get_window_id(CAMERA_WINID_FILE);
     if (winid == 0) {
         LOG_ERROR("Failed to start xawtv window!\n");
         control->update_screen_log("Failed to start xawtv window!\n");
@@ -171,13 +171,13 @@ void CameraTest::start_camera_xawtv_on_stress()
         return;
     }
 
-    if (system("/usr/local/bin/factory/start_xawtv.sh") < 0) {
+    if (system(CAMERA_START_SCRIPT.c_str()) < 0) {
         LOG_ERROR("system run start_xawtv.sh error!\n");
         return;
     }
     usleep(50000);
     
-    if (system("/usr/local/bin/factory/close_xawtv.sh") < 0) {
+    if (system(CAMERA_CLOSE_SCRIPT.c_str()) < 0) {
         LOG_ERROR("system run close_xawtv.sh error!\n");
         return;
     }
@@ -191,7 +191,7 @@ void CameraTest::close_xawtv_window()
     Display *display;
     unsigned long winid;
 
-    winid = get_window_id("/tmp/xawtv.winid");
+    winid = get_window_id(CAMERA_WINID_FILE);
     if (winid == 0) {
         LOG_ERROR("Failed to close xawtv window!\n");
         return;

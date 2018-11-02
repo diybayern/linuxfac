@@ -49,6 +49,7 @@ const string HDD_TEST_SCRIPT     = FACTORY_PATH + "hdd_test.sh";
 const string SSD_TEST_SCRIPT     = FACTORY_PATH + "ssd_test.sh";
 const string CAMERA_CHECK_SCRIPT = FACTORY_PATH + "check_camera.sh";
 const string CAMERA_START_SCRIPT = FACTORY_PATH + "start_xawtv.sh";
+const string CAMERA_CLOSE_SCRIPT = FACTORY_PATH + "close_xawtv.sh";
 const string GET_CPU_TEMP_SCRIPT = FACTORY_PATH + "get_cpu_temp.sh";
 
 const string GET_BASEINFO_INI    = FACTORY_PATH + "hwcfg.ini";
@@ -61,6 +62,7 @@ const string WIFI_SSID_FILE      = "/tmp/ssid.mac";
 const string WIFI_STATUS_FILE    = "/tmp/wifi.status";
 const string HDD_STATUS_FILE     = "/tmp/hdd.status";
 const string SSD_STATUS_FILE     = "/tmp/ssd.status";
+const string CAMERA_WINID_FILE   = "/tmp/xawtv.winid";
 
 const string DEFAULT_FTP_IP      = "172.21.5.48";
 const string DEFAULT_FTP_USER    = "test";

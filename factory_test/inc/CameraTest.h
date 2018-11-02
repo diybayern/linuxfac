@@ -16,7 +16,7 @@ public:
 private: 
     static bool camera_test_all();
     static void start_camera_xawtv();
-    static unsigned long get_window_id(const char *winid_file);
+    static unsigned long get_window_id(string winid_file);
     static bool check_if_xawtv_started();
     static void move_xawtv_window(int new_x, int new_y);
     static void move_xawtv_window_on_func_test();
