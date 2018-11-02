@@ -24,14 +24,14 @@ bool SsdTest::check_if_ssd_pass()   //TODO
     
     memset(ssd_status, 0, CMD_BUF_SIZE);
     int size = 0;
-    if (!get_file_size("/tmp/ssd.status", &size)) {
-        LOG_ERROR("/tmp/ssd.status is null\n");
+    if (!get_file_size(SSD_STATUS_FILE, &size)) {
+        LOG_ERROR("%s is null\n", SSD_STATUS_FILE.c_str());
         screen_log_black += "ERROR:get ssd status error\n\n";
         screen_log_red += "\t错误：HDD状态获取失败\n";
         return false;
     }
-    if (!read_local_data("/tmp/ssd.status", ssd_status, size)) {
-        LOG_ERROR("/tmp/ssd.status read failed\n");
+    if (!read_local_data(SSD_STATUS_FILE, ssd_status, size)) {
+        LOG_ERROR("%s read failed\n", SSD_STATUS_FILE.c_str());
         screen_log_black += "ERROR:get ssd status error\n\n";
         screen_log_red += "\t错误：HDD状态获取失败\n";
         return false;

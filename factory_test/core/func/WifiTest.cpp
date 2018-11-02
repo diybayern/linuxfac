@@ -358,32 +358,32 @@ bool WifiTest::check_if_wifi_connect_pass()
     char wifi_ssid_mac[CMD_BUF_SIZE];
     int size = 0;
     
-    if (!get_file_size("/tmp/wifi_test_info.tmp", &size)) {
-        LOG_ERROR("/tmp/wifi_test_info.tmp is null");
+    if (!get_file_size(WIFI_INFO_FILE, &size)) {
+        LOG_ERROR("%s is null", WIFI_INFO_FILE.c_str());
         screen_log_black += "\tERROR:get wifi info error\n";
         screen_log_red += "\t错误：WiFi信息获取失败\n";
         return false;
     }
     memset(wifi_info, 0, CMD_BUF_SIZE);
-    if (!read_local_data("/tmp/wifi_test_info.tmp", wifi_info, size)) {
-        LOG_ERROR("read /tmp/wifi_test_info.tmp error");
+    if (!read_local_data(WIFI_INFO_FILE, wifi_info, size)) {
+        LOG_ERROR("read %s error", WIFI_INFO_FILE.c_str());
         screen_log_black += "\tERROR:get wifi info error\n";
         screen_log_red += "\t错误：WiFi信息获取失败\n";
         return false;
     }
-    LOG_INFO("WIFI INFO:%s\n",wifi_info);
+    LOG_INFO("WIFI INFO:%s\n", wifi_info);
     screen_log_black += "WIFI INFO:" + (string)wifi_info + "\n";
 
 
-    if (!get_file_size("/tmp/wifi.status", &size)) {
-        LOG_ERROR("/tmp/wifi.status is null\n");
+    if (!get_file_size(WIFI_STATUS_FILE, &size)) {
+        LOG_ERROR("%s is null\n", WIFI_STATUS_FILE.c_str());
         screen_log_black += "\tERROR:get wifi status error\n";
         screen_log_red += "\t错误：WiFi状态获取失败\n";
         return false;
     }
     memset(wifi_status, 0, CMD_BUF_SIZE);
-    if (!read_local_data("/tmp/wifi.status", wifi_status, size)) {
-        LOG_ERROR("read /tmp/wifi.status error");
+    if (!read_local_data(WIFI_STATUS_FILE, wifi_status, size)) {
+        LOG_ERROR("read %s error", WIFI_STATUS_FILE.c_str());
         screen_log_black += "\tERROR:get wifi status error\n";
         screen_log_red += "\t错误：WiFi状态获取失败\n";
         return false;
@@ -394,15 +394,15 @@ bool WifiTest::check_if_wifi_connect_pass()
         LOG_INFO("WIFI is ready\n");
         screen_log_black += "WIFI is ready\n";
 
-        if(!get_file_size("/tmp/ssid.mac", &size)) {
-            LOG_ERROR("/tmp/ssid.mac is null\n");
+        if(!get_file_size(WIFI_SSID_FILE, &size)) {
+            LOG_ERROR("%s is null\n", WIFI_SSID_FILE.c_str());
             screen_log_black += "\tERROR:get ssid mac error\n";
             screen_log_red += "\t错误：所连ap路由mac地址获取失败\n";
             return false;
         }
         memset(wifi_ssid_mac, 0, CMD_BUF_SIZE);
-        if(!read_local_data("/tmp/ssid.mac", wifi_ssid_mac, size)) {
-            LOG_ERROR("/tmp/ssid.mac read error\n");
+        if(!read_local_data(WIFI_SSID_FILE, wifi_ssid_mac, size)) {
+            LOG_ERROR("%s read error\n", WIFI_SSID_FILE.c_str());
             screen_log_black += "\tERROR:get ssid mac error\n";
             screen_log_red += "\t错误：所连ap路由mac地址获取失败\n";
             return false;

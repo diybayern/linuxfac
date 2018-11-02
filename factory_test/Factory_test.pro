@@ -68,6 +68,8 @@ INCLUDEPATH += /usr/local/include/
 
 #QMAKE_CFLAGS = `pkg-config --cflags --libs gstreamer-video-1.0 gstreamer-1.0 glib-2.0`
 
+QMAKE_CFLAGS += -g
+
 #QMAKE_CXXFLAGS = $$QMAKE_CFLAGS
 
 #LIBS += -L/usr/lib/x86_64-linux-gnu  -lgobject-2.0 -lglib-2.0

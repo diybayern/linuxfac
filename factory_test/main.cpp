@@ -1,4 +1,6 @@
 #include <QApplication>
+#include <execinfo.h>
+#include <signal.h>
 #include "Control.h"
 #include "fac_utils.h"
 #include "fac_log.h"
@@ -66,6 +68,35 @@ void* semi_auto_test_control(void*)
     }
 }
 
+static void print_stack(void)
+{   
+    size_t i;
+    size_t size;
+    char **strings;
+    void *array[200] = {0, };
+
+    size = backtrace (array, 200);
+    strings = backtrace_symbols(array, size);
+
+    if (!strings) {
+        LOG_ERROR("Failed to get backtrace symbols!\n");
+        return;
+    }
+    
+    for (i = 0; i < size; i++) {
+        LOG_ERROR("%s\n", strings[i]);
+    }
+
+    free (strings);
+}
+
+
+void mmr_defalut_handle_signo(int signo)
+{  
+    LOG_ERROR("signo=%d\n", signo);
+    print_stack();
+    exit(1);
+}
 
 int main(int argc, char *argv[])
 {
@@ -92,6 +123,13 @@ int main(int argc, char *argv[])
        font.setPointSize(9);
     }
     a.setFont(font);
+
+    atexit(print_stack);
+    signal(SIGPIPE, SIG_IGN);    
+    signal(SIGKILL, mmr_defalut_handle_signo);
+    signal(SIGTERM, mmr_defalut_handle_signo);
+    signal(SIGSEGV, mmr_defalut_handle_signo);
+    
     LOG_INFO("************************************************************");
     LOG_INFO("******************** start factory test ********************");
     LOG_INFO("************************************************************");

@@ -56,6 +56,12 @@ const string GET_BASEINFO_INI    = FACTORY_PATH + "hwcfg.ini";
 const string MEM_UI_LOG          = FACTORY_PATH + "mem_ui_log";
 const string FAC_CONFIG_FILE     = "/tmp/fac_config.conf";
 
+const string WIFI_INFO_FILE      = "/tmp/wifi_test_info.tmp";
+const string WIFI_SSID_FILE      = "/tmp/ssid.mac";
+const string WIFI_STATUS_FILE    = "/tmp/wifi.status";
+const string HDD_STATUS_FILE     = "/tmp/hdd.status";
+const string SSD_STATUS_FILE     = "/tmp/ssd.status";
+
 const string DEFAULT_FTP_IP      = "172.21.5.48";
 const string DEFAULT_FTP_USER    = "test";
 const string DEFAULT_FTP_PASSWD  = "test";
@@ -68,8 +74,6 @@ const int BRIGHTNESS_VALUE[6] =
 #define LOG_MAX_SIZE            (5 << 20)
 #define LOG_MAX_LEN             (1024)
 #define LINE_SZ                 (1024)
-
-#define MEM_TEST_CAP            ("10M")
 
 #define TIME_MAX_LEN            (50)
 
@@ -109,6 +113,7 @@ const int BRIGHTNESS_VALUE[6] =
 
 #define XAWTV_MAX_FAIL_COUNT    (5)
 
+#define MEM_TEST_CAP            ("10M")
 #define STRESS_RECORD_NUM       (10)
 #define STRESS_MEM_CAP_MAX      (100)   /* M */
 #define STRESS_MEM_PERCENT      (0.7)

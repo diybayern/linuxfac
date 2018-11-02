@@ -24,14 +24,14 @@ bool HddTest::check_if_hdd_pass()
     
     memset(hdd_status, 0, CMD_BUF_SIZE);
     int size = 0;
-    if (!get_file_size("/tmp/hdd.status", &size)) {
-        LOG_ERROR("/tmp/hdd.status is null\n");
+    if (!get_file_size(HDD_STATUS_FILE, &size)) {
+        LOG_ERROR("%s is null\n", WIFI_SSID_FILE.c_str());
         screen_log_black += "ERROR:get hdd status error\n\n";
         screen_log_red += "\t错误：HDD状态获取失败\n";
         return false;
     }
-    if (!read_local_data("/tmp/hdd.status", hdd_status, size)) {
-        LOG_ERROR("/tmp/hdd.status read failed\n");
+    if (!read_local_data(HDD_STATUS_FILE, hdd_status, size)) {
+        LOG_ERROR("%s read failed\n", HDD_STATUS_FILE.c_str());
         screen_log_black += "ERROR:get hdd status error\n\n";
         screen_log_red += "\t错误：HDD状态获取失败\n";
         return false;
