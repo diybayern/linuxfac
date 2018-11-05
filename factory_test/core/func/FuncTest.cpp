@@ -62,6 +62,10 @@ string FanTest::fan_speed_test(string speed)
 
 void* FanTest::test_all(void *arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is null");
+        return NULL;
+    }
     Control *control = Control::get_control();
     control->set_interface_test_status(FAN_TEST_NAME, false);
     BaseInfo* baseInfo = (BaseInfo*)arg;
@@ -208,6 +212,10 @@ void StressTest::stop_mem_stress_test()
 
 void* StressTest::test_all(void* arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is null");
+        return NULL;
+    }
     BaseInfo* baseInfo = (BaseInfo*)arg;
     Control*  control  = Control::get_control();
     UiHandle* uihandle = UiHandle::get_uihandle();
@@ -437,6 +445,10 @@ void NextProcess::next_process_handle(BaseInfo* baseInfo)
 
 void* NextProcess::test_all(void* arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is null");
+        return NULL;
+    }
     BaseInfo* baseInfo = (BaseInfo*)arg;
     next_process_handle(baseInfo);
     return NULL;
@@ -475,6 +487,10 @@ void* UploadMesLog::test_all(void*)
 
 void* InterfaceTest::test_all(void *arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is null");
+        return NULL;
+    }
     BaseInfo* baseInfo = (BaseInfo*)arg;
     Control *control = Control::get_control();
 

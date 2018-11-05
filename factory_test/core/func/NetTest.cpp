@@ -230,7 +230,7 @@ bool NetTest::init()
 
     info = g_net_info;
     if (info == NULL) {
-        LOG_ERROR("malloc NetInfo failed\n");
+        LOG_ERROR("new NetInfo failed\n");
         return false;
     }
 

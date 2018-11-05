@@ -49,6 +49,10 @@ bool HddTest::check_if_hdd_pass()
 
 void* HddTest::test_all(void *arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is null");
+        return NULL;
+    }
     Control *control = Control::get_control();
     control->set_interface_test_status(HDD_TEST_NAME, false);
 

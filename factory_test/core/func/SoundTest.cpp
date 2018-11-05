@@ -460,7 +460,7 @@ bool SoundTest::stop_playback()
 bool SoundTest::init(BaseInfo* baseInfo)
 {
     if (g_record_info == NULL) {
-        LOG_ERROR("malloc SndInfo failed \n");
+        LOG_ERROR("new SndInfo failed \n");
         return false;
     }
 

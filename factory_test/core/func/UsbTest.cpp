@@ -20,34 +20,36 @@ bool UsbTest::usb_num_test(string total_num, string num_3)
             return false;
         }
     } else {
-        screen_log_red += "\t错误：需要" + num_3 + "/" + total_num + " (usb3.0/usb总数) 个usb，但只检测到" + real_num_3+ "/" + real_total_num + "个\n";
-        screen_log_black += "ERROR:current usb num is " + real_num_3 + "/" + real_total_num + ", which need " + num_3 + "/" + total_num + "\n";
+        screen_log_red += "\t错误：需要" + num_3 + "/" + total_num + " (usb3.0/usb总数) 个usb，但只检测到"
+                + real_num_3+ "/" + real_total_num + "个\n";
+        screen_log_black += "ERROR:current usb num is " + real_num_3 + "/" + real_total_num + ", which need "
+                + num_3 + "/" + total_num + "\n";
         LOG_ERROR("usb num is %s/%s,which need %s/%s\n!", real_num_3.c_str(), real_total_num.c_str(), num_3, total_num.c_str());
         return false;
     }
 }
 
-bool UsbTest::get_dev_mount_point(struct udev_device* dev, char* dst)
+bool UsbTest::get_dev_mount_point(struct udev_device* dev, char* dst) //TODO: char* dst
 {
     int len = 0;
     DIR* dir = NULL;
     struct dirent *ptr = NULL;
-    const char* sys_path = NULL;
-    const char* sys_name = NULL;
+    string sys_path = "";
+    string sys_name = "";
 
     sys_path = udev_device_get_syspath(dev);
     sys_name = udev_device_get_sysname(dev);
 
-    dir = opendir(sys_path);
+    dir = opendir(sys_path.c_str());
     if (dir == NULL) {
-        LOG_INFO("open dir=%s\n", sys_path);
+        LOG_INFO("open dir=%s\n", sys_path.c_str());
         return false;
     }
 
-    len = strlen(sys_name);
+    len = sys_name.size();
 
     while ((ptr = readdir(dir)) != NULL) {
-        if (strncmp(ptr->d_name, sys_name, len) == 0) {
+        if (strncmp(ptr->d_name, sys_name.c_str(), len) == 0) { //TODO: strncmp, snprintf, char[] ptr->d_name
             snprintf(dst, USB_BLOCK_LEN, "/dev/%s", ptr->d_name);
             break;
         }
@@ -58,8 +60,7 @@ bool UsbTest::get_dev_mount_point(struct udev_device* dev, char* dst)
     return true;
 }
 
-struct udev_device*
-UsbTest::get_child(struct udev* udev, struct udev_device* parent, const char* subsystem)
+struct udev_device* UsbTest::get_child(struct udev* udev, struct udev_device* parent, string subsystem)
 {
     struct udev_device* child = NULL;
     struct udev_list_entry* entry = NULL;
@@ -68,15 +69,15 @@ UsbTest::get_child(struct udev* udev, struct udev_device* parent, const char* su
     struct udev_enumerate* enumerate = udev_enumerate_new(udev);
 
     udev_enumerate_add_match_parent(enumerate, parent);
-    udev_enumerate_add_match_subsystem(enumerate, subsystem);
+    udev_enumerate_add_match_subsystem(enumerate, subsystem.c_str());
     udev_enumerate_scan_devices(enumerate);
 
     devices = udev_enumerate_get_list_entry(enumerate);
 
     udev_list_entry_foreach(entry, devices)
     {
-        const char *path = udev_list_entry_get_name(entry);
-        child = udev_device_new_from_syspath(udev, path);
+        string path = udev_list_entry_get_name(entry);
+        child = udev_device_new_from_syspath(udev, path.c_str());
         break;
     }
 
@@ -86,6 +87,11 @@ UsbTest::get_child(struct udev* udev, struct udev_device* parent, const char* su
 
 void UsbTest::get_usb_mass_storage(USB_INFO_T* info)
 {
+    if (info == NULL) {
+        LOG_ERROR("usb info is null");
+        return;
+    }
+    
     bool ret = false;
     int index = 0;
     struct udev* udev = NULL;
@@ -103,8 +109,8 @@ void UsbTest::get_usb_mass_storage(USB_INFO_T* info)
 
     udev_list_entry_foreach(entry, devices)
     {
-        const char* path = udev_list_entry_get_name(entry);
-        struct udev_device* scsi = udev_device_new_from_syspath(udev, path);
+        string path = udev_list_entry_get_name(entry);
+        struct udev_device* scsi = udev_device_new_from_syspath(udev, path.c_str());
 
         struct udev_device* block = get_child(udev, scsi, "block");
         struct udev_device* scsi_disk = get_child(udev, scsi, "scsi_disk");
@@ -136,19 +142,19 @@ void UsbTest::get_usb_mass_storage(USB_INFO_T* info)
     udev_enumerate_unref(enumerate);
 }
 
-bool UsbTest::usb_test_mount(char* block, const char* dir)
+bool UsbTest::usb_test_mount(string block, string dir)
 {
-    char cmd[64] = { 0, };
+    string cmd = "";
 
-    if (block == NULL || dir == NULL) {
-        LOG_INFO("mount dir=%s to block=%s failed\n", dir, block);
+    if (block == "" || dir == "") {
+        LOG_INFO("mount dir=%s to block=%s failed\n", dir.c_str(), block.c_str());
         return false;
     }
 
-    sprintf(cmd, "mount %s %s", block, dir);
-    if (system(cmd) < 0) {
-        LOG_INFO("run %s failed\n", cmd);
-        screen_log_black += "ERROR: " + (string)cmd + "failed\n";
+    cmd = "mount " + block + " " + dir;
+    if (system(cmd.c_str()) < 0) {
+        LOG_INFO("run %s failed\n", cmd.c_str());
+        screen_log_black += "ERROR: " + cmd + "failed\n";
         screen_log_red += "\t错误：u盘挂载失败\n";
         return false;
     }
@@ -156,18 +162,18 @@ bool UsbTest::usb_test_mount(char* block, const char* dir)
     return true;
 }
 
-bool UsbTest::usb_test_write(const char* dir, const char* file_name)
+bool UsbTest::usb_test_write(string dir, string file_name)
 {
     int i = 0;
     bool ret = false;
-    char name[128] = { 0, };
+    string name = "";
     int buf[USB_WRITE_LEN] = { 0, };
 
     for (i = 0; i < USB_WRITE_LEN; i++) {
         buf[i] = i;
     }
 
-    sprintf(name, "%s/%s", dir, file_name);
+    name = dir + "/" + file_name;
     ret = write_local_data(name, "w+", (char*)buf, USB_WRITE_LEN * sizeof(int));
     if (ret == false) {
         LOG_INFO("write data to usb failed\n");
@@ -178,14 +184,14 @@ bool UsbTest::usb_test_write(const char* dir, const char* file_name)
     return ret;
 }
 
-bool UsbTest::usb_test_read(const char* dir, const char* file_name)
+bool UsbTest::usb_test_read(string dir, string file_name)
 {
     int i = 0;
     bool ret = false;
-    char name[128] = { 0, };
+    string name = "";
     int buf[USB_WRITE_LEN] = { 0, };
 
-    sprintf(name, "%s/%s", dir, file_name);
+    name = dir + "/" + file_name;
     ret = read_local_data(name, (char*)buf, USB_WRITE_LEN * sizeof(int));
     if (ret == false) {
         LOG_INFO("read data from usb failed\n");
@@ -205,25 +211,25 @@ bool UsbTest::usb_test_read(const char* dir, const char* file_name)
 
     }
 
-    (void)remove(name);
+    (void)remove(name.c_str());
 
     return ret;
 }
 
-bool UsbTest::usb_test_umount(const char* dir)
+bool UsbTest::usb_test_umount(string dir)
 {
     int ret = false;
-    char cmd[64] = { 0, };
+    string cmd = "";
 
-    if (dir == NULL) {
-        LOG_INFO("dir=%s doesn't exist\n", dir);
+    if (dir == "") {
+        LOG_INFO("dir path doesn't exist\n");
         return false;
     }
-    sprintf(cmd, "umount %s", dir);
-    ret = system(cmd);
+    cmd = "umount " + dir;
+    ret = system(cmd.c_str());
     if (ret < 0) {
-        LOG_INFO("run %s failed\n", cmd);
-        screen_log_black += "ERROR: " + (string)cmd + " failed\n";
+        LOG_INFO("run %s failed\n", cmd.c_str());
+        screen_log_black += "ERROR: " + cmd + " failed\n";
         screen_log_red += "\t错误：u盘卸载失败\n";
         return false;
     }
@@ -233,6 +239,11 @@ bool UsbTest::usb_test_umount(const char* dir)
 
 bool UsbTest::usb_test_write_read(USB_INFO_T* info)
 {
+    if (info == NULL) {
+        LOG_ERROR("usb info is null");
+        return false;
+    }
+    
     int i = 0;
     string path = USB_MNT_FAC_CONF;
     string file_name = USB_TEST_FILE;
@@ -240,7 +251,7 @@ bool UsbTest::usb_test_write_read(USB_INFO_T* info)
     (void)mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     
     for (i = 0; i < info->dev_num; i++) {
-        if (!usb_test_mount(info->dev[i].block, path.c_str())) {
+        if (!usb_test_mount(info->dev[i].block, path)) {
             return false;
         }
         if (!usb_test_write(path.c_str(), file_name.c_str())) {
@@ -249,7 +260,7 @@ bool UsbTest::usb_test_write_read(USB_INFO_T* info)
         if (!usb_test_read(path.c_str(), file_name.c_str())) {
             return false;
         }
-        if (!usb_test_umount(path.c_str())) {
+        if (!usb_test_umount(path)) {
             return false;
         }
         usleep(10000);
@@ -287,6 +298,10 @@ bool UsbTest::usb_test_all(int num)
 
 void* UsbTest::test_all(void *arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is null");
+        return NULL;
+    }
     Control *control = Control::get_control();
     control->set_interface_test_status(USB_TEST_NAME, false);
     BaseInfo* baseInfo = (BaseInfo*)arg;
@@ -339,12 +354,16 @@ void UsbTest::start_test(BaseInfo* baseInfo)
 }
 
 
-bool UsbTest::usb_test_read_cfg(const char* dir)
+bool UsbTest::usb_test_read_cfg(string dir)
 {
-    char name[128] = {0};
-    char cmd[256] = {0};
+    if (dir == "") {
+        LOG_ERROR("dir path is null");
+        return false;
+    }
+    string name = "";
+    string cmd = "";
 
-    sprintf(name, "%s/fac_config.conf", dir);
+    name = dir + "/fac_config.conf";
 
     if (check_file_exit(name)) {
         LOG_INFO("find fac config conf!\n");
@@ -353,9 +372,9 @@ bool UsbTest::usb_test_read_cfg(const char* dir)
         return false;
     }
 
-    sprintf(cmd, "sudo cp -r %s %s", name, FAC_CONFIG_FILE.c_str());
+    cmd = "sudo cp -r " + name + " " + FAC_CONFIG_FILE;
     if (execute_command(cmd, true) == "error") {
-        LOG_ERROR("system cmd %s failed!", cmd);
+        LOG_ERROR("system cmd %s failed!", cmd.c_str());
         return false;
     }
 
@@ -364,6 +383,11 @@ bool UsbTest::usb_test_read_cfg(const char* dir)
 
 bool UsbTest::usb_test_read_cfg(USB_INFO_T* info)
 {
+    if (info == NULL) {
+        LOG_ERROR("info is null");
+        return false;
+    }
+    
     int i = 0;
     bool ret = false;
     string path = USB_MNT_FAC_CONF;
@@ -372,9 +396,9 @@ bool UsbTest::usb_test_read_cfg(USB_INFO_T* info)
 
     for (i = 0; i < info->dev_num; i++) {
 
-        usb_test_mount(info->dev[i].block, path.c_str());
-        ret = usb_test_read_cfg(path.c_str());
-        usb_test_umount(path.c_str());
+        usb_test_mount(info->dev[i].block, path);
+        ret = usb_test_read_cfg(path);
+        usb_test_umount(path);
 
         if (ret) {
             break;

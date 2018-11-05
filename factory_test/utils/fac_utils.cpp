@@ -304,7 +304,7 @@ string read_conf_line(const string conf_path, const string tag)
     } else {
         char match[128];
         char line[CMD_BUF_SIZE];
-        char* value = (char*)malloc(128);
+        char value[128] = {0};
         sprintf(match, "%s=%%s", tag.c_str());
         while (fgets(line, sizeof(line), conf_fp) != NULL) {
             string str = delNL(line);
@@ -323,6 +323,10 @@ string read_conf_line(const string conf_path, const string tag)
 
 int get_fac_config_from_conf(const string conf_path, FacArg *fac)
 {
+    if (fac == NULL) {
+        LOG_ERROR("fac does not have mem malloc");
+        return FAIL;
+    }
     int ret = 0;
     string str = "";
     /* get wifi config */
@@ -447,6 +451,10 @@ bool combine_fac_log_to_mes(string sendLogPath, string path)
 
 string ftp_send_file(string local_file_path, FacArg* fac)
 {
+    if (local_file_path == "" || fac == NULL) {
+        LOG_ERROR("no path or ftp config");
+        return "error";
+    }
     LOG_INFO("send log start.\n");
     FtpInit();
     string ftp_rsp = "";
@@ -566,7 +574,7 @@ string change_float_to_string(float fla)
 string get_cpu_info(CpuStatus* st_cpu)
 {
     FILE* fp = NULL;
-    char line[8192] = { 0, };
+    char line[8192] = { 0, }; //TODO£ºchar to string
     CpuStatus cpu_info;
     CpuStatus cpu_diff;
     string cpu_str = "";
@@ -577,7 +585,7 @@ string get_cpu_info(CpuStatus* st_cpu)
         return cpu_str;
     }
 
-    while (fgets(line, sizeof(line), fp) != NULL) {
+    while (fgets(line, sizeof(line), fp) != NULL) { //TODO: fgets(char*, )
         if (!strncmp(line, "cpu ", 4)) {
 
             sscanf(line + 5,
@@ -641,6 +649,11 @@ void stop_gpu_stress_test()
 
 void write_stress_record(vector<string> record)
 {
+    if (record.size() == 0) {
+        LOG_INFO("stress record is null");
+        return;
+    }
+    
     if (access(STRESS_RECORD, F_OK) == 0) {
         remove(STRESS_RECORD);
     }

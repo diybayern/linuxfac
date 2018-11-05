@@ -22,43 +22,51 @@ Control::~Control()
             _funcBase[i] = NULL;
         }
     }
-    
+
     if (_baseInfo != NULL) {
+        LOG_INFO("~baseInfo");
         delete _baseInfo;
         _baseInfo = NULL;
     }
         
     if (_hwInfo != NULL) {
+        LOG_INFO("~_hwInfo");
         delete _hwInfo;
         _hwInfo = NULL;
     }
 
     if (_facArg != NULL) {
+        LOG_INFO("~_facArg");
         delete _facArg;
         _facArg = NULL;
     }
 
     if (_mesInfo != NULL) {
+        LOG_INFO("~_mesInfo");
         delete _mesInfo;
         _mesInfo = NULL;
     }
     
     if (_funcFinishStatus != NULL) {
+        LOG_INFO("~_funcFinishStatus");
         delete _funcFinishStatus;
         _funcFinishStatus = NULL;
     }
     
     if (_interfaceTestStatus != NULL) {
+        LOG_INFO("~_interfaceTestStatus");
         delete _interfaceTestStatus;
         _interfaceTestStatus = NULL;
     }
     
     if (_interfaceSelectStatus != NULL) {
+        LOG_INFO("~_interfaceSelectStatus");
         delete _interfaceSelectStatus;
         _interfaceSelectStatus = NULL;
     }
     
     if (_interfaceTestResult != NULL) {
+        LOG_INFO("~_interfaceTestResult");
         delete _interfaceTestResult;
         _interfaceTestResult = NULL;
     }
@@ -408,8 +416,9 @@ void Control::init_fac_config()
     UsbTest* usb = (UsbTest*)_funcBase[USB];
     if (!usb->usb_test_read_status()) {
         LOG_ERROR("init copy fac config error");
+    } else {
+        _fac_config_status = get_fac_config_from_conf(FAC_CONFIG_FILE, _facArg);
     }
-    _fac_config_status = get_fac_config_from_conf(FAC_CONFIG_FILE, _facArg);
 }
 
 void Control::start_interface_test()

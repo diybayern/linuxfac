@@ -239,7 +239,11 @@ int EdidTest::get_edid_num(BaseInfo* baseInfo)
 }
 
 void* EdidTest::test_all(void *arg)
-{   
+{
+    if (arg == NULL) {
+        LOG_ERROR("arg is null");
+        return NULL;
+    }
     Control *control = Control::get_control();
     BaseInfo* baseInfo = (BaseInfo *)arg;
     

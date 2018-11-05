@@ -96,6 +96,10 @@ error_return:
 
 void* BrightTest::test_all(void *arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is null");
+        return NULL;
+    }
     Control::get_control()->update_screen_log("==================== " + BRIGHT_TEST_NAME + " ====================\n");
     BaseInfo* baseInfo = (BaseInfo*)arg;
     Control::get_control()->confirm_test_result(BRIGHT_TEST_NAME);

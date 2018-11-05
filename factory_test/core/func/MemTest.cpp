@@ -38,6 +38,10 @@ bool MemTest::mem_stability_test()
 
 void* MemTest::test_all(void *arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is null");
+        return NULL;
+    }
     Control *control = Control::get_control();
     BaseInfo* baseInfo = (BaseInfo*)arg;
     bool is_pass = true;

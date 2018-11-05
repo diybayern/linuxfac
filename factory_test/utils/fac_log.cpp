@@ -99,10 +99,9 @@ void _write_log(const char *fname, const char *function, int line, int level, co
 void write_mes_log(const char *fmt, ...)
 {
     va_list args;
-    char *buf;
+    char buf[512] = {0};
     FILE *fp;
 
-    buf = (char *)malloc(512);
     if (buf == NULL) {
         LOG_ERROR("Failed to alloc memory(size %d) for mes log.\n", 512);
         return;
@@ -115,26 +114,22 @@ void write_mes_log(const char *fmt, ...)
     fp = fopen(MES_FILE, "a+");
     if (fp == NULL) {
         LOG_ERROR("Failed to open send log file %s\n", MES_FILE);
-        free(buf);
         return;
     }
     fprintf(fp, "%s", buf);
     fflush(fp);
     fclose(fp);
-
-    free(buf);
 }
 
 
 void write_stress_record(const char *fmt, ...)
 {
     va_list args;
-    char *buf;
+    char buf[512] = {0};
     FILE *fp;
 
-    buf = (char *)malloc(512);
     if (buf == NULL) {
-        LOG_ERROR("Failed to alloc memory(size %d) for mes log.\n", 512);
+        LOG_ERROR("Failed to alloc memory(size %d) for stress record.\n", 512);
         return;
     }
 
@@ -145,14 +140,11 @@ void write_stress_record(const char *fmt, ...)
     fp = fopen(STRESS_RECORD, "a+");
     if (fp == NULL) {
         LOG_ERROR("Failed to open send log file %s\n", MES_FILE);
-        free(buf);
         return;
     }
     fprintf(fp, "%s", buf);
     fflush(fp);
     fclose(fp);
-
-    free(buf);
 }
 
 

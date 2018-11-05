@@ -39,12 +39,12 @@ public:
     
     static bool usb_num_test(string total_num, string num_3);
     static bool get_dev_mount_point(struct udev_device* dev, char* dst);
-    static struct udev_device* get_child(struct udev* udev, struct udev_device* parent, const char* subsystem);
+    static struct udev_device* get_child(struct udev* udev, struct udev_device* parent, string subsystem);
     static void get_usb_mass_storage(USB_INFO_T* info);
-    static bool usb_test_mount(char* block, const char* dir);
-    static bool usb_test_write(const char* dir, const char* file_name);
-    static bool usb_test_read(const char* dir, const char* file_name);
-    static bool usb_test_umount(const char* dir);
+    static bool usb_test_mount(string block, string dir);
+    static bool usb_test_write(string dir, string file_name);
+    static bool usb_test_read(string dir, string file_name);
+    static bool usb_test_umount(string dir);
     static bool usb_test_write_read(USB_INFO_T* info);
     static bool usb_test_all(int num);
     static void *test_all(void *arg);
@@ -52,7 +52,7 @@ public:
 
     bool usb_test_read_status();
     bool usb_test_read_cfg(USB_INFO_T* info);
-    bool usb_test_read_cfg(const char* dir);
+    bool usb_test_read_cfg(string dir);
 };
 
 
