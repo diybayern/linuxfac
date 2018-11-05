@@ -188,6 +188,7 @@ class Control : public QObject
 public:
     //explicit Control(QObject *parent = 0);
     Control();
+    ~Control();
     static Control* _control;
     void set_test_result(string func, string result, string ui_log);
     void confirm_test_result(string func);

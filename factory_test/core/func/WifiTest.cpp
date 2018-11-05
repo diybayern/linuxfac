@@ -18,9 +18,18 @@
 #include "fac_utils.h"
 
 
-WifiInfo* WifiTest::g_wifi_info = NULL;
+WifiInfo* WifiTest::g_wifi_info = new WifiInfo();
 string WifiTest::screen_log_black = "";
 string WifiTest::screen_log_red = "";
+
+WifiTest::~WifiTest()
+{
+    LOG_INFO("~WifiTest()");
+    if (g_wifi_info != NULL) {
+        delete g_wifi_info;
+        g_wifi_info = NULL;
+    }
+}
 
 bool WifiTest::wifi_get_wlan_name(char* wlan_name, int size)
 {
@@ -257,8 +266,8 @@ bool WifiTest::init()
     pthread_t pid;
     WifiInfo* info;
 
-    info = (WifiInfo *)malloc(sizeof(WifiInfo));
-    if (!info) {
+    info = g_wifi_info;
+    if (info == NULL) {
         return false;
     }
 
@@ -288,11 +297,10 @@ bool WifiTest::init()
     int tmp = pthread_create(&pid, NULL, wifi_recv_loopback_msg, info);
     if (tmp < 0) {
         LOG_ERROR("create wifi recv thread failed\n");
-        free(info);
+        delete info;
+        info = NULL;
         return false;
     }
-
-    g_wifi_info = info;
 
     return true;
 }
@@ -474,6 +482,10 @@ void* WifiTest::test_all(void*)
 
 void WifiTest::start_test(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
     pthread_t tid;
     pthread_create(&tid, NULL, test_all, baseInfo);
 }

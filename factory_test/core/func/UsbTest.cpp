@@ -186,7 +186,7 @@ bool UsbTest::usb_test_read(const char* dir, const char* file_name)
     int buf[USB_WRITE_LEN] = { 0, };
 
     sprintf(name, "%s/%s", dir, file_name);
-    ret = read_local_data(name, (char*) buf, USB_WRITE_LEN * sizeof(int));
+    ret = read_local_data(name, (char*)buf, USB_WRITE_LEN * sizeof(int));
     if (ret == false) {
         LOG_INFO("read data from usb failed\n");
         screen_log_black += "ERROR: read data from usb failed\n";
@@ -234,8 +234,8 @@ bool UsbTest::usb_test_umount(const char* dir)
 bool UsbTest::usb_test_write_read(USB_INFO_T* info)
 {
     int i = 0;
-    string path = "/mnt/usb_factory_test";
-    string file_name = "usbbbbbb_test";
+    string path = USB_MNT_FAC_CONF;
+    string file_name = USB_TEST_FILE;
 
     (void)mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     
@@ -330,6 +330,10 @@ void* UsbTest::test_all(void *arg)
 
 void UsbTest::start_test(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
     pthread_t tid;
     pthread_create(&tid, NULL, test_all, baseInfo);
 }
@@ -362,7 +366,7 @@ bool UsbTest::usb_test_read_cfg(USB_INFO_T* info)
 {
     int i = 0;
     bool ret = false;
-    string path = "/mnt/usb_factory_test";
+    string path = USB_MNT_FAC_CONF;
 
     (void) mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 

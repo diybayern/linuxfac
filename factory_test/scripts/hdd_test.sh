@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-log_file=/var/log/factory.log
+log_file=/var/log/factory_test/factory.log
 hdd_status=/tmp/hdd.status
 hdd_exist_result=0
 hdd_cap_result=0

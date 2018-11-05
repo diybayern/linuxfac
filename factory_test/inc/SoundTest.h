@@ -35,6 +35,7 @@ class Control;
 class SoundTest : public FuncBase
 {
 public:
+    ~SoundTest();
     static bool start_playback();
     static bool stop_playback();
 

@@ -74,6 +74,10 @@ void* SsdTest::test_all(void *arg)
 
 void SsdTest::start_test(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
     pthread_t tid;
     pthread_create(&tid, NULL, test_all, baseInfo);
 }

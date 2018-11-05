@@ -20,6 +20,7 @@ struct WifiInfo {
 class WifiTest : public FuncBase
 {
 public:
+    ~WifiTest();
     bool init();
     static void* test_all(void*);
     void start_test(BaseInfo* baseInfo);

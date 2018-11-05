@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-log_file=/var/log/factory.log
+log_file=/var/log/factory_test/factory.log
 ssd_status_file=/tmp/ssd.status
 ssd_exist_result=0
 ssd_cap_result=0

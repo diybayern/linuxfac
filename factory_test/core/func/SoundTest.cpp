@@ -21,9 +21,22 @@
 static pthread_mutex_t gMutex;
 //SoundTest* SoundTest::_mInstance = NULL;
 
-SndInfo* SoundTest::g_record_info = NULL;
-SndInfo* SoundTest::g_playback_info = NULL;
+SndInfo* SoundTest::g_record_info = new SndInfo();
+SndInfo* SoundTest::g_playback_info = new SndInfo();
 SndStatus SoundTest::gStatus = SOUND_UNKNOW;
+
+SoundTest::~SoundTest()
+{
+    LOG_INFO("~SoundTest()");
+    if (g_record_info != NULL) {
+        delete g_record_info;
+        g_record_info = NULL;
+    }
+    if (g_playback_info != NULL) {
+        delete g_playback_info;
+        g_playback_info = NULL;
+    }
+}
 
 void SoundTest::init_volume()
 {
@@ -446,8 +459,7 @@ bool SoundTest::stop_playback()
 
 bool SoundTest::init(BaseInfo* baseInfo)
 {
-    g_record_info = (SndInfo *) malloc(sizeof(SndInfo));
-    if (!g_record_info) {
+    if (g_record_info == NULL) {
         LOG_ERROR("malloc SndInfo failed \n");
         return false;
     }
@@ -461,8 +473,7 @@ bool SoundTest::init(BaseInfo* baseInfo)
     g_record_info->pcm          = NULL;
     g_record_info->card         = DEFAULT_CARD_NAME;
 
-    g_playback_info = (SndInfo *) malloc(sizeof(SndInfo));
-    if (!g_playback_info) {
+    if (g_playback_info == NULL) {
         return false;
     }
 
@@ -522,6 +533,10 @@ void* SoundTest::test_all(void*)
 
 void SoundTest::start_test(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
     pthread_t tid;
     pthread_create(&tid, NULL, test_all, baseInfo);
 }

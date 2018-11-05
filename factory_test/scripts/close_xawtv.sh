@@ -1,5 +1,5 @@
 #!/bin/sh
-log_file=/var/log/factory.log
+log_file=/var/log/factory_test/factory.log
 xawtv_welcome="/tmp/xawtv_welcome.winid"
 if [ -f $xawtv_welcome ];then
     winid=`cat /tmp/xawtv_welcome.winid`

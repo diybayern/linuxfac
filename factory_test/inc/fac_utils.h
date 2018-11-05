@@ -64,6 +64,9 @@ const string HDD_STATUS_FILE     = "/tmp/hdd.status";
 const string SSD_STATUS_FILE     = "/tmp/ssd.status";
 const string CAMERA_WINID_FILE   = "/tmp/xawtv.winid";
 
+const string USB_MNT_FAC_CONF    = "/mnt/usb_factory_test";
+const string USB_TEST_FILE       = "usbbbbbb_test";
+
 const string DEFAULT_FTP_IP      = "172.21.5.48";
 const string DEFAULT_FTP_USER    = "test";
 const string DEFAULT_FTP_PASSWD  = "test";
@@ -103,10 +106,10 @@ const int BRIGHTNESS_VALUE[6] =
 #define RECEIVE_NUM             (70)
 #define INTERFACE_NUM           (512)
 
-#define MES_FILE                ("/var/log/mes.txt")
-#define STRESS_RECORD           ("/var/log/stress.log")
-#define LOG_FILE                ("/var/log/factory.log")
-#define LOG_FILE_BAK            ("/var/log/factory_bak.log")
+#define MES_FILE                ("/var/log/factory_test/mes.txt")
+#define STRESS_RECORD           ("/var/log/factory_test/stress.log")
+#define LOG_FILE                ("/var/log/factory_test/factory.log")
+#define LOG_FILE_BAK            ("/var/log/factory_test/factory_bak.log")
 
 #define NEXT_LOCK               ("next")
 #define PCBA_LOCK               ("PCBA")

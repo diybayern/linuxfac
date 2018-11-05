@@ -24,6 +24,11 @@ bool CpuTest::is_cpu_test_pass(BaseInfo* baseInfo)
 
 void CpuTest::start_test(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
+
     Control *control = Control::get_control();
     control->set_interface_test_status(CPU_TEST_NAME, false);
     screen_log_black = "";
@@ -88,6 +93,10 @@ void* FanTest::test_all(void *arg)
 
 void FanTest::start_test(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
     pthread_t tid;
     pthread_create(&tid, NULL, test_all, baseInfo);
 }
@@ -246,11 +255,11 @@ void* StressTest::test_all(void* arg)
         write_local_data(STRESS_LOCK_FILE, "w+", (char*)PCBA_LOCK, sizeof(PCBA_LOCK));
     }
 
-    if (execute_command("sync", true) == "error") {
+    /*if (execute_command("sync", true) == "error") {
         uihandle->confirm_test_result_warning("系统同步失败");
         LOG_ERROR("cmd sync error\n");
         return NULL;
-    }
+    }*/
     
     if (!check_file_exit(STRESS_LOCK_FILE)) {
         uihandle->confirm_test_result_warning("lock文件创建异常");
@@ -357,6 +366,10 @@ void* StressTest::test_all(void* arg)
 
 void StressTest::start_test(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
     pthread_t tid;
     pthread_create(&tid, NULL, test_all, baseInfo);
 }
@@ -365,7 +378,6 @@ string StressTest::get_stress_result_record()
 {
     return stress_result;
 }
-
 
 bool NextProcess::create_stress_test_lock() 
 {
@@ -432,6 +444,10 @@ void* NextProcess::test_all(void* arg)
 
 void NextProcess::start_test(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
     pthread_t tid;
     pthread_create(&tid, NULL, test_all, baseInfo);
 }
@@ -440,9 +456,12 @@ void NextProcess::init(){
     pthread_mutex_init(&g_next_process_lock, NULL);
 }
 
-
 void UploadMesLog::start_test(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
     pthread_t tid;
     pthread_create(&tid, NULL, test_all, baseInfo);
 }
@@ -453,7 +472,6 @@ void* UploadMesLog::test_all(void*)
     control->upload_mes_log();
     return NULL;
 }
-
 
 void* InterfaceTest::test_all(void *arg)
 {
@@ -798,6 +816,10 @@ void* InterfaceTest::test_all(void *arg)
 
 void InterfaceTest::start_test(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
     pthread_t tid;
     pthread_create(&tid, NULL, test_all, baseInfo);
 }

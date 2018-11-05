@@ -20,6 +20,7 @@ struct NetInfo {
 class NetTest : public FuncBase
 {
 public:
+    ~NetTest();
     static NetInfo* g_net_info;
     bool init();
     static bool net_test_all(bool test_flag);

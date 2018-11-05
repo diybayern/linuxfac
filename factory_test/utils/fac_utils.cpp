@@ -11,6 +11,9 @@ netbuf* ftp_handle;
 */
 string execute_command(string cmd, bool norm_print)
 {
+    if (cmd == "") {
+        return "error";
+    }
     string cmd_result = "";
     char result[1024];
     int rc = 0;
@@ -78,6 +81,11 @@ void get_current_open_time(TimeInfo* date)
 
 void diff_running_time(TimeInfo* dst, TimeInfo* src)
 {
+    if (dst == NULL || src == NULL) {
+        LOG_ERROR("TimeInfo is null");
+        return;
+    }
+    
     if (dst->second < src->second) {
         dst->second += 60;
         dst->minute -= 1;
@@ -149,6 +157,7 @@ bool write_local_data(string filename, string mod, char* buf, int size)
     }
 
     fflush(outfile);
+    //fsync(fileno(outfile));    //if fsync sound test has problem!!!
     fclose(outfile);
 
     return true;
@@ -357,7 +366,7 @@ int get_fac_config_from_conf(const string conf_path, FacArg *fac)
     }
     fac->ftp_job_number = str;
 /*    if (ret != 0) {
-        return ret;
+        return ret;  // if job number or path is null, stop read ftp config
     }*/
 
     str = read_conf_line(conf_path, "ftp_ip");
@@ -478,10 +487,9 @@ string delNL(string line)
 string lower_to_capital(string lower_str)
 {
     for (unsigned int i = 0; i < lower_str.size(); i++) {
-        if (lower_str[i] >= 'a' && lower_str[i] <= 'z') {
-            lower_str[i] = lower_str[i] - 32;
-        }
+        lower_str[i] = toupper(lower_str[i]);
     }
+    
     return lower_str;
 }
 

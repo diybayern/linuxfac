@@ -18,9 +18,18 @@
 #include "fac_utils.h"
 
 
-NetInfo* NetTest::g_net_info = NULL;
+NetInfo* NetTest::g_net_info = new NetInfo();
 string NetTest::screen_log_black = "";
 string NetTest::screen_log_red = "";
+
+NetTest::~NetTest()
+{
+    LOG_INFO("~NetTest()");
+    if (g_net_info != NULL) {
+        delete g_net_info;
+        g_net_info = NULL;
+    }
+}
 
 bool NetTest::net_get_eth_name(char* eth_name, int size)
 {
@@ -219,8 +228,8 @@ bool NetTest::init()
     pthread_t pid;
     NetInfo* info;
 
-    info = (NetInfo*)malloc(sizeof(NetInfo));
-    if (!info) {
+    info = g_net_info;
+    if (info == NULL) {
         LOG_ERROR("malloc NetInfo failed\n");
         return false;
     }
@@ -251,11 +260,10 @@ bool NetTest::init()
     int tmp = pthread_create(&pid, NULL, net_recv_loopback_msg, info);
     if (tmp < 0) {
         LOG_ERROR("create thread failed\n");
-        free(info);
+        delete info;
+        info = NULL;
         return false;
     }
-
-    g_net_info = info;
 
     return true;
 }
@@ -558,6 +566,10 @@ void* NetTest::test_all(void*)
 
 void NetTest::start_test(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
     pthread_t tid;
     pthread_create(&tid, NULL, test_all, baseInfo);
 }

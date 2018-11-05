@@ -31,7 +31,7 @@ WIFI_TEST_CONFIG_INFO=/tmp/wifi_test_info.tmp
 WIFI_TEST_RESULT=/tmp/wifi.status
 WIFI_SSID_MAC=/tmp/ssid.mac
 
-FACTORY_SHELL_LOG=/var/log/factory_test_bash.log
+FACTORY_SHELL_LOG=/var/log/factory_test/factory_test_bash.log
 WPA_CONFIG=/tmp/wpa.conf
 WPA_SUPPLICANT_EXIST=0
 FACTORY_WIFI_TEST_LOCK=/tmp/.wifi_test.lock

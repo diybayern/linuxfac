@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-log_file=/var/log/factory.log
+log_file=/var/log/factory_test/factory.log
 pidof xawtv | xargs kill -9
 xawtv &
 

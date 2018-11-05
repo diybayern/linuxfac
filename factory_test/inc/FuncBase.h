@@ -2,10 +2,14 @@
 #define _FUNCBASE_H
 
 #include "fac_utils.h"
+#include "fac_log.h"
 
 class FuncBase
 {
 public:
+    virtual ~FuncBase(){
+        LOG_INFO("~FuncBase()");
+    }
     virtual void start_test(BaseInfo* baseInfo) = 0;
 };
 

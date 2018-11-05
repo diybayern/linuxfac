@@ -3,6 +3,67 @@
 
 #include <algorithm>
 
+Control::~Control()
+{
+    LOG_INFO("~Control()");
+    for (int i = INTERFACE; i < FUNC_TYPE_NUM; i++) {
+        if (_funcBase[i] != NULL) {
+            if (i == NET) {
+                NetTest* net = (NetTest*)_funcBase[NET];
+                net->~NetTest();
+            } else if (i == WIFI) {
+                WifiTest* wifi = (WifiTest*)_funcBase[NET];
+                wifi->~WifiTest();
+            } else if (i == SOUND) {
+                SoundTest* sound = (SoundTest*)_funcBase[NET];
+                sound->~SoundTest();
+            }
+            delete _funcBase[i];
+            _funcBase[i] = NULL;
+        }
+    }
+    
+    if (_baseInfo != NULL) {
+        delete _baseInfo;
+        _baseInfo = NULL;
+    }
+        
+    if (_hwInfo != NULL) {
+        delete _hwInfo;
+        _hwInfo = NULL;
+    }
+
+    if (_facArg != NULL) {
+        delete _facArg;
+        _facArg = NULL;
+    }
+
+    if (_mesInfo != NULL) {
+        delete _mesInfo;
+        _mesInfo = NULL;
+    }
+    
+    if (_funcFinishStatus != NULL) {
+        delete _funcFinishStatus;
+        _funcFinishStatus = NULL;
+    }
+    
+    if (_interfaceTestStatus != NULL) {
+        delete _interfaceTestStatus;
+        _interfaceTestStatus = NULL;
+    }
+    
+    if (_interfaceSelectStatus != NULL) {
+        delete _interfaceSelectStatus;
+        _interfaceSelectStatus = NULL;
+    }
+    
+    if (_interfaceTestResult != NULL) {
+        delete _interfaceTestResult;
+        _interfaceTestResult = NULL;
+    }
+}
+
 Control::Control():QObject()
 {
     _funcBase[INTERFACE]      = new InterfaceTest();
@@ -402,8 +463,10 @@ void Control::start_upload_log()
 
 
 void Control::set_test_result(string func, string result, string ui_log)
-
 {
+    if (func == "" || result == "" || ui_log == "") {
+        return;
+    }
     _uiHandle->set_test_result(func, result);
     _uiHandle->update_screen_log(ui_log);
 }
@@ -503,11 +566,11 @@ void Control::init_mes_log()
 
 
     LOG_MES("---------------------Product infomation-----------------------\n");
-    LOG_MES("Model: \t%s\n", _hwInfo->product_name);
-    LOG_MES("SN: \t%s\n", sn_capital);
-    LOG_MES("MAC: \t%s\n", mac_capital);
+    LOG_MES("Model: \t%s\n", (_hwInfo->product_name).c_str());
+    LOG_MES("SN: \t%s\n", sn_capital.c_str());
+    LOG_MES("MAC: \t%s\n", mac_capital.c_str());
     LOG_MES("DATE: \t%s\n", date);
-    LOG_MES("OPERATION: \t%s\n", _facArg->ftp_job_number);
+    LOG_MES("OPERATION: \t%s\n", (_facArg->ftp_job_number).c_str());
     LOG_MES("---------------------Simple test result-----------------------\n");
     LOG_MES("MEMORY:    NULL\n");
     LOG_MES("USB:       NULL\n");
@@ -539,10 +602,13 @@ void Control::init_mes_log()
 
 void Control::update_mes_log(string tag, string value)
 {
+    if (tag == "" || value == "") {
+        return;
+    }
+    
     FILE* fp;
     char line[200];
-    char* sp = NULL;
-    int file_size;
+    size_t sp = 0;
     int first = 1;
  
     bzero(line,sizeof(line));
@@ -552,26 +618,18 @@ void Control::update_mes_log(string tag, string value)
         return;
     }
  
-    fseek(fp, 0, SEEK_END);
-    file_size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    char* buf = (char*)malloc(file_size + 128);
-    if (NULL == buf) {
-        fclose(fp);
-        return;
-    }
-    
-    bzero(buf, file_size);
- 
+    string buf = "";
+
     while (fgets(line, sizeof(line), fp) != NULL) {
-        if (first &&((sp = strstr(line, tag.c_str())) != NULL)) {
-            char value_temp[128];
-            bzero(value_temp, 128);
-            sprintf(value_temp, "%s\n", value.c_str());
-            memcpy(sp + 11, value_temp, strlen(value_temp) + 1);//修改标签内容，加TAG_OFFSET是为了对齐值
+        string str_line = line;
+        if (first &&((sp = str_line.find(tag)) != str_line.npos)) {
+            string value_temp = "";
+            value_temp = value + "\n";
+            str_line.replace(sp + 11, value_temp.size(), value_temp);
             first = 0;
         }
-        strcat(buf, line);
+        buf += str_line;
     }
  
     fclose(fp);
@@ -580,16 +638,11 @@ void Control::update_mes_log(string tag, string value)
         return ;
     }
 
-    if (buf != NULL) {
-        int len = strlen(buf);
-        fwrite(buf, 1, len, fp);
+    if (buf != "") {
+        int len = buf.size();
+        fwrite(buf.c_str(), 1, len, fp);
     }
     fclose(fp);
-
-    if (buf != NULL) {
-        free(buf);
-    }
-
 }
 
 
@@ -984,6 +1037,7 @@ void Control::factory_delete_event()
     LOG_INFO("factory test delete_event occurred.\n");
     SoundTest* sound = (SoundTest*) _funcBase[SOUND];
     sound->sound_record_restore(_baseInfo);
+    _control->~Control();
 }
 
 
