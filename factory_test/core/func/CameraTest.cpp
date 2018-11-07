@@ -8,7 +8,7 @@
 
 unsigned long CameraTest::get_window_id(string winid_file)
 {
-    char winidbuf[CMD_BUF_SIZE];
+    char winidbuf[CMD_BUF_SIZE];    //TODO: char[] winidbuf
     unsigned long winid;
     int size = 0;
 
@@ -146,9 +146,9 @@ bool CameraTest::camera_test_all()
 void* CameraTest::test_all(void*)
 {
     Control* control = Control::get_control();
-    control->update_screen_log("==================== " + CAMERA_TEST_NAME + " ====================\n");
+    control->update_screen_log("==================== " + FUNC_TEST_NAME[F_CAMERA] + " ====================\n");
     camera_test_all();    
-    control->confirm_test_result(CAMERA_TEST_NAME);
+    control->confirm_test_result(FUNC_TEST_NAME[F_CAMERA]);
     return NULL;
 }
 

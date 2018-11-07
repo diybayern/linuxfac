@@ -17,169 +17,6 @@
 #include "FuncBase.h"
 #include "UiHandle.h"
 
-#define   FUNC_TYPE_NUM     (16)
-
-enum FuncType {
-    INTERFACE = 0,
-    MEM,
-    USB,
-    NET,
-    EDID,
-    CPU,
-    HDD,
-    FAN,
-    WIFI,
-    SSD,
-    SOUND,
-    BRIGHT,
-    CAMERA,
-    STRESS,
-    NEXT_PROCESS,
-    UPLOAD_MES_LOG,
-};
-
-enum InterfaceRunStatus {
-    INF_RUNEND = 0,
-    INF_BREAK,
-    INF_RUNNING
-};
-
-enum TestStep {
-    STEP_IDLE = 0,
-    STEP_INTERFACE,
-    STEP_SOUND,
-    STEP_DISPLAY,
-    STEP_BRIGHTNESS,
-    STEP_CAMERA,
-    STEP_STRESS,
-    STEP_MEM,
-    STEP_FAN
-};
-
-struct FuncFinishStatus {
-    FuncFinishStatus() {
-        interface_finish = false;
-        mem_finish       = false;
-        usb_finish       = false;
-        cpu_finish       = false;
-        net_finish       = false;
-        edid_finish      = false;
-        hdd_finish       = false;
-        fan_finish       = false;
-        wifi_finish      = false;
-        ssd_finish       = false;
-        sound_finish     = false;
-        display_finish   = false;
-        bright_finish    = false;
-        camera_finish    = false;
-        stress_finish    = false;
-    }
-    bool interface_finish;
-    bool mem_finish;
-    bool usb_finish;
-    bool cpu_finish;
-    bool net_finish;
-    bool edid_finish;
-    bool hdd_finish;
-    bool fan_finish;
-    bool wifi_finish;
-    bool ssd_finish;
-    bool sound_finish;
-    bool display_finish;
-    bool bright_finish;
-    bool camera_finish;
-    bool stress_finish;
-};
-
-struct InterfaceTestStatus {
-    InterfaceTestStatus() {
-        cpu_test_over  = false;
-        mem_test_over  = false;
-        usb_test_over  = false;
-        edid_test_over = false;
-        net_test_over  = false;
-        hdd_test_over  = false;
-        fan_test_over  = false;
-        wifi_test_over = false;
-        ssd_test_over  = false;
-    }
-    bool mem_test_over;
-    bool usb_test_over;
-    bool cpu_test_over;
-    bool net_test_over;
-    bool edid_test_over;
-    bool hdd_test_over;
-    bool fan_test_over;
-    bool wifi_test_over;
-    bool ssd_test_over;
-};
-
-struct InterfaceTestResult {
-    InterfaceTestResult() {
-        mem_test_result  = false;
-        usb_test_result  = false;
-        cpu_test_result  = false;
-        net_test_result  = false;
-        edid_test_result = false;
-        hdd_test_result  = false;
-        fan_test_result  = false;
-        wifi_test_result = false;
-        ssd_test_result  = false;
-    }
-    bool mem_test_result;
-    bool usb_test_result;
-    bool cpu_test_result;
-    bool net_test_result;
-    bool edid_test_result;
-    bool hdd_test_result;
-    bool fan_test_result;
-    bool wifi_test_result;
-    bool ssd_test_result;
-};
-
-struct InterfaceTestFailNum {
-    int mem_test_fail_num;
-    int usb_test_fail_num;
-    int cpu_test_fail_num;
-    int net_test_fail_num;
-    int edid_test_fail_num;
-    int hdd_test_fail_num;
-    int fan_test_fail_num;
-    int wifi_test_fail_num;
-    int ssd_test_fail_num;
-};
-
-struct InterfaceSelectStatus {
-    InterfaceSelectStatus() {
-        mem_select  = true;
-        usb_select  = true;
-        cpu_select  = true;
-        net_select  = true;
-        edid_select = true;
-        hdd_select  = true;
-        fan_select  = true;
-        wifi_select = true;
-        ssd_select  = true;
-    }
-    bool mem_select;
-    bool usb_select;
-    bool cpu_select;
-    bool net_select;
-    bool edid_select;
-    bool hdd_select;
-    bool fan_select;
-    bool wifi_select;
-    bool ssd_select;
-};
-
-struct MesInfo {
-    MesInfo():func(""),
-        status("")
-    {
-    }
-    string func;
-    string status;
-};
 
 class UsbTest;
 class Control : public QObject
@@ -217,10 +54,6 @@ public:
         return _uiHandle;
     }
     
-    FuncFinishStatus* get_func_finish_status()
-    {
-        return _funcFinishStatus;
-    }
 
     BaseInfo* get_base_info()
     {
@@ -231,12 +64,6 @@ public:
     {
         return _hwInfo;
     }
-
-    void set_interfacetest_finish()
-    {
-        _funcFinishStatus->interface_finish = true;
-    }
-
 
     void set_interface_test_status(string func, bool status);
     void set_interface_test_finish(string func);
@@ -257,18 +84,6 @@ public:
 
     FuncBase** get_funcbase() {
         return _funcBase;
-    }
-
-    InterfaceSelectStatus* get_interface_select_status() {
-        return _interfaceSelectStatus;
-    }
-
-    InterfaceTestStatus* get_interface_test_status() {
-        return _interfaceTestStatus;
-    }
-
-    InterfaceTestResult* get_interface_test_result() {
-        return _interfaceTestResult;
     }
 
     int get_interface_run_status() {
@@ -319,11 +134,6 @@ private:
     BaseInfo* _baseInfo;
     HwInfo* _hwInfo;
     MesInfo* _mesInfo;
-    FuncFinishStatus* _funcFinishStatus;
-    InterfaceTestStatus* _interfaceTestStatus;
-    InterfaceSelectStatus* _interfaceSelectStatus;
-    InterfaceTestResult* _interfaceTestResult;
-    InterfaceTestFailNum* _interfaceTestFailNum;
     
     int _testStep;
     FuncBase* _funcBase[FUNC_TYPE_NUM];

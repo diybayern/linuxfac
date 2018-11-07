@@ -58,44 +58,38 @@ struct LRMI_regs {
  returns 1 if sucessful, 0 for failure
 */
 #define LRMI_init LRMI_MAKENAME(init)
-int 
-LRMI_init(void);
+int LRMI_init(void);
 
 /*
  Simulate a 16 bit far call
  returns 1 if sucessful, 0 for failure
 */
 #define LRMI_call LRMI_MAKENAME(call)
-int
-LRMI_call(struct LRMI_regs *r);
+int LRMI_call(struct LRMI_regs *r);
 
 /*
  Simulate a 16 bit interrupt
  returns 1 if sucessful, 0 for failure
 */
 #define LRMI_int LRMI_MAKENAME(int)
-int
-LRMI_int(int interrupt, struct LRMI_regs *r);
+int LRMI_int(int interrupt, struct LRMI_regs *r);
 
 /*
  Allocate real mode memory
  The returned block is paragraph (16 byte) aligned
 */
 #define LRMI_alloc_real LRMI_MAKENAME(alloc_real)
-void *
-LRMI_alloc_real(int size);
+void *LRMI_alloc_real(int size);
 
 /*
  Free real mode memory
 */
 #define LRMI_free_real LRMI_MAKENAME(free_real)
-void
-LRMI_free_real(void *m);
+void LRMI_free_real(void *m);
 
 /*
  * Get the base address of the real memory address space block.
  */
-size_t
-LRMI_base_addr(void);
+size_t LRMI_base_addr(void);
 }
 #endif

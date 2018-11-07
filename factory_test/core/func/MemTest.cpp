@@ -8,6 +8,10 @@ string MemTest::screen_log_red = "";
 
 bool MemTest::compare_men_cap(int mem_cap)
 {
+    if (mem_cap <= 0) {
+        LOG_ERROR("mem cap is wrong");
+        return false;
+    }
     float mem_cap_min = mem_cap * 1024 * 0.9;
     float mem_cap_max = mem_cap * 1024;
     string real_mem_cap = execute_command("free -m | awk '/Mem/ {print $2}'", true);
@@ -23,6 +27,7 @@ bool MemTest::compare_men_cap(int mem_cap)
     }
 }
 
+/* use memtester in scripts test mem stability */
 bool MemTest::mem_stability_test()
 {
     string stable_result;
@@ -46,10 +51,10 @@ void* MemTest::test_all(void *arg)
     BaseInfo* baseInfo = (BaseInfo*)arg;
     bool is_pass = true;
     
-    control->set_interface_test_status(MEM_TEST_NAME, false);
+    control->set_interface_test_status(INTERFACE_TEST_NAME[I_MEM], false);
     screen_log_black = "";
     screen_log_red = "";
-    screen_log_black += "==================== " + MEM_TEST_NAME + " ====================\n";
+    screen_log_black += "==================== " + INTERFACE_TEST_NAME[I_MEM] + " ====================\n";
     
     if (!control->get_third_product_state()) {
         is_pass = compare_men_cap(get_int_value(baseInfo->mem_cap));
@@ -61,19 +66,19 @@ void* MemTest::test_all(void *arg)
     LOG_INFO("mem stability test result:%s\n", stability_result.c_str());
     if (is_pass) {
         LOG_INFO("mem test result:\tPASS\n");
-        screen_log_black += MEM_TEST_NAME + "结果：\t\t\t成功\n\n";
-        control->set_interface_test_result(MEM_TEST_NAME, true); 
+        screen_log_black += INTERFACE_TEST_NAME[I_MEM] + "结果：\t\t\t成功\n\n";
+        control->set_interface_test_result(INTERFACE_TEST_NAME[I_MEM], true); 
     } else {
         LOG_INFO("mem test result:\tFAIL\n");
-        screen_log_red = MEM_TEST_NAME + "结果：\t\t\t失败\n\n" + screen_log_red;
-        control->set_interface_test_result(MEM_TEST_NAME, false); 
+        screen_log_red = INTERFACE_TEST_NAME[I_MEM] + "结果：\t\t\t失败\n\n" + screen_log_red;
+        control->set_interface_test_result(INTERFACE_TEST_NAME[I_MEM], false); 
     }
     remove_local_file(MEM_UI_LOG);
     control->update_screen_log(screen_log_black);
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");
     }
-    control->set_interface_test_status(MEM_TEST_NAME, true);
+    control->set_interface_test_status(INTERFACE_TEST_NAME[I_MEM], true);
     return NULL;
 }
 

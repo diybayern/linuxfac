@@ -17,6 +17,8 @@
 #include "fac_log.h"
 #include "fac_utils.h"
 
+extern bool interfaceTestOver[INTERFACE_TEST_NUM];
+
 
 WifiInfo* WifiTest::g_wifi_info = new WifiInfo();
 string WifiTest::screen_log_black = "";
@@ -437,10 +439,10 @@ bool WifiTest::check_if_wifi_connect_pass()
 void* WifiTest::test_all(void*)
 {
     Control *control = Control::get_control();
-    control->set_interface_test_status(WIFI_TEST_NAME, false);
+    control->set_interface_test_status(INTERFACE_TEST_NAME[I_WIFI], false);
     while (1) {
         //starting wifi test after net test over
-        if (control->get_interface_test_status()->net_test_over) {
+        if (interfaceTestOver[I_NET]) {
             break;
         }
         sleep(1);
@@ -449,7 +451,7 @@ void* WifiTest::test_all(void*)
     LOG_INFO("---------- start wifi test ----------\n");
     screen_log_black = "";
     screen_log_red = "";
-    screen_log_black += "==================== " + WIFI_TEST_NAME + " ====================\n";
+    screen_log_black += "==================== " + INTERFACE_TEST_NAME[I_WIFI] + " ====================\n";
     bool is_pass = false;
     FacArg* _facArg = control->get_fac_arg();
     string cmd = "bash " + WIFI_TEST_SCRIPT + + " " + _facArg->wifi_ssid + " " + _facArg->wifi_passwd + " " + _facArg->wifi_enp;
@@ -465,18 +467,18 @@ void* WifiTest::test_all(void*)
 
     if (is_pass) {
         LOG_INFO("wifi test result:\tPASS\n");
-        screen_log_black += "\n" + WIFI_TEST_NAME + "结果:\t\t\t成功\n\n";
-        control->set_interface_test_result(WIFI_TEST_NAME, true); 
+        screen_log_black += "\n" + INTERFACE_TEST_NAME[I_WIFI] + "结果:\t\t\t成功\n\n";
+        control->set_interface_test_result(INTERFACE_TEST_NAME[I_WIFI], true); 
     } else {
         LOG_INFO("wifi test result:\tFAIL\n");
-        screen_log_red = WIFI_TEST_NAME + "结果:\t\t\t失败\n\n" + screen_log_red;
-        control->set_interface_test_result(WIFI_TEST_NAME, false); 
+        screen_log_red = INTERFACE_TEST_NAME[I_WIFI] + "结果:\t\t\t失败\n\n" + screen_log_red;
+        control->set_interface_test_result(INTERFACE_TEST_NAME[I_WIFI], false); 
     }
     control->update_screen_log(screen_log_black);
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");
     }
-    control->set_interface_test_status(WIFI_TEST_NAME, true);
+    control->set_interface_test_status(INTERFACE_TEST_NAME[I_WIFI], true);
     return NULL;
 }
 

@@ -5,20 +5,22 @@
 #include "fac_utils.h"
 #include "fac_log.h"
 
+extern bool funcFinishStatus[FUNC_TEST_NUM];
+
+
 void* semi_auto_test_control(void*)
 {
     Control* control = Control::get_control();
     while (1) {
         int testStep = control->get_test_step();
-        FuncFinishStatus* funcFinishStatus = control->get_func_finish_status();
         usleep(500000);
         
         if (testStep != STEP_IDLE) {
-            if (funcFinishStatus->interface_finish 
-                && funcFinishStatus->sound_finish 
-                && funcFinishStatus->display_finish
-                && funcFinishStatus->bright_finish
-                && funcFinishStatus->camera_finish) {
+            if (funcFinishStatus[F_INTERFACE] 
+                && funcFinishStatus[F_SOUND]
+                && funcFinishStatus[F_DISPLAY]
+                && funcFinishStatus[F_BRIGHT]
+                && funcFinishStatus[F_CAMERA]) {
                 if (control->get_auto_upload_mes_status() && !control->get_third_product_state()) {
                     control->upload_mes_log();
                 }
@@ -26,7 +28,7 @@ void* semi_auto_test_control(void*)
             
             switch (testStep){
                 case STEP_INTERFACE: {
-                    if (funcFinishStatus->interface_finish && !funcFinishStatus->sound_finish) {                
+                    if (funcFinishStatus[F_INTERFACE] && !funcFinishStatus[F_SOUND]) {                
                         LOG_INFO("interface_finish OK.\n");
                         control->set_test_step(STEP_SOUND);
                         control->start_sound_test();
@@ -34,7 +36,7 @@ void* semi_auto_test_control(void*)
                 } break;
                 
                 case STEP_SOUND: {
-                    if (funcFinishStatus->sound_finish && !funcFinishStatus->display_finish) {
+                    if (funcFinishStatus[F_SOUND] && !funcFinishStatus[F_DISPLAY]) {
                         LOG_INFO("sound_finish OK.\n");
                         control->set_test_step(STEP_DISPLAY);
                         control->start_display_test();
@@ -42,7 +44,7 @@ void* semi_auto_test_control(void*)
                 } break;
                 
                 case STEP_DISPLAY: {
-                    if (funcFinishStatus->display_finish && !funcFinishStatus->bright_finish) {
+                    if (funcFinishStatus[F_DISPLAY] && !funcFinishStatus[F_BRIGHT]) {
                         if (control->get_base_info()->bright_level != "0" || control->get_base_info()->bright_level != "") {
                            LOG_INFO("display_finish OK.\n");
                            control->set_test_step(STEP_BRIGHTNESS);
@@ -52,7 +54,7 @@ void* semi_auto_test_control(void*)
                 } break;
                 
                 case STEP_BRIGHTNESS: {
-                    if (funcFinishStatus->bright_finish && !funcFinishStatus->camera_finish) {
+                    if (funcFinishStatus[F_BRIGHT] && !funcFinishStatus[F_CAMERA]) {
                         if (control->get_base_info()->camera_exist != "0" || control->get_base_info()->camera_exist != "") {
                            LOG_INFO("bright_finish OK.\n");
                            control->set_test_step(STEP_CAMERA);

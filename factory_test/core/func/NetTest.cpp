@@ -226,7 +226,7 @@ bool NetTest::init()
 {
     bool ret = false;
     pthread_t pid;
-    NetInfo* info;
+    NetInfo* info;   //TODO: NetInfo --> char[]
 
     info = g_net_info;
     if (info == NULL) {
@@ -541,26 +541,26 @@ error:
 void* NetTest::test_all(void*)
 {
     Control *control = Control::get_control();
-    control->set_interface_test_status(NET_TEST_NAME, false);
+    control->set_interface_test_status(INTERFACE_TEST_NAME[I_NET], false);
     
     screen_log_black = "";
     screen_log_red = "";
-    screen_log_black += "==================== " + NET_TEST_NAME + " ====================\n";
+    screen_log_black += "==================== " + INTERFACE_TEST_NAME[I_NET] + " ====================\n";
     bool is_pass = net_test_all(true);
     if (is_pass) {
         LOG_INFO("net test result:\tPASS\n");
-        screen_log_black += NET_TEST_NAME + "结果：\t\t\t成功\n\n";
-        control->set_interface_test_result(NET_TEST_NAME, true);
+        screen_log_black += INTERFACE_TEST_NAME[I_NET] + "结果：\t\t\t成功\n\n";
+        control->set_interface_test_result(INTERFACE_TEST_NAME[I_NET], true);
     } else {
         LOG_INFO("net test result:\tFAIL\n");
-        screen_log_red = NET_TEST_NAME + "结果：\t\t\t失败\n\n" + screen_log_red;
-        control->set_interface_test_result(NET_TEST_NAME, false);
+        screen_log_red = INTERFACE_TEST_NAME[I_NET] + "结果：\t\t\t失败\n\n" + screen_log_red;
+        control->set_interface_test_result(INTERFACE_TEST_NAME[I_NET], false);
     }
     control->update_screen_log(screen_log_black);
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");
     }
-    control->set_interface_test_status(NET_TEST_NAME, true);
+    control->set_interface_test_status(INTERFACE_TEST_NAME[I_NET], true);
     return NULL;
 }
 

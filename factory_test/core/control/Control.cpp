@@ -3,6 +3,56 @@
 
 #include <algorithm>
 
+extern bool interfaceTestSelectStatus[INTERFACE_TEST_NUM];
+extern bool interfaceTestResult[INTERFACE_TEST_NUM];
+extern bool interfaceTestOver[INTERFACE_TEST_NUM];
+extern bool interfaceTestFinish[INTERFACE_TEST_NUM];
+extern bool funcFinishStatus[FUNC_TEST_NUM];
+
+Control::Control():QObject()
+{
+    _funcBase[MEM]            = new MemTest();
+    _funcBase[USB]            = new UsbTest();
+    _funcBase[CPU]            = new CpuTest();
+    _funcBase[EDID]           = new EdidTest();
+    _funcBase[NET]            = new NetTest();
+    _funcBase[HDD]            = new HddTest();
+    _funcBase[SSD]            = new SsdTest();
+    _funcBase[FAN]            = new FanTest();
+    _funcBase[WIFI]           = new WifiTest();
+    _funcBase[INTERFACE]      = new InterfaceTest();
+    _funcBase[SOUND]          = new SoundTest();
+    _funcBase[BRIGHT]         = new BrightTest();
+    _funcBase[CAMERA]         = new CameraTest();
+    _funcBase[STRESS]         = new StressTest();
+    _funcBase[NEXT_PROCESS]   = new NextProcess();
+    _funcBase[UPLOAD_MES_LOG] = new UploadMesLog();
+    
+    _uiHandle                 = UiHandle::get_uihandle();
+    
+    _baseInfo                 = new BaseInfo;
+    _hwInfo                   = new HwInfo;
+    _facArg                   = new FacArg;
+    _mesInfo                  = new MesInfo;
+
+    _testStep = STEP_IDLE;
+    _interfaceRunStatus = INF_RUNEND;
+    
+    init_base_info();
+    init_hw_info();
+    init_fac_config();
+    init_mes_log();
+}
+
+Control* Control::_control = NULL;
+Control* Control::get_control()
+{
+    if (!_control) {
+        _control = new Control();
+    }
+    return _control;
+}
+
 Control::~Control()
 {
     LOG_INFO("~Control()");
@@ -46,79 +96,6 @@ Control::~Control()
         delete _mesInfo;
         _mesInfo = NULL;
     }
-    
-    if (_funcFinishStatus != NULL) {
-        LOG_INFO("~_funcFinishStatus");
-        delete _funcFinishStatus;
-        _funcFinishStatus = NULL;
-    }
-    
-    if (_interfaceTestStatus != NULL) {
-        LOG_INFO("~_interfaceTestStatus");
-        delete _interfaceTestStatus;
-        _interfaceTestStatus = NULL;
-    }
-    
-    if (_interfaceSelectStatus != NULL) {
-        LOG_INFO("~_interfaceSelectStatus");
-        delete _interfaceSelectStatus;
-        _interfaceSelectStatus = NULL;
-    }
-    
-    if (_interfaceTestResult != NULL) {
-        LOG_INFO("~_interfaceTestResult");
-        delete _interfaceTestResult;
-        _interfaceTestResult = NULL;
-    }
-}
-
-Control::Control():QObject()
-{
-    _funcBase[INTERFACE]      = new InterfaceTest();
-    _funcBase[MEM]            = new MemTest();
-    _funcBase[USB]            = new UsbTest();
-    _funcBase[CPU]            = new CpuTest();
-    _funcBase[EDID]           = new EdidTest();
-    _funcBase[NET]            = new NetTest();
-    _funcBase[HDD]            = new HddTest();
-    _funcBase[FAN]            = new FanTest();
-    _funcBase[WIFI]           = new WifiTest();
-    _funcBase[SSD]            = new SsdTest();
-    _funcBase[SOUND]          = new SoundTest();
-    _funcBase[BRIGHT]         = new BrightTest();
-    _funcBase[CAMERA]         = new CameraTest();
-    _funcBase[STRESS]         = new StressTest();
-    _funcBase[NEXT_PROCESS]   = new NextProcess();
-    _funcBase[UPLOAD_MES_LOG] = new UploadMesLog();
-    
-    _uiHandle                 = UiHandle::get_uihandle();
-    
-    _baseInfo                 = new BaseInfo;
-    _hwInfo                   = new HwInfo;
-    _facArg                   = new FacArg;
-    _mesInfo                  = new MesInfo;
-
-    _funcFinishStatus         = new FuncFinishStatus;
-    _interfaceTestStatus      = new InterfaceTestStatus;    
-    _interfaceSelectStatus    = new InterfaceSelectStatus;
-    _interfaceTestResult      = new InterfaceTestResult;
-
-    _testStep = STEP_IDLE;
-    _interfaceRunStatus = INF_RUNEND;
-    
-    init_base_info();
-    init_hw_info();
-    init_fac_config();
-    init_mes_log();
-}
-
-Control* Control::_control = NULL;
-Control* Control::get_control()
-{
-    if (!_control) {
-        _control = new Control();
-    }
-    return _control;
 }
 
 void Control::init_base_info()
@@ -188,76 +165,84 @@ void Control::init_ui()
         }
     }
     
-    _uiHandle->add_main_test_button(INTERFACE_TEST_NAME);
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_INTERFACE]);
     
-    _uiHandle->add_interface_test_button(MEM_TEST_NAME);
+    _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_MEM]);
     
     if (!_is_third_product || _baseInfo->usb_total_num != "0") {
-        _uiHandle->add_interface_test_button(USB_TEST_NAME);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_USB]);
     } else {
-        _funcFinishStatus->usb_finish = true;
-        _interfaceTestStatus->usb_test_over = true;
+        interfaceTestSelectStatus[I_USB] = false;
+        interfaceTestFinish[I_USB]       = true;
+        interfaceTestOver[I_USB]         = true;
     }
-    _uiHandle->add_interface_test_button(NET_TEST_NAME);
+    _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_NET]);
     
     if (_is_third_product) {
-        _funcFinishStatus->edid_finish = true;
-        _interfaceTestStatus->edid_test_over = true;
-        _funcFinishStatus->cpu_finish = true;
-        _interfaceTestStatus->cpu_test_over = true;
+        interfaceTestSelectStatus[I_EDID] = false;
+        interfaceTestFinish[I_EDID]       = true;
+        interfaceTestOver[I_EDID]         = true;
+        
+        interfaceTestSelectStatus[I_CPU]  = false;
+        interfaceTestFinish[I_CPU]        = true;
+        interfaceTestOver[I_CPU]          = true;
     } else {
-        _uiHandle->add_interface_test_button(EDID_TEST_NAME);
-        _uiHandle->add_interface_test_button(CPU_TEST_NAME);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_EDID]);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_CPU]);
     }
     
     if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
-        _uiHandle->add_interface_test_button(HDD_TEST_NAME);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_HDD]);
     } else {
-        _funcFinishStatus->hdd_finish = true;
-        _interfaceTestStatus->hdd_test_over = true;
+        interfaceTestSelectStatus[I_HDD] = false;
+        interfaceTestFinish[I_HDD]       = true;
+        interfaceTestOver[I_HDD]         = true;
     }
     
     if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
-        _uiHandle->add_interface_test_button(SSD_TEST_NAME);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_SSD]);
     } else {
-        _funcFinishStatus->ssd_finish = true;
-        _interfaceTestStatus->ssd_test_over = true;
+        interfaceTestSelectStatus[I_SSD] = false;
+        interfaceTestFinish[I_SSD]       = true;
+        interfaceTestOver[I_SSD]         = true;
     }
     
     if (_baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") {
-        _uiHandle->add_interface_test_button(FAN_TEST_NAME);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_FAN]);
     } else {
-        _funcFinishStatus->fan_finish = true;
-        _interfaceTestStatus->fan_test_over = true;
+        interfaceTestSelectStatus[I_FAN] = false;
+        interfaceTestFinish[I_FAN]       = true;
+        interfaceTestOver[I_FAN]         = true;
     }
     
     if (!_is_third_product && _baseInfo->wifi_exist != "0" && _baseInfo->wifi_exist != "") {
-        _uiHandle->add_interface_test_button(WIFI_TEST_NAME);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_WIFI]);
     } else {
-        _funcFinishStatus->wifi_finish = true;
-        _interfaceTestStatus->wifi_test_over = true;
+        interfaceTestSelectStatus[I_WIFI] = false;
+        interfaceTestFinish[I_WIFI]       = true;
+        interfaceTestOver[I_WIFI]         = true;
     }
     
-    _uiHandle->add_main_test_button(SOUND_TEST_NAME);
-    _uiHandle->add_main_test_button(DISPLAY_TEST_NAME);
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_SOUND]);
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_DISPLAY]);
 
     if (!_is_third_product && _baseInfo->bright_level != "0" && _baseInfo->bright_level != ""){
-        _uiHandle->add_main_test_button(BRIGHT_TEST_NAME);
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_BRIGHT]);
     } else {
-        _funcFinishStatus->bright_finish = true;
+        funcFinishStatus[F_BRIGHT] = true;
     }
     
     if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
-        _uiHandle->add_main_test_button(CAMERA_TEST_NAME);
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_CAMERA]);
     } else {
-        _funcFinishStatus->camera_finish = true;
+        funcFinishStatus[F_CAMERA] = true;
     }
 
-    _uiHandle->add_main_test_button(STRESS_TEST_NAME);
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_STRESS]);
     if (!_is_third_product) {
-        _uiHandle->add_main_test_button(UPLOAD_LOG_NAME);
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_UPLOAD_MES_LOG]);
         if (!check_file_exit(WHOLE_TEST_FILE)) {
-            _uiHandle->add_main_test_button(NEXT_PROCESS_NAME);
+            _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_NEXT_PROCESS]);
         }    
     }
     
@@ -289,24 +274,22 @@ void Control::init_ui()
     _uiHandle->add_stress_test_label("产品型号");
     _uiHandle->add_stress_test_label("硬件版本");
 
-    connect(_uiHandle->get_qobject(INTERFACE_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_interface_test()));
-        
+    connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_INTERFACE]), SIGNAL(clicked()), this, SLOT(start_interface_test()));           
+    connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_SOUND]), SIGNAL(clicked()), this, SLOT(start_sound_test()));
+    connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_DISPLAY]), SIGNAL(clicked()), this, SLOT(start_display_test()));
     if (!_is_third_product && _baseInfo->bright_level != "0" && _baseInfo->bright_level != ""){
-        connect(_uiHandle->get_qobject(BRIGHT_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_bright_test()));
+        connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_BRIGHT]), SIGNAL(clicked()), this, SLOT(start_bright_test()));
     }
     if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
-        connect(_uiHandle->get_qobject(CAMERA_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_camera_test()));
+        connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_CAMERA]), SIGNAL(clicked()), this, SLOT(start_camera_test()));
     }
-    connect(_uiHandle->get_qobject(SOUND_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_sound_test()));
-    connect(_uiHandle->get_qobject(DISPLAY_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_display_test()));
-
-    connect(_uiHandle->get_qobject(STRESS_TEST_NAME), SIGNAL(clicked()), this, SLOT(start_stress_test()));
-    if (!_is_third_product) {	
-        connect(_uiHandle->get_qobject(UPLOAD_LOG_NAME), SIGNAL(clicked()), this, SLOT(start_upload_log()));
+    connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_STRESS]), SIGNAL(clicked()), this, SLOT(start_stress_test()));
+    if (!_is_third_product) {
+        connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_UPLOAD_MES_LOG]), SIGNAL(clicked()), this, SLOT(start_upload_log()));
     }
 
     if (!_is_third_product && !check_file_exit(WHOLE_TEST_FILE)) {
-        connect(_uiHandle->get_qobject(NEXT_PROCESS_NAME), SIGNAL(clicked()), this, SLOT(start_next_process()));
+        connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_NEXT_PROCESS]), SIGNAL(clicked()), this, SLOT(start_next_process()));
     }
     connect(_uiHandle, SIGNAL(to_show_test_confirm_dialog(string)), this, SLOT(show_test_confirm_dialog(string)));
     connect(_uiHandle, SIGNAL(sig_ui_handled_test_result(string, string)), this, SLOT(set_test_result_pass_or_fail(string, string)));
@@ -342,9 +325,10 @@ void Control::retry_sn_mac_test()
     }
 }
 
+/* after upload success */
 void Control::confirm_shut_down_or_next_process(string process)
 {
-    if (process == NEXT_PROCESS_NAME) {
+    if (process == FUNC_TEST_NAME[F_NEXT_PROCESS]) {
         _funcBase[NEXT_PROCESS]->start_test(_baseInfo);
     } else if (process == "关机") {
         if (execute_command("shutdown -h now", true) == "error"){
@@ -354,6 +338,7 @@ void Control::confirm_shut_down_or_next_process(string process)
     }
 }
 
+/* compare input string with system mac or sn */
 void Control::check_sn_mac_compare_result(string message)
 {
     if (_display_sn_or_mac == "MAC") {
@@ -388,9 +373,10 @@ void Control::check_sn_mac_compare_result(string message)
     }
 }
 
+/* show result confirmation box to choose PASS or FAIL ----display, stress */
 void Control::show_test_confirm_dialog(string item)
 {
-    if (item.compare(STRESS_TEST_NAME) == 0) {
+    if (item.compare(FUNC_TEST_NAME[F_STRESS]) == 0) {
         _stress_test_window_quit_status = false;
     }
     _uiHandle->confirm_test_result_dialog(item);
@@ -414,11 +400,11 @@ void Control::init_func_test()
 void Control::init_fac_config()
 {
     UsbTest* usb = (UsbTest*)_funcBase[USB];
-    if (!usb->usb_test_read_status()) {
+    if (!usb->usb_test_read_status()) { // copy fac_config.conf from usb to /tmp/
         LOG_ERROR("init copy fac config error");
-    } else {
-        _fac_config_status = get_fac_config_from_conf(FAC_CONFIG_FILE, _facArg);
     }
+    /* Read FAC_CONFIG_FILE regardless of whether or not usb file exists */
+    _fac_config_status = get_fac_config_from_conf(FAC_CONFIG_FILE, _facArg);
 }
 
 void Control::start_interface_test()
@@ -436,7 +422,7 @@ void Control::start_sound_test()
 void Control::start_display_test()
 {
     LOG_INFO("******************** start display test ********************");
-    update_screen_log("==================== " + DISPLAY_TEST_NAME + " ====================\n");
+    update_screen_log("==================== " + FUNC_TEST_NAME[F_DISPLAY] + " ====================\n");
     _uiHandle->show_display_ui();
 }
 
@@ -474,18 +460,21 @@ void Control::start_upload_log()
 void Control::set_test_result(string func, string result, string ui_log)
 {
     if (func == "" || result == "" || ui_log == "") {
+        LOG_ERROR("parameters is wrong");
         return;
     }
     _uiHandle->set_test_result(func, result);
     _uiHandle->update_screen_log(ui_log);
 }
 
+/* show result confirmation box to choose PASS or FAIL ----sound, camera, brightness */
 void Control::confirm_test_result(string func)
 {
     LOG_INFO("confirm %s result", func.c_str());
     _uiHandle->confirm_test_result_dialog(func);
 }
 
+/* Set brightness test result box PASS is or not clickable */
 void Control::set_brightness_dialog_button_state(bool state)
 {
     LOG_INFO("set_brightness_dialog_button_state");
@@ -500,6 +489,7 @@ void Control::show_main_test_ui()
     auto_test_mac_or_stress();
 }
 
+/* show welcome and stress result record when open factory test software */
 void Control::show_stress_record(){
     update_screen_log("---------------------------------------------------------------------------------------------\n");
     update_screen_log("\t\tWelcome to Factory Test Software\n");
@@ -509,10 +499,11 @@ void Control::show_stress_record(){
     print_stress_test_result(_record);
 }
 
+/* print stress record in screen */
 void Control::print_stress_test_result(vector<string> record) 
 {
     update_screen_log("The last Stress test result is...\n");
-    update_screen_log("==================== " + STRESS_TEST_NAME + "结果 ====================\n");
+    update_screen_log("==================== " + FUNC_TEST_NAME[F_STRESS] + "结果 ====================\n");
 
     for (unsigned int i = 0; i < record.size(); i++) {
         update_screen_log(record[i]);
@@ -537,42 +528,22 @@ int Control::get_test_step()
 
 void Control::init_mes_log()
 {
-    int i=0;
-    int j=0;
-    char date[64] = {0, };
-    char new_mac_name[128];
-    char tmp[128];
-    struct tm *timenow = NULL;
-    time_t timep;
- 
-    while (_hwInfo->mac[i] != '\0') {
-        if (_hwInfo->mac[i] != ':') {
-            new_mac_name[j] = _hwInfo->mac[i];
-            j++;
-        }
-        i++;
-    }
-
-    new_mac_name[j] = '\0';
-    string mac_capital = "";
-    string sn_capital = "";
+    char date[64] = {0,};
+    string tmp = "";
+    string mac_capital = _hwInfo->mac;
+    string sn_capital = _hwInfo->sn;
     
-    mac_capital = lower_to_capital(new_mac_name);
-    sn_capital = lower_to_capital(_hwInfo->sn);
+    mac_capital.erase(remove(mac_capital.begin(), mac_capital.end(), ':'), mac_capital.end());
     
     if (access(MES_FILE, F_OK) == 0) {
         remove(MES_FILE);
     }
 
-    sprintf(tmp, "%s%s.txt", _facArg->ftp_dest_path.c_str(), mac_capital.c_str());
+    tmp = _facArg->ftp_dest_path + mac_capital + ".txt";
     _facArg->ftp_dest_path = tmp;
     LOG_INFO("_facArg->ftp_dest_path:%s", (_facArg->ftp_dest_path).c_str());
     
-    time(&timep);
-    timenow = localtime(&timep);
-    strftime(date, 64, "%Y%m%d-%H:%M:%S", timenow);
-
-
+    get_current_time(date);
 
     LOG_MES("---------------------Product infomation-----------------------\n");
     LOG_MES("Model: \t%s\n", (_hwInfo->product_name).c_str());
@@ -616,12 +587,10 @@ void Control::update_mes_log(string tag, string value)
     }
     
     FILE* fp;
-    char line[200];
+    char line[200] = {0, };  //TODO: char[] line
     size_t sp = 0;
     int first = 1;
- 
-    bzero(line,sizeof(line));
- 
+  
     if ((fp = fopen(MES_FILE, "r")) == NULL) {
         LOG_ERROR("open %s failed", MES_FILE);
         return;
@@ -630,7 +599,7 @@ void Control::update_mes_log(string tag, string value)
     fseek(fp, 0, SEEK_SET);
     string buf = "";
 
-    while (fgets(line, sizeof(line), fp) != NULL) {
+    while (fgets(line, sizeof(line), fp) != NULL) {  //TODO: fgets(char* , )
         string str_line = line;
         if (first &&((sp = str_line.find(tag)) != str_line.npos)) {
             string value_temp = "";
@@ -655,12 +624,13 @@ void Control::update_mes_log(string tag, string value)
 }
 
 
-void Control::upload_mes_log() {
-    update_screen_log("==================== " + UPLOAD_LOG_NAME + " ====================\n");
+void Control::upload_mes_log()
+{
+    update_screen_log("==================== " + FUNC_TEST_NAME[F_UPLOAD_MES_LOG] + " ====================\n");
     if (_fac_config_status != 0) {
         LOG_INFO("fac config is wrong, do not upload");
         _uiHandle->confirm_test_result_warning("配置文件有误");
-        set_test_result(UPLOAD_LOG_NAME, "FAIL", "配置文件有误");
+        set_test_result(FUNC_TEST_NAME[F_UPLOAD_MES_LOG], "FAIL", "配置文件有误");
         return;
     } else {
         if (!combine_fac_log_to_mes(MES_FILE, STRESS_RECORD)) {
@@ -674,10 +644,10 @@ void Control::upload_mes_log() {
             _uiHandle->confirm_test_result_warning("log文件拼接失败");
             return;
         }
-        string upload_log = "ftp ip:\t\t" + (string)_facArg->ftp_ip + "\n";
-        upload_log += "ftp user:\t\t" + (string)_facArg->ftp_user + "\n";
-        upload_log += "ftp passwd:\t\t" + (string)_facArg->ftp_passwd + "\n";
-        upload_log += "ftp path:\t\t" + (string)_facArg->ftp_dest_path + "\n";
+        string upload_log = "ftp ip:\t\t" + _facArg->ftp_ip + "\n";
+        upload_log += "ftp user:\t\t" + _facArg->ftp_user + "\n";
+        upload_log += "ftp passwd:\t\t" + _facArg->ftp_passwd + "\n";
+        upload_log += "ftp path:\t\t" + _facArg->ftp_dest_path + "\n";
         update_screen_log(upload_log);
 
         _uiHandle->confirm_test_result_waiting("正在上传中...");
@@ -691,10 +661,10 @@ void Control::upload_mes_log() {
             } else {
                 _uiHandle->confirm_test_result_success("上传成功", "下道工序");
             }
-            set_test_result(UPLOAD_LOG_NAME, "PASS", response);
+            set_test_result(FUNC_TEST_NAME[F_UPLOAD_MES_LOG], "PASS", response);
         } else {
             _uiHandle->confirm_test_result_warning("上传失败");
-            set_test_result(UPLOAD_LOG_NAME, "FAIL", response);
+            set_test_result(FUNC_TEST_NAME[F_UPLOAD_MES_LOG], "FAIL", response);
         }
     }
     _testStep = STEP_IDLE;
@@ -727,183 +697,61 @@ int Control::get_screen_width()
     return _uiHandle->get_screen_width();
 }
 
-void Control::set_interface_select_status(string func, bool state) {
-    _funcFinishStatus->interface_finish = false;
-    if (func == MEM_TEST_NAME) {
-        _interfaceSelectStatus->mem_select = state;
-        if (_interfaceSelectStatus->mem_select) {
-            _funcFinishStatus->mem_finish = false;
-        } else {
-            _funcFinishStatus->mem_finish = true;
-            _interfaceTestStatus->mem_test_over = true;
-        }
-    }
-    if (func == USB_TEST_NAME) {
-        _interfaceSelectStatus->usb_select = state;
-        if (_interfaceSelectStatus->usb_select) {
-            _funcFinishStatus->usb_finish = false;
-        } else {
-            _funcFinishStatus->usb_finish = true;
-            _interfaceTestStatus->usb_test_over = true;
-        }
-    }
-    if (func == NET_TEST_NAME) {
-        _interfaceSelectStatus->net_select = state;
-        if (_interfaceSelectStatus->net_select) {
-            _funcFinishStatus->net_finish = false;
-        } else {
-            _funcFinishStatus->net_finish = true;
-            _interfaceTestStatus->net_test_over = true;
-        }
-    }
-    if (func == EDID_TEST_NAME) {
-        _interfaceSelectStatus->edid_select = state;
-        if (_interfaceSelectStatus->edid_select) {
-            _funcFinishStatus->edid_finish = false;
-        } else {
-            _funcFinishStatus->edid_finish = true;
-            _interfaceTestStatus->edid_test_over = true;
-        }
-    }
-    if (func == CPU_TEST_NAME) {
-        _interfaceSelectStatus->cpu_select = state;
-        if (_interfaceSelectStatus->cpu_select) {
-            _funcFinishStatus->cpu_finish = false;
-        } else {
-            _funcFinishStatus->cpu_finish = true;
-            _interfaceTestStatus->cpu_test_over = true;
-        }
-    }
-    if (func == HDD_TEST_NAME) {
-        _interfaceSelectStatus->hdd_select = state;
-        if (_interfaceSelectStatus->hdd_select) {
-            _funcFinishStatus->hdd_finish = false;
-        } else {
-            _funcFinishStatus->hdd_finish = true;
-            _interfaceTestStatus->hdd_test_over = true;
-        }
-    }
-    if (func == FAN_TEST_NAME) {
-        _interfaceSelectStatus->fan_select = state;
-        if (_interfaceSelectStatus->fan_select) {
-            _funcFinishStatus->fan_finish = false;
-        } else {
-            _funcFinishStatus->fan_finish = true;
-            _interfaceTestStatus->fan_test_over = true;
-        }
-    }
-    if (func == WIFI_TEST_NAME) {
-        _interfaceSelectStatus->wifi_select = state;
-        if (_interfaceSelectStatus->wifi_select) {
-            _funcFinishStatus->wifi_finish = false;
-        } else {
-            _funcFinishStatus->wifi_finish = true;
-            _interfaceTestStatus->wifi_test_over = true;
-        }
-    }
-    if (func == SSD_TEST_NAME) {
-        _interfaceSelectStatus->ssd_select = state;
-        if (_interfaceSelectStatus->ssd_select) {
-            _funcFinishStatus->ssd_finish = false;
-        } else {
-            _funcFinishStatus->ssd_finish = true;
-            _interfaceTestStatus->ssd_test_over = true;
+void Control::set_interface_select_status(string func, bool state)
+{
+    funcFinishStatus[F_INTERFACE] = false;
+
+    for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
+        if (func == INTERFACE_TEST_NAME[i]) {
+            interfaceTestSelectStatus[i] = state;
+            if (state) {
+                interfaceTestFinish[i] = false;  //TODO-YHT:  = (!state)
+                interfaceTestOver[i]   = false;
+            } else {
+                interfaceTestFinish[i] = true;
+                interfaceTestOver[i]   = true;
+            }
+            break;
         }
     }
 }
 
-void Control::set_interface_test_status(string func, bool status){
-    if (func == MEM_TEST_NAME) {
-        _interfaceTestStatus->mem_test_over = status;
-    }
-    if (func == USB_TEST_NAME) {
-        _interfaceTestStatus->usb_test_over = status;
-    }
-    if (func == CPU_TEST_NAME) {
-        _interfaceTestStatus->cpu_test_over = status;
-    }
-    if (func == NET_TEST_NAME) {
-        _interfaceTestStatus->net_test_over = status;
-    }
-    if (func == EDID_TEST_NAME) {
-        _interfaceTestStatus->edid_test_over = status;
-    }
-    if (func == HDD_TEST_NAME) {
-        _interfaceTestStatus->hdd_test_over = status;
-    }
-    if (func == FAN_TEST_NAME) {
-        _interfaceTestStatus->fan_test_over = status;
-    }
-    if (func == WIFI_TEST_NAME) {
-        _interfaceTestStatus->wifi_test_over = status;
-    }
-    if (func == SSD_TEST_NAME) {
-        _interfaceTestStatus->ssd_test_over = status;
+void Control::set_interface_test_status(string func, bool status)
+{
+    for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
+        if (func == INTERFACE_TEST_NAME[i]) {
+            interfaceTestOver[i] = status;
+            break;
+        }
     }
 }
 
-void Control::set_interface_test_finish(string func){
-    if (func == MEM_TEST_NAME) {
-        _funcFinishStatus->mem_finish = true;
-    }
-    if (func == USB_TEST_NAME) {
-        _funcFinishStatus->usb_finish = true;
-    }
-    if (func == CPU_TEST_NAME) {
-        _funcFinishStatus->cpu_finish = true;
-    }
-    if (func == NET_TEST_NAME) {
-        _funcFinishStatus->net_finish = true;
-    }
-    if (func == EDID_TEST_NAME) {
-        _funcFinishStatus->edid_finish = true;
-    }
-    if (func == HDD_TEST_NAME) {
-        _funcFinishStatus->hdd_finish = true;
-    }
-    if (func == FAN_TEST_NAME) {
-        _funcFinishStatus->fan_finish = true;
-    }
-    if (func == WIFI_TEST_NAME) {
-        _funcFinishStatus->wifi_finish = true;
-    }
-    if (func == SSD_TEST_NAME) {
-        _funcFinishStatus->ssd_finish = true;
+void Control::set_interface_test_finish(string func)
+{
+    for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
+        if (func == INTERFACE_TEST_NAME[i]) {
+            interfaceTestFinish[i] = true;
+            break;
+        }
     }
 }
 
-void Control::set_interface_test_result(string func, bool status) {
-    if (func == MEM_TEST_NAME) {
-        _interfaceTestResult->mem_test_result = status;
-    }
-    if (func == USB_TEST_NAME) {
-        _interfaceTestResult->usb_test_result = status;
-    }
-    if (func == CPU_TEST_NAME) {
-        _interfaceTestResult->cpu_test_result = status;
-    }
-    if (func == NET_TEST_NAME) {
-        _interfaceTestResult->net_test_result = status;
-    }
-    if (func == EDID_TEST_NAME) {
-        _interfaceTestResult->edid_test_result = status;
-    }
-    if (func == HDD_TEST_NAME) {
-        _interfaceTestResult->hdd_test_result = status;
-    }
-    if (func == FAN_TEST_NAME) {
-        _interfaceTestResult->fan_test_result = status;
-    }
-    if (func == WIFI_TEST_NAME) {
-        _interfaceTestResult->wifi_test_result = status;
-    }
-    if (func == SSD_TEST_NAME) {
-        _interfaceTestResult->ssd_test_result = status;
+void Control::set_interface_test_result(string func, bool status)
+{
+    for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
+        if (func == INTERFACE_TEST_NAME[i]) {
+            interfaceTestResult[i] = status;
+            break;
+        }
     }
 }
 
 void* Control::update_mes_log_thread(void* arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is NULL");
+        return NULL;
+    }
     MesInfo* info = (MesInfo*)arg;
     Control::get_control()->update_mes_log(info->func, info->status);
     return NULL;
@@ -911,6 +759,10 @@ void* Control::update_mes_log_thread(void* arg)
 
 void Control::start_update_mes_log(MesInfo* info)
 {
+    if (info == NULL) {
+        LOG_ERROR("info is NULL");
+        return;
+    }
     pthread_t tid;
     pthread_create(&tid, NULL, update_mes_log_thread, info);
 }
@@ -918,101 +770,32 @@ void Control::start_update_mes_log(MesInfo* info)
 
 void Control::set_test_result_pass_or_fail(string func, string result)
 {
-    if (result == "PASS") {
-        if (func == SOUND_TEST_NAME) {
-            _mesInfo->func = "AUDIO";
-            _mesInfo->status = "PASS";
-            start_update_mes_log(_mesInfo);
-            update_screen_log(SOUND_TEST_NAME + "结果：\t\t\t成功\n");
-            LOG_INFO("sound test result:\tPASS\n");
-            _funcFinishStatus->sound_finish = true;
+    if (func == FUNC_TEST_NAME[F_STRESS]) {
+        LOG_INFO("stress test result:\t%s\n", result.c_str());
+        StressTest* stress = (StressTest*)_funcBase[STRESS];
+        string stress_result = stress->get_stress_result_record();
+        _record.push_back(result + "  " + stress_result);
+        if (_record.size() > STRESS_RECORD_NUM) {
+            _record.erase(_record.begin());
         }
-        if (func == DISPLAY_TEST_NAME) {
-            _mesInfo->func = "DISPLAY";
-            _mesInfo->status = "PASS";
-            start_update_mes_log(_mesInfo);
-            update_screen_log(DISPLAY_TEST_NAME + "结果：\t\t\t成功\n");
-            LOG_INFO("display test result:\tPASS\n");
-            _funcFinishStatus->display_finish = true;
-        }
-        if (func == BRIGHT_TEST_NAME) {
-            _mesInfo->func = "BRIGHTNESS";
-            _mesInfo->status = "PASS";
-            start_update_mes_log(_mesInfo);
-            update_screen_log(BRIGHT_TEST_NAME + "结果：\t\t\t成功\n");
-            LOG_INFO("bright test result:\tPASS\n");
-            _funcFinishStatus->bright_finish = true;
-        }
-        if (func == CAMERA_TEST_NAME) {
-            CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
-            camera->close_xawtv_window();
-            _mesInfo->func = "CAMERA";
-            _mesInfo->status = "PASS";
-            start_update_mes_log(_mesInfo);
-            update_screen_log(CAMERA_TEST_NAME + "结果：\t\t\t成功\n");
-            LOG_INFO("camera test result:\tPASS\n");
-            _funcFinishStatus->camera_finish = true;
-        }
-        if (func == STRESS_TEST_NAME) {
-            LOG_INFO("stress test result:\tPASS\n");
-            StressTest* stress = (StressTest*)_funcBase[STRESS];
-            string result = stress->get_stress_result_record();
-            _record.push_back("PASS  " + result);
-            if (_record.size() > STRESS_RECORD_NUM) {
-                _record.erase(_record.begin());
-            }
-            write_stress_record(_record);
-            print_stress_test_result(_record);
-            _funcFinishStatus->stress_finish = true;
-        }
+        write_stress_record(_record);
+        print_stress_test_result(_record);
+        funcFinishStatus[F_STRESS] = BOOL_RESULT(result);
     } else {
-
-        if (func == SOUND_TEST_NAME) {
-            _mesInfo->func = "AUDIO";
-            _mesInfo->status = "FAIL";
-            start_update_mes_log(_mesInfo);
-            update_color_screen_log(SOUND_TEST_NAME + "结果：\t\t\t失败\n", "red");
-            LOG_INFO("sound test result:\tFAIL\n");
-            _funcFinishStatus->sound_finish = false;
-        }
-        if (func == DISPLAY_TEST_NAME) {
-            _mesInfo->func = "DISPLAY";
-            _mesInfo->status = "FAIL";
-            start_update_mes_log(_mesInfo);
-            update_color_screen_log(DISPLAY_TEST_NAME + "结果：\t\t\t失败\n", "red");
-            LOG_INFO("display test result:\tFAIL\n");
-            _funcFinishStatus->display_finish = false;
-        }
-        if (func == BRIGHT_TEST_NAME) {
-            _mesInfo->func = "BRIGHTNESS";
-            _mesInfo->status = "FAIL";
-            start_update_mes_log(_mesInfo);
-            update_color_screen_log(BRIGHT_TEST_NAME + "结果：\t\t\t失败\n", "red");
-            LOG_INFO("bright test result:\tFAIL\n");
-            _funcFinishStatus->bright_finish = false;
-        }
-        if (func == CAMERA_TEST_NAME) {
-            CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
-            camera->close_xawtv_window();
-            _mesInfo->func = "CAMERA";
-            _mesInfo->status = "FAIL";
-            start_update_mes_log(_mesInfo);
-            update_color_screen_log(CAMERA_TEST_NAME + "结果：\t\t\t失败\n", "red");
-            LOG_INFO("camera test result:\tFAIL\n");
-            _funcFinishStatus->camera_finish = false;
-        }
-        if (func == STRESS_TEST_NAME) {
-            LOG_INFO("stress test result:\tFAIL\n");
-            StressTest* stress = (StressTest*)_funcBase[STRESS];
-            string result = stress->get_stress_result_record();
-            _record.push_back("FAIL  " + result);
-            if (_record.size() > STRESS_RECORD_NUM) {
-                _record.erase(_record.begin());
+        int fun_id = 0;
+        for (int i = F_SOUND; i < F_STRESS; i++) {
+            if (func == FUNC_TEST_NAME[i]) {
+                fun_id = i;
+                break;
             }
-            write_stress_record(_record);
-            print_stress_test_result(_record);
-            _funcFinishStatus->stress_finish = false;
         }
+        _mesInfo->func = FUNC_TEST_TAG_NAME[fun_id];
+        _mesInfo->status = result;
+        start_update_mes_log(_mesInfo);
+        update_screen_log(FUNC_TEST_NAME[fun_id] + "结果：\t\t\t" + CHINESE_RESULT(result) + "\n");
+        string log_info = FUNC_TEST_TAG_NAME[fun_id] + " test result:\t" + result + "\n";
+        LOG_INFO(log_info.c_str());
+        funcFinishStatus[fun_id] = BOOL_RESULT(result);
     }
     _uiHandle->set_test_result(func, result);
 }

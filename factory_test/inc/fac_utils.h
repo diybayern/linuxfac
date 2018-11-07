@@ -20,25 +20,84 @@
 using std::string;
 using namespace std;
 
-const string MEM_TEST_NAME  = "内存测试";
-const string USB_TEST_NAME  = "USB测试";
-const string NET_TEST_NAME  = "网口测试";
-const string EDID_TEST_NAME = "EDID测试";
-const string CPU_TEST_NAME  = "CPU测试";
-const string HDD_TEST_NAME  = "HDD测试";
-const string FAN_TEST_NAME  = "FAN测试";
-const string WIFI_TEST_NAME = "WIFI测试";
-const string SSD_TEST_NAME  = "SSD测试";
+#define   FUNC_TYPE_NUM       (16)
+#define   INTERFACE_TEST_NUM  (9)
+#define   FUNC_TEST_NUM       (8)
 
-const string INTERFACE_TEST_NAME = "接口测试";
-const string SOUND_TEST_NAME     = "音频测试";
-const string DISPLAY_TEST_NAME   = "显示测试";
-const string BRIGHT_TEST_NAME    = "亮度测试";
-const string CAMERA_TEST_NAME    = "摄像头测试";
-const string STRESS_TEST_NAME    = "拷机测试";
-const string UPLOAD_LOG_NAME     = "上传日志";
-const string NEXT_PROCESS_NAME   = "下道工序";
 
+//注意顺序
+const string INTERFACE_TEST_NAME[INTERFACE_TEST_NUM]    = {"内存测试", "USB测试", "网口测试", "EDID测试", "CPU测试", "HDD测试", "SSD测试", "FAN测试", "WIFI测试"};
+const string INTERFACE_TEST_MES_TAG[INTERFACE_TEST_NUM] = {"MEM", "USB", "NET", "EDID", "CPU", "HDD", "SSD", "FAN", "WIFI"};
+const string FUNC_TEST_NAME[FUNC_TEST_NUM]              = {"接口测试", "音频测试", "显示测试", "亮度测试", "摄像头测试", "拷机测试", "上传日志", "下道工序"};
+const string FUNC_TEST_TAG_NAME[FUNC_TEST_NUM]          = {"INTERFACE", "AUDIO", "DISPLAY", "BRIGHT", "CAMERA", "STRESS", "UPLOAD_MES_LOG", "NEXT_PROCESS"};
+
+enum FuncType {
+    MEM = 0,
+    USB,
+    NET,
+    EDID,
+    CPU,
+    HDD,
+    SSD,
+    FAN,
+    WIFI,
+    INTERFACE,//must behind interface test func
+    SOUND,
+    BRIGHT,
+    CAMERA,
+    STRESS,
+    UPLOAD_MES_LOG,
+    NEXT_PROCESS,
+};
+
+//顺序需要与前面定义的一致
+enum InterfaceTestType {
+    I_MEM = 0,
+    I_USB,
+    I_NET,
+    I_EDID,
+    I_CPU,
+    I_HDD,
+    I_SSD,
+    I_FAN,
+    I_WIFI,
+};
+
+enum FuncTestType {
+    F_INTERFACE = 0,
+    F_SOUND,
+    F_DISPLAY,
+    F_BRIGHT,
+    F_CAMERA,
+    F_STRESS,
+    F_UPLOAD_MES_LOG,
+    F_NEXT_PROCESS,
+};
+
+struct MesInfo {
+    MesInfo():func(""),
+        status("")
+    {
+    }
+    string func;
+    string status;
+};
+
+enum InterfaceRunStatus {
+    INF_RUNEND = 0,
+    INF_BREAK,
+    INF_RUNNING
+};
+
+enum TestStep {
+    STEP_IDLE = 0,
+    STEP_INTERFACE,
+    STEP_SOUND,
+    STEP_DISPLAY,
+    STEP_BRIGHTNESS,
+    STEP_CAMERA,
+    STEP_STRESS,
+};
 
 const string FACTORY_PATH        = "/usr/local/bin/factory/";
 const string STRESS_LOCK_FILE    = FACTORY_PATH + "lock";
@@ -128,7 +187,9 @@ const int BRIGHTNESS_VALUE[6] =
 #define STRESS_MEMTEST_START(x) ((x).day == 0 && (x).hour == 0 && (x).minute == 30 && (x).second >= 0 && (x).second <= 1)
 #define STRESS_MEMTEST_ITV(x)   ((x).day == 0 && (x).hour == 0 && (x).minute == 10 && (x).second >= 0 && (x).second <= 1)
 
-#define PRINT_RESULT_STR(x)     ((x) ? "PASS" : "FAIL")
+#define STRING_RESULT(x)        ((x) ? "PASS" : "FAIL")
+#define BOOL_RESULT(x)          ((x) == "PASS" ? true : false)
+#define CHINESE_RESULT(x)       ((x) == "PASS" ? "成功" : "失败")
 
 enum {
     SUCCESS = 0,

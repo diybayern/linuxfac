@@ -6,6 +6,10 @@ string SsdTest::screen_log_red = "";
 
 bool SsdTest::ssd_test_all(string ssd_cap)
 {
+    if (ssd_cap == "") {
+        LOG_ERROR("ssd cap is wrong");
+        return false;
+    }
     string result = execute_command("bash " + SSD_TEST_SCRIPT + " " + ssd_cap, true);
     if (result == "error") {
         LOG_ERROR("%s run error", SSD_TEST_SCRIPT.c_str());
@@ -18,9 +22,9 @@ bool SsdTest::ssd_test_all(string ssd_cap)
     return false;
 }
 
-bool SsdTest::check_if_ssd_pass()   //TODO
+bool SsdTest::check_if_ssd_pass()
 {
-    char ssd_status[CMD_BUF_SIZE];
+    char ssd_status[CMD_BUF_SIZE];   //TODO: char[] ssd_status
     
     memset(ssd_status, 0, CMD_BUF_SIZE);
     int size = 0;
@@ -50,29 +54,29 @@ bool SsdTest::check_if_ssd_pass()   //TODO
 void* SsdTest::test_all(void *arg)
 {
     if (arg == NULL) {
-        LOG_ERROR("arg is null");
+        LOG_ERROR("arg is NULL");
         return NULL;
     }
     Control *control = Control::get_control();
-    control->set_interface_test_status(SSD_TEST_NAME, false);
+    control->set_interface_test_status(INTERFACE_TEST_NAME[I_SSD], false);
 
     screen_log_black = "";
     screen_log_red = "";
-    screen_log_black += "==================== " + SSD_TEST_NAME + " ====================\n";
+    screen_log_black += "==================== " + INTERFACE_TEST_NAME[I_SSD] + " ====================\n";
     BaseInfo* baseInfo = (BaseInfo *)arg;
     bool result = ssd_test_all(baseInfo->ssd_cap);
     if (result) {
-        screen_log_black += SSD_TEST_NAME + "结果：\t\t\t成功\n\n";
-        control->set_interface_test_result(SSD_TEST_NAME, true); 
+        screen_log_black += INTERFACE_TEST_NAME[I_SSD] + "结果：\t\t\t成功\n\n";
+        control->set_interface_test_result(INTERFACE_TEST_NAME[I_SSD], true); 
     } else {
-        screen_log_red = SSD_TEST_NAME + "结果：\t\t\t失败\n\n" + screen_log_red;
-        control->set_interface_test_result(SSD_TEST_NAME, false); 
+        screen_log_red = INTERFACE_TEST_NAME[I_SSD] + "结果：\t\t\t失败\n\n" + screen_log_red;
+        control->set_interface_test_result(INTERFACE_TEST_NAME[I_SSD], false); 
     }
     control->update_screen_log(screen_log_black);
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");
     }
-    control->set_interface_test_status(SSD_TEST_NAME, true);
+    control->set_interface_test_status(INTERFACE_TEST_NAME[I_SSD], true);
     return NULL;
 }
 

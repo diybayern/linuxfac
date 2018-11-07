@@ -72,11 +72,11 @@ bool EdidTest::do_vbe_ddc_service(unsigned BX, reg_frame* regs)
     return do_vbe_service(AX, BX, regs);
 }
 
-bool EdidTest::read_edid(unsigned int controller, char* output)
+bool EdidTest::read_edid(unsigned int controller, char* output) //TODO: char* output
 {
     int i = 0;
     reg_frame regs;
-    unsigned char* block = NULL;
+    unsigned char* block = NULL;  //TODO: unsigned char* block
 
     block = (unsigned char*)LRMI_alloc_real(EDID_BLOCK_SIZE);
 
@@ -100,7 +100,7 @@ bool EdidTest::read_edid(unsigned int controller, char* output)
     }
 
     for (i = 0; i < EDID_BLOCK_SIZE; i++) {
-        if (MAGIC != block[i]) {
+        if (block[i] != MAGIC) {
             break;
         }
     }
@@ -121,7 +121,7 @@ bool EdidTest::read_edid(unsigned int controller, char* output)
     return true;
 }
 
-bool EdidTest::parse_edid(char* buf)
+bool EdidTest::parse_edid(char* buf)   //TODO: char* buf
 {
     int i = 0;
     char check_sum = 0;
@@ -130,7 +130,7 @@ bool EdidTest::parse_edid(char* buf)
         check_sum += buf[i];
     }
 
-    if (0 != check_sum) {
+    if (check_sum != 0) {
         LOG_ERROR("check sum failed sum=%d\n", check_sum);
         return false;
     }
@@ -145,7 +145,7 @@ bool EdidTest::edid_test_all(unsigned int num)
     bool read_ret = true;
     bool parse_ret = true;
     bool result = true;
-    char edid_buf[EDID_BLOCK_SIZE] = {0, };
+    char edid_buf[EDID_BLOCK_SIZE] = {0};  //TODO: char[] edid_buf
     int edid_num = num;
 
     LOG_INFO("edid test start\n");
@@ -215,16 +215,21 @@ error:
     pthread_mutex_unlock(&g_reg_mutex);
 
     result = read_ret && parse_ret;
-    LOG_INFO("read edid: \t%s\n", PRINT_RESULT_STR(read_ret));
-    LOG_INFO("parse edid : \t%s\n", PRINT_RESULT_STR(parse_ret));
+    LOG_INFO("read edid: \t%s\n", STRING_RESULT(read_ret));
+    LOG_INFO("parse edid : \t%s\n", STRING_RESULT(parse_ret));
 
 print:
-    LOG_INFO("edid test result: \t%s\n", PRINT_RESULT_STR(result));
+    LOG_INFO("edid test result: \t%s\n", STRING_RESULT(result));
     return result;
 }
 
 int EdidTest::get_edid_num(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseinfo is null");
+        return 0;
+    }
+    
     int vga = 0, hdmi = 0;
     
     if (baseInfo->vga_exist != "" && baseInfo->vga_exist != "0") {
@@ -247,27 +252,34 @@ void* EdidTest::test_all(void *arg)
     Control *control = Control::get_control();
     BaseInfo* baseInfo = (BaseInfo *)arg;
     
-    control->set_interface_test_status(EDID_TEST_NAME, false);
+    control->set_interface_test_status(INTERFACE_TEST_NAME[I_EDID], false);
     screen_log_black = "";
     screen_log_red = "";
     
-    screen_log_black += "==================== " + EDID_TEST_NAME + " ====================\n";
+    screen_log_black += "==================== " + INTERFACE_TEST_NAME[I_EDID] + " ====================\n";
     int edid_num = get_edid_num(baseInfo);
-    LOG_INFO("edid num: %d", edid_num);
-    
-    bool is_pass = edid_test_all(edid_num);
-    if (is_pass) {
-        screen_log_black += EDID_TEST_NAME + "结果:\t\t\t成功\n\n";
-        control->set_interface_test_result(EDID_TEST_NAME, true);
+
+    bool is_pass;
+    if (edid_num <= 0) {
+        LOG_ERROR("edid num (0) is wrong");
+        is_pass = false;
     } else {
-        screen_log_red = EDID_TEST_NAME + "结果:\t\t\t失败\n\n" + screen_log_red;
-        control->set_interface_test_result(EDID_TEST_NAME, false);
+        LOG_INFO("edid num: %d", edid_num);
+        is_pass = edid_test_all(edid_num);
+    }
+    
+    if (is_pass) {
+        screen_log_black += INTERFACE_TEST_NAME[I_EDID] + "结果:\t\t\t成功\n\n";
+        control->set_interface_test_result(INTERFACE_TEST_NAME[I_EDID], true);
+    } else {
+        screen_log_red = INTERFACE_TEST_NAME[I_EDID] + "结果:\t\t\t失败\n\n" + screen_log_red;
+        control->set_interface_test_result(INTERFACE_TEST_NAME[I_EDID], false);
     }
     control->update_screen_log(screen_log_black);
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");
     }
-    control->set_interface_test_status(EDID_TEST_NAME, true);
+    control->set_interface_test_status(INTERFACE_TEST_NAME[I_EDID], true);
     return NULL;
 }
 

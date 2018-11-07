@@ -515,7 +515,7 @@ void* SoundTest::test_all(void*)
 {
     Control *control = Control::get_control();
     UiHandle* uihandle = UiHandle::get_uihandle();
-    control->update_screen_log("==================== " + SOUND_TEST_NAME + " ====================\n");
+    control->update_screen_log("==================== " + FUNC_TEST_NAME[F_SOUND] + " ====================\n");
     uihandle->start_audio_progress_dialog();
     usleep(200000);
     start_record();
@@ -526,7 +526,7 @@ void* SoundTest::test_all(void*)
     sleep(3);
     stop_playback();
     sleep(1);        
-    control->confirm_test_result(SOUND_TEST_NAME);
+    control->confirm_test_result(FUNC_TEST_NAME[F_SOUND]);
     
     return NULL;
 }

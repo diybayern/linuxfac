@@ -4,6 +4,13 @@
 #include <ftplib.h>
 #include <map>
 
+bool interfaceTestSelectStatus[INTERFACE_TEST_NUM] = {1,1,1,1,1,1,1,1,1};
+bool interfaceTestResult[INTERFACE_TEST_NUM]       = {0,0,0,0,0,0,0,0,0};
+bool interfaceTestOver[INTERFACE_TEST_NUM]         = {0,0,0,0,0,0,0,0,0};
+bool interfaceTestFinish[INTERFACE_TEST_NUM]       = {0,0,0,0,0,0,0,0,0};
+bool funcFinishStatus[FUNC_TEST_NUM]               = {0,0,0,0,0,0,0,0};
+
+
 netbuf* ftp_handle;
 
 /*
@@ -55,7 +62,8 @@ string execute_command(string cmd, bool norm_print)
        }
 }
 
-void get_current_time(char tmp_buf[])
+/* get system time */
+void get_current_time(char tmp_buf[]) //TODO: char[] tmp_buf
 {
     struct timeval  tv;
     struct timezone tz;
@@ -67,8 +75,13 @@ void get_current_time(char tmp_buf[])
     snprintf(tmp_buf, TIME_MAX_LEN, ".%03ld", tv.tv_usec / 1000);
 }
 
+/* get boot time */
 void get_current_open_time(TimeInfo* date)
 {
+    if (date == NULL) {
+        LOG_ERROR("date pointer is NULL ");
+        return;
+    }
     struct timespec time_space;
     
     clock_gettime(CLOCK_MONOTONIC, &time_space);
@@ -125,8 +138,12 @@ bool check_file_exit(string filename)
 
 bool get_file_size(string filename, int *size)
 {
+    if (filename == "" || size == NULL) {
+        LOG_ERROR("filename or size pointer is null");
+        return false;
+    }
+    
     FILE* infile = NULL;
-
     if ((infile = fopen(filename.c_str(), "rb")) == NULL) {
         return false;
     }
@@ -139,7 +156,7 @@ bool get_file_size(string filename, int *size)
     return true;
 }
 
-bool write_local_data(string filename, string mod, char* buf, int size)
+bool write_local_data(string filename, string mod, char* buf, int size) //TODO: char* buf
 {
     int count = 0;
     FILE * outfile = NULL;
@@ -163,8 +180,13 @@ bool write_local_data(string filename, string mod, char* buf, int size)
     return true;
 }
 
-bool read_local_data(string filename, char* buf, int size)
+bool read_local_data(string filename, char* buf, int size) //TODO: char* buf
 {
+    if (filename == "" || buf == NULL || size == 0) {
+        LOG_ERROR("parameters is wrong");
+        return false;
+    }
+    
     int ret = 0;
     FILE * infile = NULL;
 
@@ -187,10 +209,11 @@ bool read_local_data(string filename, char* buf, int size)
 
 bool remove_local_file(string filename)
 {
-    int ret;
     if (filename == ""){
         return true;
     }
+
+    int ret;
     ret = remove(filename.c_str());
     if (execute_command("sync", true) == "error" ) {
         LOG_ERROR("system sync error\n");
@@ -205,8 +228,13 @@ bool remove_local_file(string filename)
 
 void get_hwinfo(HwInfo* hwInfo)
 {
-    hwInfo->sn = execute_command("dmidecode -s system-serial-number", true);
-    
+    if (hwInfo == NULL) {
+        LOG_ERROR("hwInfo is NULL");
+        return;
+    }
+    string sn = execute_command("dmidecode -s system-serial-number", true);
+    sn = lower_to_capital(sn);
+    hwInfo->sn = sn;
     string mac = execute_command("ifconfig | grep HWaddr | awk '/eth0/ {print $5}'", true);
     mac = lower_to_capital(mac);
     hwInfo->mac = mac;
@@ -228,8 +256,14 @@ int get_int_value(const string str)
     }
 }
 
+/* Obtain system configuration information from ini file or DMI */
 void get_baseinfo(BaseInfo* baseInfo, const string info)
 {
+    if (baseInfo == NULL || info == "") {
+        LOG_ERROR("baseInfo or info string is NULL");
+        return;
+    }
+    
     map<string, string> tmap;
     string str;
     char buf[128] = {0};
@@ -297,6 +331,10 @@ bool is_digit(string str)
 
 string read_conf_line(const string conf_path, const string tag)
 {
+    if (conf_path == "" || tag == "" || !check_file_exit(conf_path)) {
+        LOG_ERROR("path or tag is null");
+        return "";
+    }
     FILE* conf_fp;
     if ((conf_fp = fopen(conf_path.c_str(), "r")) == NULL) {
         LOG_ERROR("ftp_config.conf open failed\n");
@@ -304,9 +342,9 @@ string read_conf_line(const string conf_path, const string tag)
     } else {
         char match[128];
         char line[CMD_BUF_SIZE];
-        char value[128] = {0};
+        char value[128] = {0};             //TODO: char[] match, line,value
         sprintf(match, "%s=%%s", tag.c_str());
-        while (fgets(line, sizeof(line), conf_fp) != NULL) {
+        while (fgets(line, sizeof(line), conf_fp) != NULL) { //TODO: fgets
             string str = delNL(line);
             if (str[0] != '#') {//ignore the comment
                 if (str.find(tag) != str.npos) {
@@ -327,8 +365,10 @@ int get_fac_config_from_conf(const string conf_path, FacArg *fac)
         LOG_ERROR("fac does not have mem malloc");
         return FAIL;
     }
+    
     int ret = 0;
     string str = "";
+    
     /* get wifi config */
     str = read_conf_line(conf_path, "wifi_ssid");
     if (str == "") {
@@ -397,6 +437,7 @@ int get_fac_config_from_conf(const string conf_path, FacArg *fac)
     return ret;
 }
 
+/* translate ftp upload result to chinese */
 string response_to_chinese(string response)
 {
     string str_res = "";
@@ -426,6 +467,10 @@ string response_to_chinese(string response)
 
 bool combine_fac_log_to_mes(string sendLogPath, string path)
 {
+    if (sendLogPath == "" || path == "") {
+        LOG_ERROR("log path is null");
+        return false;
+    }
     FILE* fp_mes;
     FILE* fp_fac;
     int c;
@@ -447,7 +492,6 @@ bool combine_fac_log_to_mes(string sendLogPath, string path)
     fclose(fp_fac);
     return true;
 }
-
 
 string ftp_send_file(string local_file_path, FacArg* fac)
 {
@@ -525,7 +569,7 @@ string get_current_cpu_freq()
     int cpu_max = 0;
     string cpu_freq = "";
     string str = execute_command("cat /proc/cpuinfo| grep processor| wc -l", false);
-    if(str == "error") {
+    if (str == "error") {
         return cpu_freq + "\n";
     }
 
@@ -541,6 +585,7 @@ string get_current_cpu_freq()
     return cpu_freq;
 }
 
+/* get memory used and free cap */
 string get_mem_info()
 {
     int ret = 0;
@@ -548,7 +593,7 @@ string get_mem_info()
     struct sysinfo si;
 
     ret = sysinfo(&si);
-    if (-1 == ret) {
+    if (ret == -1) {
         LOG_ERROR("get mem info failed\n");
     }
     string mem_used = to_string((si.totalram - si.freeram) >> 20);
@@ -559,6 +604,7 @@ string get_mem_info()
     return mem_info;
 }
 
+/* Convert float to string, keep two decimals */
 string change_float_to_string(float fla)
 {
     string str = to_string(fla);
@@ -571,8 +617,14 @@ string change_float_to_string(float fla)
     return str.substr(0, i + 3);
 }
 
+/* get cpu resource used status (usr, sys, idle, iowait) */
 string get_cpu_info(CpuStatus* st_cpu)
 {
+    if (st_cpu == NULL) {
+        LOG_ERROR("st_cpu is NULL");
+        return "";
+    }
+    
     FILE* fp = NULL;
     char line[8192] = { 0, }; //TODO£ºchar to string
     CpuStatus cpu_info;
@@ -647,6 +699,7 @@ void stop_gpu_stress_test()
     }
 }
 
+/* update stress record to stress.log */
 void write_stress_record(vector<string> record)
 {
     if (record.size() == 0) {
@@ -664,17 +717,23 @@ void write_stress_record(vector<string> record)
 
 }
 
+/* get last stress result, no more than 10 records */
 void read_stress_record(vector<string> *record)
 {
+    if (record == NULL) {
+        LOG_ERROR("record pointer is NULL");
+        return;
+    }
+    
     FILE* fp = NULL;
-    char line[8192] = { 0, };
+    char line[8192] = { 0, };   //TODO: char[] line
 
     if ((fp = fopen(STRESS_RECORD, "r")) == NULL) {
         LOG_ERROR("open %s failed\n", STRESS_RECORD);
         return;
     }
 
-    while (fgets(line, sizeof(line), fp) != NULL) {
+    while (fgets(line, sizeof(line), fp) != NULL) { //TODO: fgets()
         record->push_back(string(line));
     }
     while (record->size() > STRESS_RECORD_NUM) {

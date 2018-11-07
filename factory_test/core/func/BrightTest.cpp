@@ -7,7 +7,7 @@
 int BrightTest::inotify_fd = 0;
 int BrightTest::wd = 0;
 
-inline int BrightTest::brightness_is_set(const int* const array, int array_cout, int value)
+int BrightTest::brightness_is_set(const int* const array, int array_cout, int value)
 {
     for(int i = 0; i < array_cout; i++) {
         if(value == *(array + i)) {
@@ -22,7 +22,7 @@ void BrightTest::bright_test_all(string bright_level)
     Control* control = Control::get_control();
     int bright_num = get_int_value(bright_level);
     int actual_brightness_fd = 0;
-    char buf[4096];
+    char buf[4096];         //TODO: char[] buf
     int bright_cnt = 0;
     int bright_set_mask = 0;
     int bright_value = 0;
@@ -43,7 +43,7 @@ void BrightTest::bright_test_all(string bright_level)
     bright_set = 0;
     for(bright_cnt = 0; bright_cnt < bright_num; bright_cnt++) {
         bright_value = 0;
-        ret = read(inotify_fd, buf, 64);
+        ret = read(inotify_fd, buf, 64);    //TODO: read( , char* , )
         if(ret <= 0) {
             LOG_ERROR("inotify read error\n");
             goto error_return;
@@ -100,9 +100,9 @@ void* BrightTest::test_all(void *arg)
         LOG_ERROR("arg is null");
         return NULL;
     }
-    Control::get_control()->update_screen_log("==================== " + BRIGHT_TEST_NAME + " ====================\n");
+    Control::get_control()->update_screen_log("==================== " + FUNC_TEST_NAME[F_BRIGHT] + " ====================\n");
     BaseInfo* baseInfo = (BaseInfo*)arg;
-    Control::get_control()->confirm_test_result(BRIGHT_TEST_NAME);
+    Control::get_control()->confirm_test_result(FUNC_TEST_NAME[F_BRIGHT]);
     bright_test_all(baseInfo->bright_level);
     return NULL;
 }
