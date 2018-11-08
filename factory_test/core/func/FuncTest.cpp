@@ -120,7 +120,7 @@ void FanTest::start_test(BaseInfo* baseInfo)
 }
 
 
-int  StressTest::mem_stress_num = 0;
+int  StressTest::mem_stress_test_num = 0;
 bool StressTest::mem_stress_status = false;
 bool StressTest::mem_stress_result = true;
 string StressTest::stress_result = "";
@@ -162,7 +162,7 @@ bool StressTest::start_cpuburn_stress()
     stop_cpuburn_stress();
 
     if (processornum > 32) {
-        processornum = 32;
+        processornum = 32;  //TODO: 
     }
     while(processornum-- > 0) {
         string cmd_burn = "";
@@ -191,8 +191,8 @@ void* StressTest::mem_stress_test(void*)
 {
     pthread_detach(pthread_self());
     mem_stress_status = true;
-    mem_stress_num++;
-    LOG_INFO("---------- start stress mem test NO.%d ----------\n", mem_stress_num);
+    mem_stress_test_num++;
+    LOG_INFO("---------- start stress mem test NO.%d ----------\n", mem_stress_test_num);
     stop_mem_stress_test();
     
     string free_mem_cap = execute_command("free -m | awk '/Mem/ {print $4}'", true);
@@ -245,11 +245,11 @@ void* StressTest::test_all(void* arg)
     
     string datebuf = "";
     CpuStatus st_cpu = {0,0,0,0,0,0,0,0,0,0,0};
-    pthread_t pid_t1, pid_t2;
+    pthread_t pid_camera, pid_gpu, pid_mem;
 
     stress_result = ""; 
     string mem_result_str = "NULL";
-    mem_stress_num = 0;
+    mem_stress_test_num = 0;
     mem_stress_status = false;
     mem_stress_result = true;
     bool encode = true;
@@ -281,7 +281,7 @@ void* StressTest::test_all(void* arg)
         write_local_data(STRESS_LOCK_FILE, "w+", (char*)PCBA_LOCK, sizeof(PCBA_LOCK));
     }
 
-    if (execute_command("sync", true) == "error") {
+    if (system("sync") < 0) {
         uihandle->confirm_test_result_warning("系统同步失败");
         LOG_ERROR("cmd sync error\n");
         return NULL;
@@ -296,7 +296,7 @@ void* StressTest::test_all(void* arg)
     uihandle->show_stress_test_ui();
     
     if (get_int_value(baseInfo->camera_exist) == 1) {
-        pthread_create(&pid_t1, NULL, camera_stress_test, camera);
+        pthread_create(&pid_camera, NULL, camera_stress_test, camera);
     }
 
     uihandle->update_stress_label_value("产品型号", (control->get_hw_info())->product_name);
@@ -308,7 +308,7 @@ void* StressTest::test_all(void* arg)
     uihandle->update_stress_label_value("解码状态", STRING_RESULT(decode));
 
     if (baseInfo->platform == "IDV") {
-        pthread_create(&pid_t2, NULL, gpu_stress_test, NULL);
+        pthread_create(&pid_gpu, NULL, gpu_stress_test, NULL);
     }
     start_cpuburn_stress();
     
@@ -348,16 +348,16 @@ void* StressTest::test_all(void* arg)
 
         if (STRESS_MEMTEST_START(tmp_dst) && !mem_stress_status) {
             get_current_open_time(&mem_src);
-            pthread_create(&pid_t1, NULL, mem_stress_test, NULL);
+            pthread_create(&pid_mem, NULL, mem_stress_test, NULL);
         }
 
         diff_running_time(&mem_dst, &mem_src);
         if (STRESS_MEMTEST_ITV(mem_dst) && !mem_stress_status) {
             get_current_open_time(&mem_src);
-            pthread_create(&pid_t1, NULL, mem_stress_test, NULL);
+            pthread_create(&pid_mem, NULL, mem_stress_test, NULL);
         }
 
-        if (mem_stress_num == 1 && !mem_stress_status && mem_stress_result) {
+        if (mem_stress_test_num == 1 && !mem_stress_status && mem_stress_result) {
             mem_result_str = "PASS";
             uihandle->update_stress_label_value("Mem压力测试", mem_result_str);
         } else if (!mem_stress_result){
@@ -409,6 +409,11 @@ bool NextProcess::create_stress_test_lock()
 {
     LOG_INFO("start creating stress lock\n");
     write_local_data(STRESS_LOCK_FILE, "w+", (char*)NEXT_LOCK, sizeof(NEXT_LOCK));
+
+    if (system("sync") < 0) {
+        LOG_ERROR("cmd sync error\n");
+        return false;
+    }
 
     if (check_file_exit(STRESS_LOCK_FILE)) {
         LOG_INFO("create stress test lock success\n");
@@ -543,7 +548,8 @@ void* InterfaceTest::test_all(void *arg)
     
     FuncBase** FuncBase = control->get_funcbase();
 
-    int interfaceTestFailNum[INTERFACE_TEST_NUM]       = {0,0,0,0,0,0,0,0,0};
+    int interfaceTestFailNum[INTERFACE_TEST_NUM];
+    memset(interfaceTestFailNum, 0, sizeof(interfaceTestFailNum));
     
     int test_num = control->get_interface_test_times();
     int real_test_num = 0;
@@ -568,16 +574,14 @@ void* InterfaceTest::test_all(void *arg)
         
         while (1) {
             sleep(1);
-            if (interfaceTestOver[I_MEM]
-                && interfaceTestOver[I_USB]
-                && interfaceTestOver[I_NET]
-                && interfaceTestOver[I_EDID]
-                && interfaceTestOver[I_CPU]
-                && interfaceTestOver[I_HDD]
-                && interfaceTestOver[I_SSD]
-                && interfaceTestOver[I_FAN]
-                && interfaceTestOver[I_WIFI]) {
-
+            bool tmp_test_over = true;
+            for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
+                tmp_test_over &= interfaceTestOver[i];
+                if (!tmp_test_over) {
+                    break;
+                }
+            }
+            if (tmp_test_over) {
                 for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
                     if (!interfaceTestResult[i]) {
                         interfaceTestFailNum[i]++;
@@ -609,15 +613,15 @@ void* InterfaceTest::test_all(void *arg)
     }
     
     control->update_screen_log("===============================================");
-    if (interfaceTestFinish[I_MEM]
-      && interfaceTestFinish[I_USB]
-      && interfaceTestFinish[I_NET]
-      && interfaceTestFinish[I_EDID]
-      && interfaceTestFinish[I_CPU]
-      && interfaceTestFinish[I_HDD]
-      && interfaceTestFinish[I_FAN]
-      && interfaceTestFinish[I_WIFI]
-      && interfaceTestFinish[I_SSD]) {
+    
+    bool tmp_test_finish = true;
+    for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
+        tmp_test_finish &= interfaceTestFinish[i];
+        if (!tmp_test_finish) {
+            break;
+        }
+    }
+    if (tmp_test_finish) {
          funcFinishStatus[F_INTERFACE] = true;
     }
     

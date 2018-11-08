@@ -1,4 +1,4 @@
-#include "SsdTest.h"
+#include "FuncTest.h"
 #include "fac_log.h"
 
 string SsdTest::screen_log_black = "";

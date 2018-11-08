@@ -8,17 +8,18 @@
 
 unsigned long CameraTest::get_window_id(string winid_file)
 {
-    char winidbuf[CMD_BUF_SIZE];    //TODO: char[] winidbuf
-    unsigned long winid;
+    char winidbuf[CMD_BUF_SIZE] = {0, };    //TODO: char[] winidbuf
+    unsigned long winid = 0;
     int size = 0;
 
-    memset(winidbuf, 0, CMD_BUF_SIZE);
     if (!get_file_size(winid_file, &size)) {
+        LOG_ERROR("get %s size failed", winid_file.c_str());
         return 0;
     }
     LOG_INFO("%s file size %d\n", winid_file.c_str(), size);
     
     if (!read_local_data(winid_file, winidbuf, size)) {
+        LOG_ERROR("read %s date failed", winid_file.c_str());
         return 0;
     }
 
@@ -39,8 +40,8 @@ unsigned long CameraTest::get_window_id(string winid_file)
  
 void CameraTest::move_xawtv_window(int new_x, int new_y)
 {
-    Display *display;
-    unsigned long winid;
+    Display *display = NULL;
+    unsigned long winid = 0;
 
     winid = get_window_id(CAMERA_WINID_FILE);
     if (winid == 0) {
@@ -64,9 +65,9 @@ void CameraTest::move_xawtv_window_on_func_test()
 
     screen_width = Control::get_control()->get_screen_width();
 
-    /* xawtv window size: 384 x 288 */
-    new_x = screen_width - 395;
-    new_y = 50;
+    /* xawtv camera window size: 384 x 288 */
+    new_x = screen_width - 395; // move to the right
+    new_y = 50;    // move to the top
     move_xawtv_window(new_x, new_y);
 } 
 
@@ -89,7 +90,7 @@ void CameraTest::start_camera_xawtv()
 
 bool CameraTest::check_if_xawtv_started()
 {
-    unsigned long winid;
+    unsigned long winid = 0;
     Control* control = Control::get_control();
 
     winid = get_window_id(CAMERA_WINID_FILE);
@@ -114,9 +115,11 @@ bool CameraTest::camera_test_all()
     string result = execute_command("sh " + CAMERA_CHECK_SCRIPT, true);
     if (result == "error"){
         LOG_ERROR("system run error!\n");
+        return false;
     }
     usleep(50000);
     if (result != "VIDEOOK") {
+        LOG_ERROR("not found camera devices");
         return false;
     }
 
@@ -138,6 +141,7 @@ bool CameraTest::camera_test_all()
         /* xawtv started failed, just report FAIL result */
         LOG_ERROR("ERROR: Failed to start xawtv, GPU fault may be detected!\n");
         control->update_screen_log("ERROR: Failed to start xawtv, GPU fault may be detected!\n");
+        control->update_screen_log("错误: xawtv启动失败, 可能存在GPU故障!\n");
     }
 
     return false;
@@ -192,9 +196,9 @@ void CameraTest::start_camera_xawtv_on_stress()
 
 void CameraTest::close_xawtv_window()
 {
-    Display *display;
-    unsigned long winid;
-
+    Display *display = NULL;
+    unsigned long winid = 0;
+    
     winid = get_window_id(CAMERA_WINID_FILE);
     if (winid == 0) {
         LOG_ERROR("Failed to close xawtv window!\n");

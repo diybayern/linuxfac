@@ -44,6 +44,7 @@ bool WifiTest::wifi_get_wlan_name(char* wlan_name, int size)
     struct ifreq *ifreq = NULL;
 
     if (wlan_name == NULL) {
+        LOG_ERROR("wlan name is NULL");
         return false;
     }
 
@@ -85,6 +86,7 @@ bool WifiTest::wifi_get_wlan_index(char* wlan_name, unsigned int* index)
     struct ifreq ifr;
 
     if (wlan_name == NULL) {
+        LOG_ERROR("wlan name is NULL");
         return false;
     }
 
@@ -128,13 +130,14 @@ bool WifiTest::wifi_sprintf_mac_addr(unsigned char* src, char* dst)
 
 bool WifiTest::wifi_get_mac_addr(unsigned char* wlan_name, unsigned char* hw_buf)
 {
+    if (wlan_name == NULL || hw_buf == NULL) {
+        LOG_ERROR("wlan name or hw_buf parameter is wrong");
+        return false;
+    }
+
     int fd = -1;
     struct ifreq ifr;
     unsigned char buf[128] = { 0, };
-
-    if (wlan_name == NULL || hw_buf == NULL) {
-        return false;
-    }
 
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
@@ -162,6 +165,11 @@ bool WifiTest::wifi_get_mac_addr(unsigned char* wlan_name, unsigned char* hw_buf
 
 void* WifiTest::wifi_recv_loopback_msg(void *arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is NULL");
+        return NULL;
+    }
+    
     int fd = -1;
     int ret = 0;
     int len = 0;
@@ -212,7 +220,8 @@ void* WifiTest::wifi_recv_loopback_msg(void *arg)
             // exchange will transform message
             if (memcmp(recv_packet.dst_mac, bc_mac, MAC_ADDR_LEN) != 0) {
                 //if orientation package, increase the rece_num
-                LOG_INFO("recv roll back msg index=%d\n", recv_packet.index);
+                wifi_sprintf_mac_addr(recv_packet.src_mac, (char *)buf);
+                LOG_INFO("recv roll back msg index=%d, from mac=%s\n", recv_packet.index, buf);
                 info->recv_num++;
             } else {
                 // if broadcast package, send back orientation package
@@ -266,10 +275,11 @@ bool WifiTest::init()
 {
     bool ret = 0;
     pthread_t pid;
-    WifiInfo* info;
+    WifiInfo* info = NULL;
 
     info = g_wifi_info;
     if (info == NULL) {
+        LOG_ERROR("wifi info is NULL");
         return false;
     }
 
@@ -278,21 +288,24 @@ bool WifiTest::init()
     ret = wifi_get_wlan_name((char *)info->wlan_name, WLAN_NAME_LEN);
     if (ret == false) {
         LOG_ERROR("get wlan name failed\n");
-        free(info);
+        delete info;
+        info = NULL;
         return false;
     }
 
     ret = wifi_get_wlan_index((char *)info->wlan_name, &info->wlan_index);
     if (ret == false) {
         LOG_ERROR("get wlan index failed\n");
-        free(info);
+        delete info;
+        info = NULL;
         return false;
     }
 
     ret = wifi_get_mac_addr(info->wlan_name, info->mac);
     if (ret == false) {
         LOG_ERROR("get mac addr failed\n");
-        free(info);
+        delete info;
+        info = NULL;
         return false;
     }
 
@@ -309,7 +322,10 @@ bool WifiTest::init()
 
 bool WifiTest::wifi_send_broadcast_msg(WifiInfo* info, int num)
 {
-
+    if (info == NULL || num <= 0) {
+        LOG_ERROR("wifi info or num is empty");
+        return false;
+    }
     int i = 0;
     bool ret = true;
     unsigned char dest_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
@@ -345,8 +361,9 @@ bool WifiTest::wifi_test_send_msg() {
 
     LOG_INFO("send package num: \t\t%d\n", TOTAL_SEND_NUM);
     LOG_INFO("recv package num: \t\t%d\n", info->recv_num);
-    screen_log_black += "send package num:\t\t100\nrecv package num:\t\t" + to_string(info->recv_num) + "\n";
-    if (info->recv_num < RECEIVE_NUM) {
+    screen_log_black += "send package num:\t\t" + to_string(TOTAL_SEND_NUM)
+                    + "\nrecv package num:\t\t" + to_string(info->recv_num) + "\n";
+    if (info->recv_num < WLAN_RECV_MIN_NUM) {
         ret = false;
         LOG_ERROR("WIFI test failed!\n");
         screen_log_red += "\t错误：WiFi收包个数不达标\n";
@@ -363,9 +380,9 @@ bool WifiTest::wifi_test_send_msg() {
 
 bool WifiTest::check_if_wifi_connect_pass()
 {
-    char wifi_info[CMD_BUF_SIZE];
-    char wifi_status[CMD_BUF_SIZE];
-    char wifi_ssid_mac[CMD_BUF_SIZE];
+    char wifi_info[CMD_BUF_SIZE] = {0,};
+    char wifi_status[CMD_BUF_SIZE] = {0,};
+    char wifi_ssid_mac[CMD_BUF_SIZE] = {0,};
     int size = 0;
     
     if (!get_file_size(WIFI_INFO_FILE, &size)) {
@@ -374,7 +391,7 @@ bool WifiTest::check_if_wifi_connect_pass()
         screen_log_red += "\t错误：WiFi信息获取失败\n";
         return false;
     }
-    memset(wifi_info, 0, CMD_BUF_SIZE);
+
     if (!read_local_data(WIFI_INFO_FILE, wifi_info, size)) {
         LOG_ERROR("read %s error", WIFI_INFO_FILE.c_str());
         screen_log_black += "\tERROR:get wifi info error\n";
@@ -391,7 +408,7 @@ bool WifiTest::check_if_wifi_connect_pass()
         screen_log_red += "\t错误：WiFi状态获取失败\n";
         return false;
     }
-    memset(wifi_status, 0, CMD_BUF_SIZE);
+
     if (!read_local_data(WIFI_STATUS_FILE, wifi_status, size)) {
         LOG_ERROR("read %s error", WIFI_STATUS_FILE.c_str());
         screen_log_black += "\tERROR:get wifi status error\n";
@@ -410,7 +427,7 @@ bool WifiTest::check_if_wifi_connect_pass()
             screen_log_red += "\t错误：所连ap路由mac地址获取失败\n";
             return false;
         }
-        memset(wifi_ssid_mac, 0, CMD_BUF_SIZE);
+
         if(!read_local_data(WIFI_SSID_FILE, wifi_ssid_mac, size)) {
             LOG_ERROR("%s read error\n", WIFI_SSID_FILE.c_str());
             screen_log_black += "\tERROR:get ssid mac error\n";

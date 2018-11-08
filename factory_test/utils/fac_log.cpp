@@ -42,7 +42,6 @@ void __write_log(write_log_callback func, const char *fname, const char *functio
     char msg[LOG_MAX_LEN + 1];
     char *tmp = msg;
     const char *buf = fmt;
-    char tmp_buf[TIME_MAX_LEN] = {0, };
     
     size_t len_fmt  = strnlen(fmt, LOG_MAX_LEN);
     size_t file_len = (fname) ? (strnlen(fname, LOG_MAX_LEN)) : (0);
@@ -52,8 +51,9 @@ void __write_log(write_log_callback func, const char *fname, const char *functio
     size_t len_all  = len_fmt;
     size_t len = 0;
 
-    get_current_time(tmp_buf);
-    len = snprintf(tmp, buf_left, "%s", tmp_buf);
+    string tmp_buf = get_current_time();
+    
+    len = snprintf(tmp, buf_left, "%s", tmp_buf.c_str());
     buf_left -= len;
     tmp += len;
     len_all += len;

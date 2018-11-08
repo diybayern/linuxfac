@@ -16,49 +16,61 @@ void* semi_auto_test_control(void*)
         usleep(500000);
         
         if (testStep != STEP_IDLE) {
-            if (funcFinishStatus[F_INTERFACE] 
-                && funcFinishStatus[F_SOUND]
-                && funcFinishStatus[F_DISPLAY]
-                && funcFinishStatus[F_BRIGHT]
-                && funcFinishStatus[F_CAMERA]) {
+            bool tmp_func_finish = true;
+            for (int i = 0; i < F_STRESS; i++) {
+                tmp_func_finish &= funcFinishStatus[i];
+                if (!tmp_func_finish) {
+                    break;
+                }
+
+            }
+            if (tmp_func_finish) {
                 if (control->get_auto_upload_mes_status() && !control->get_third_product_state()) {
                     control->upload_mes_log();
                 }
             }
             
-            switch (testStep){
+            switch (testStep) {
                 case STEP_INTERFACE: {
-                    if (funcFinishStatus[F_INTERFACE] && !funcFinishStatus[F_SOUND]) {                
+                    if (funcFinishStatus[F_INTERFACE]) {                
                         LOG_INFO("interface_finish OK.\n");
                         control->set_test_step(STEP_SOUND);
-                        control->start_sound_test();
+                        if (!funcFinishStatus[F_SOUND]) {
+                            control->start_sound_test();
+                        }
                     }
                 } break;
                 
                 case STEP_SOUND: {
-                    if (funcFinishStatus[F_SOUND] && !funcFinishStatus[F_DISPLAY]) {
+                    if (funcFinishStatus[F_SOUND]) {
                         LOG_INFO("sound_finish OK.\n");
                         control->set_test_step(STEP_DISPLAY);
-                        control->start_display_test();
+                        if (!funcFinishStatus[F_DISPLAY]) {
+                            control->start_display_test();
+                        }
                     }
                 } break;
                 
                 case STEP_DISPLAY: {
-                    if (funcFinishStatus[F_DISPLAY] && !funcFinishStatus[F_BRIGHT]) {
+                    if (funcFinishStatus[F_DISPLAY]) {
                         if (control->get_base_info()->bright_level != "0" || control->get_base_info()->bright_level != "") {
-                           LOG_INFO("display_finish OK.\n");
-                           control->set_test_step(STEP_BRIGHTNESS);
-                           control->start_bright_test();
+                            LOG_INFO("display_finish OK.\n");
+                            control->set_test_step(STEP_BRIGHTNESS);
+                            if (!funcFinishStatus[F_BRIGHT]) {
+                                control->start_bright_test();
+                            }
                         }
                     }
                 } break;
                 
                 case STEP_BRIGHTNESS: {
-                    if (funcFinishStatus[F_BRIGHT] && !funcFinishStatus[F_CAMERA]) {
+                    if (funcFinishStatus[F_BRIGHT]) {
                         if (control->get_base_info()->camera_exist != "0" || control->get_base_info()->camera_exist != "") {
-                           LOG_INFO("bright_finish OK.\n");
-                           control->set_test_step(STEP_CAMERA);
-                           control->start_camera_test();
+                            LOG_INFO("bright_finish OK.\n");
+                            control->set_test_step(STEP_CAMERA);
+                            if (!funcFinishStatus[F_CAMERA]) {
+                                control->start_camera_test();
+                            }
                         }
                     }
                 } break;
@@ -70,14 +82,14 @@ void* semi_auto_test_control(void*)
     }
 }
 
-static void print_stack(void)
+static void print_stack()
 {   
     size_t i;
     size_t size;
     char **strings;
     void *array[200] = {0, };
 
-    size = backtrace (array, 200);
+    size = backtrace(array, 200);
     strings = backtrace_symbols(array, size);
 
     if (!strings) {

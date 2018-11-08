@@ -4,7 +4,7 @@
 #include <ftplib.h>
 #include <map>
 
-bool interfaceTestSelectStatus[INTERFACE_TEST_NUM] = {1,1,1,1,1,1,1,1,1};
+bool interfaceTestSelectStatus[INTERFACE_TEST_NUM] = {1,1,1,1,1,1,1,1,1};//TODO
 bool interfaceTestResult[INTERFACE_TEST_NUM]       = {0,0,0,0,0,0,0,0,0};
 bool interfaceTestOver[INTERFACE_TEST_NUM]         = {0,0,0,0,0,0,0,0,0};
 bool interfaceTestFinish[INTERFACE_TEST_NUM]       = {0,0,0,0,0,0,0,0,0};
@@ -63,16 +63,18 @@ string execute_command(string cmd, bool norm_print)
 }
 
 /* get system time */
-void get_current_time(char tmp_buf[]) //TODO: char[] tmp_buf
+string get_current_time()
 {
+    char tmp_buf[TIME_MAX_LEN] = {0};//TODO: char[] tmp_buf
     struct timeval  tv;
     struct timezone tz;
     struct tm nowtime;
     gettimeofday(&tv, &tz);
     localtime_r(&tv.tv_sec, &nowtime);
     strftime(tmp_buf, TIME_MAX_LEN, "%Y-%m-%d %H:%M:%S", &nowtime);
-    tmp_buf += strlen(tmp_buf);
-    snprintf(tmp_buf, TIME_MAX_LEN, ".%03ld", tv.tv_usec / 1000);
+    snprintf(tmp_buf + strlen(tmp_buf), TIME_MAX_LEN, ".%03ld", tv.tv_usec / 1000);
+    
+    return (string)tmp_buf;
 }
 
 /* get boot time */

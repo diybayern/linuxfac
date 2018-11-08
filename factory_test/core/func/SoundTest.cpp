@@ -118,6 +118,10 @@ void SoundTest::init_volume()
 
 void* SoundTest::record_loop(void *arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is NULL");
+        return NULL;
+    }
 //    FILE * outfile = NULL;
     bool ret = false;
     SndInfo *info = (SndInfo *)arg;
@@ -171,8 +175,10 @@ void* SoundTest::record_loop(void *arg)
             fclose(outfile);
 #endif
             ret = write_local_data(SOUND_RECORD_FILE, "a+", buf, buffer_size);
-            if (ret == false)
+            if (ret == false) {
+                LOG_ERROR("write data to %s failed", SOUND_RECORD_FILE);
                 break;
+            }
         } else {
             LOG_ERROR("read size not period_size:%ld", recv_len);
         }
@@ -191,6 +197,11 @@ err_record:
 
 void* SoundTest::playback_loop(void *arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is NULL");
+        return NULL;
+    }
+    
     bool flag = false;
     int ret = 0;
     SndInfo *info = (SndInfo *)arg;
@@ -208,8 +219,8 @@ void* SoundTest::playback_loop(void *arg)
     }
 
     if ((info->samplearate != g_record_info->samplearate)
-        	|| (info->channels != g_record_info->channels)
-        	|| (info->format != g_record_info->format)) {
+            || (info->channels != g_record_info->channels)
+            || (info->format != g_record_info->format)) {
         LOG_ERROR("playback params is different from record params! \n");
         goto err_playback;
     }
@@ -271,6 +282,11 @@ err_playback:
 
 bool SoundTest::open_sound_card(SndInfo *info)
 {
+    if (info == NULL) {
+        LOG_ERROR("sound info is NULL");
+        return false;
+    }
+    
     int err = -1;
     bool result = false;
 
@@ -386,6 +402,11 @@ err:
 
 void SoundTest::close_sound_card(SndInfo *info)
 {
+    if (info == NULL) {
+        LOG_ERROR("sound info is NULL");
+        return;
+    }
+
     if (info->pcm) {
         snd_pcm_close(info->pcm);
         info->pcm = NULL;
@@ -414,6 +435,7 @@ bool SoundTest::start_record()
 bool SoundTest::stop_record()
 {
     if (gStatus == SOUND_RECORD_STOP) {
+        LOG_ERROR("status is already SOUND_RECORD_STOP");
         return false;
     }
 
@@ -446,6 +468,7 @@ bool SoundTest::start_playback()
 bool SoundTest::stop_playback()
 {
     if (gStatus == SOUND_PLAYBACK_STOP) {
+        LOG_ERROR("status is already SOUND_PLAYBACK_STOP");
         return false;
     }
 
@@ -459,11 +482,14 @@ bool SoundTest::stop_playback()
 
 bool SoundTest::init(BaseInfo* baseInfo)
 {
-    if (g_record_info == NULL) {
-        LOG_ERROR("new SndInfo failed \n");
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is NULL");
         return false;
     }
-
+    if (g_record_info == NULL) {
+        LOG_ERROR("new record Info failed \n");
+        return false;
+    }
     memset(g_record_info, 0, sizeof(SndInfo));
     g_record_info->samplearate  = DEFAULT_SAMPLERATE;
     g_record_info->channels     = DEFAULT_CHANNEL;
@@ -474,9 +500,9 @@ bool SoundTest::init(BaseInfo* baseInfo)
     g_record_info->card         = DEFAULT_CARD_NAME;
 
     if (g_playback_info == NULL) {
+        LOG_ERROR("new playback Info failed \n");
         return false;
     }
-
     memset(g_playback_info, 0, sizeof(SndInfo));
     g_playback_info->samplearate    = DEFAULT_SAMPLERATE;
     g_playback_info->channels       = DEFAULT_CHANNEL;
@@ -500,7 +526,6 @@ bool SoundTest::init(BaseInfo* baseInfo)
 
     }
 
-
     if (pthread_mutex_init(&gMutex, NULL) != 0) {
         return false;
     }
@@ -517,15 +542,15 @@ void* SoundTest::test_all(void*)
     UiHandle* uihandle = UiHandle::get_uihandle();
     control->update_screen_log("==================== " + FUNC_TEST_NAME[F_SOUND] + " ====================\n");
     uihandle->start_audio_progress_dialog();
-    usleep(200000);
+    usleep(200000);  //wait for Synchronize progress bar and recording
     start_record();
-    sleep(3);
+    sleep(3);        //recording 3 seconds
     stop_record();
-    sleep(1);
+    sleep(1);        //wait 1 seconds to start playback
     start_playback();
-    sleep(3);
+    sleep(3);        //playback 3 seconds
     stop_playback();
-    sleep(1);        
+    sleep(1);        //wait 1 seconds to show result confirm box 
     control->confirm_test_result(FUNC_TEST_NAME[F_SOUND]);
     
     return NULL;
@@ -543,6 +568,10 @@ void SoundTest::start_test(BaseInfo* baseInfo)
 
 bool SoundTest::sound_record_restore(BaseInfo* baseInfo)
 {
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return false;
+    }
     if (baseInfo->platform == "IDV") {
         if (system("if [ ! -f /tmp/no_pulseaudio ]; then pulseaudio --start --log-target=syslog; else rm -f /tmp/no_pulseaudio; fi") < 0) {
             LOG_ERROR("pulseaudio --start error\n");

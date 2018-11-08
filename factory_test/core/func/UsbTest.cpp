@@ -36,6 +36,11 @@ bool UsbTest::usb_num_test(string total_num, string num_3)
 
 bool UsbTest::get_dev_mount_point(struct udev_device* dev, char* dst) //TODO: char* dst
 {
+    if (dev == NULL || dst == NULL) {
+        LOG_ERROR("dev or dst parameters is NULL");
+        return false;
+    }
+    
     int len = 0;
     DIR* dir = NULL;
     struct dirent *ptr = NULL;
@@ -67,6 +72,11 @@ bool UsbTest::get_dev_mount_point(struct udev_device* dev, char* dst) //TODO: ch
 
 struct udev_device* UsbTest::get_child(struct udev* udev, struct udev_device* parent, string subsystem)
 {
+    if (udev == NULL || parent == NULL || subsystem == "") {
+        LOG_ERROR("udev, parent or subsystem parameters is wrong");
+        return NULL;
+    }
+    
     struct udev_device* child = NULL;
     struct udev_list_entry* entry = NULL;
     struct udev_list_entry *devices = NULL;
@@ -112,8 +122,8 @@ void UsbTest::get_usb_mass_storage(USB_INFO_T* info)
 
     devices = udev_enumerate_get_list_entry(enumerate);
 
-    udev_list_entry_foreach(entry, devices)
-    {
+    udev_list_entry_foreach(entry, devices) {
+        
         string path = udev_list_entry_get_name(entry);
         struct udev_device* scsi = udev_device_new_from_syspath(udev, path.c_str());
 
@@ -327,7 +337,8 @@ void* UsbTest::test_all(void *arg)
     screen_log_black += "==================== " + INTERFACE_TEST_NAME[I_USB] + " ====================\n";
     
     bool result_num_test = true;
-    int num;
+    int num = 0;
+    /* third product does not test usb num, just test usb write & read */
     if (control->get_third_product_state()) {
         num = get_int_value(baseInfo->usb_total_num);
     } else {
@@ -370,7 +381,7 @@ void UsbTest::start_test(BaseInfo* baseInfo)
 }
 
 
-bool UsbTest::usb_test_read_cfg(string dir)
+bool UsbTest::usb_test_read_config(string dir)
 {
     if (dir == "") {
         LOG_ERROR("dir path is null");
@@ -379,7 +390,7 @@ bool UsbTest::usb_test_read_cfg(string dir)
     string name = "";
     string cmd = "";
 
-    name = dir + "/fac_config.conf";
+    name = dir + "/" + FAC_CONFIG_NAME;
 
     if (check_file_exit(name)) {
         LOG_INFO("find fac config conf!\n");
@@ -413,10 +424,11 @@ bool UsbTest::usb_test_read_cfg(USB_INFO_T* info)
     for (i = 0; i < info->dev_num; i++) {
 
         usb_test_mount(info->dev[i].block, path);
-        ret = usb_test_read_cfg(path);
+        ret = usb_test_read_config(path);
         usb_test_umount(path);
 
         if (ret) {
+            LOG_ERROR("get fac config when read No.%d usb", i);
             break;
         }
         usleep(10000);
@@ -442,6 +454,7 @@ bool UsbTest::usb_test_read_status()
     if (info.dev_num != 0) {
         ret = usb_test_read_cfg(&info);
     } else {
+        LOG_ERROR("no usb num can read fac config");
         ret = false;
     }
 

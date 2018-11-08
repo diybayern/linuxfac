@@ -20,6 +20,30 @@ private:
     string screen_log_red;
 };
 
+class HddTest : public FuncBase
+{
+public:
+    static bool hdd_test_all(string hdd_cap);
+    static bool check_if_hdd_pass();
+    static void *test_all(void *arg);
+    void start_test(BaseInfo* baseInfo);
+private:
+    static string screen_log_black;
+    static string screen_log_red;
+};
+
+class SsdTest : public FuncBase
+{
+public:
+    static bool ssd_test_all(string ssd_cap);
+    static bool check_if_ssd_pass();
+    static void *test_all(void *arg);
+    void start_test(BaseInfo* baseInfo);
+private:
+    static string screen_log_black;
+    static string screen_log_red;
+
+};
 
 class FanTest : public FuncBase
 {
@@ -27,6 +51,7 @@ public:
     static string fan_speed_test(string speed);
     static void *test_all(void *arg);
     void start_test(BaseInfo* baseInfo);
+private:
     static string screen_log_black;
     static string screen_log_red;
 };
@@ -34,9 +59,6 @@ public:
 class UsbTest : public FuncBase
 {
 public:
-    static string screen_log_black;
-    static string screen_log_red;
-    
     static bool usb_num_test(string total_num, string num_3);
     static bool get_dev_mount_point(struct udev_device* dev, char* dst);
     static struct udev_device* get_child(struct udev* udev, struct udev_device* parent, string subsystem);
@@ -52,7 +74,11 @@ public:
 
     bool usb_test_read_status();
     bool usb_test_read_cfg(USB_INFO_T* info);
-    bool usb_test_read_cfg(string dir);
+    bool usb_test_read_config(string dir);
+private:
+    static string screen_log_black;
+    static string screen_log_red;
+
 };
 
 
@@ -69,7 +95,7 @@ public:
     static void stop_mem_stress_test();
     string get_stress_result_record();
 private:
-    static int  mem_stress_num;
+    static int  mem_stress_test_num;
     static bool mem_stress_status;
     static bool mem_stress_result;
     static string stress_result;

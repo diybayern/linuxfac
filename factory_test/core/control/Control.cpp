@@ -56,7 +56,7 @@ Control* Control::get_control()
 Control::~Control()
 {
     LOG_INFO("~Control()");
-    for (int i = INTERFACE; i < FUNC_TYPE_NUM; i++) {
+    for (int i = 0; i < FUNC_TYPE_NUM; i++) {
         if (_funcBase[i] != NULL) {
             if (i == NET) {
                 NetTest* net = (NetTest*)_funcBase[NET];
@@ -104,21 +104,18 @@ void Control::init_base_info()
 
     if (baseinfo != "error") {
         int len = baseinfo.size();
-        if(baseinfo[0] != '{' || baseinfo[len - 1] != '}')
-        {
+        if (baseinfo[0] == '{' && baseinfo[len - 1] == '}') {  // hwInfo string must have '{', '}'
+            baseinfo = baseinfo.substr(1, baseinfo.length() - 2);  // delete '{', '}'
+            get_baseinfo(_baseInfo, baseinfo);
+            LOG_INFO("product is %s", (_baseInfo->platform).c_str());
+        } else {
             LOG_INFO("base info is not right");
-            goto _is_third;
         }
-
-        baseinfo = baseinfo.substr(1, baseinfo.length() - 2);
-        get_baseinfo(_baseInfo, baseinfo);
-        LOG_INFO("product is %s", (_baseInfo->platform).c_str());
     } else {
         LOG_ERROR("get hwcfg.ini information error");
     }
     
-_is_third:
-    if (_baseInfo->platform == "") {
+    if (_baseInfo->platform == "") {  // platform is IDV, VDI or null
         _is_third_product = true;
         LOG_INFO("this is third product\n");
     } else {
@@ -143,13 +140,17 @@ void Control::init_ui()
         _uiHandle->add_main_label("内存容量:", execute_command("free -m | awk '/Mem/ {print $2}'", true) + "M");
         _uiHandle->add_main_label("HDD容量:", "--");//TODO
         _uiHandle->add_main_label("SSD容量:", "--");//TODO
+        //input -1 to get actual linked edid num in test third product
         _uiHandle->add_main_label("EDID信息:", to_string(edid_read_i2c_test(-1)));
         
         string real_total_num = execute_command("lsusb -t | grep \"Mass Storage\" | wc -l", true);
         string real_num_3 = execute_command("lsusb -t | grep \"Mass Storage\" | grep \"5000M\" | wc -l", true);
-        _baseInfo->usb_total_num = real_total_num;
-        _baseInfo->usb_3_num = real_num_3;
-        _uiHandle->add_main_label("USB信息:", real_num_3 + "/" + real_total_num);
+        if (real_total_num != "error") {
+            _baseInfo->usb_total_num = real_total_num;
+        } else if (real_num_3 != "error") {
+            _baseInfo->usb_3_num = real_num_3;
+        }
+        _uiHandle->add_main_label("USB信息:", _baseInfo->usb_3_num + "/" + _baseInfo->usb_total_num);
         _uiHandle->add_main_label("网卡信息:", get_third_net_info());
 
         string wifi_exist = execute_command("ifconfig -a | grep wlan0", true);
@@ -169,16 +170,17 @@ void Control::init_ui()
     
     _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_MEM]);
     
-    if (!_is_third_product || _baseInfo->usb_total_num != "0") {
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_USB]);
-    } else {
+    if (_is_third_product && _baseInfo->usb_total_num == "0") { // do not test usb when it is third product and no usb
         interfaceTestSelectStatus[I_USB] = false;
         interfaceTestFinish[I_USB]       = true;
         interfaceTestOver[I_USB]         = true;
+    } else {
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_USB]);
     }
+    
     _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_NET]);
     
-    if (_is_third_product) {
+    if (_is_third_product) {   // third product does not test EDID and CPU
         interfaceTestSelectStatus[I_EDID] = false;
         interfaceTestFinish[I_EDID]       = true;
         interfaceTestOver[I_EDID]         = true;
@@ -206,8 +208,8 @@ void Control::init_ui()
         interfaceTestFinish[I_SSD]       = true;
         interfaceTestOver[I_SSD]         = true;
     }
-    
-    if (_baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") {
+
+    if (!_is_third_product && _baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") { // third product's fan_speed is ""
         _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_FAN]);
     } else {
         interfaceTestSelectStatus[I_FAN] = false;
@@ -215,7 +217,7 @@ void Control::init_ui()
         interfaceTestOver[I_FAN]         = true;
     }
     
-    if (!_is_third_product && _baseInfo->wifi_exist != "0" && _baseInfo->wifi_exist != "") {
+    if (!_is_third_product && _baseInfo->wifi_exist != "0" && _baseInfo->wifi_exist != "") { // third product does not test wifi
         _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_WIFI]);
     } else {
         interfaceTestSelectStatus[I_WIFI] = false;
@@ -245,8 +247,7 @@ void Control::init_ui()
             _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_NEXT_PROCESS]);
         }    
     }
-    
-    
+
     if (_is_third_product) {
         _uiHandle->add_complete_or_single_test_label("第三方终端");
     } else if (check_file_exit(WHOLE_TEST_FILE)) {
@@ -301,6 +302,7 @@ void Control::init_ui()
     connect(_uiHandle, SIGNAL(sig_ui_factory_delete_event()), this, SLOT(slot_factory_delete_event()));
 }
 
+/* third product show net speed and duplex, just test send and recv msg */
 string Control::get_third_net_info()
 {
     NetTest* net = (NetTest*)_funcBase[NET];
@@ -314,6 +316,7 @@ string Control::get_third_net_info()
     }
 }
 
+/* try again after test sn or mac FAILed */
 void Control::retry_sn_mac_test()
 {
     if (_display_sn_or_mac == "MAC") {
@@ -343,7 +346,7 @@ void Control::check_sn_mac_compare_result(string message)
 {
     if (_display_sn_or_mac == "MAC") {
         string mac = _hwInfo->mac;
-        mac.erase(remove(mac.begin(), mac.end(), ':'), mac.end());
+        mac.erase(remove(mac.begin(), mac.end(), ':'), mac.end()); // delete ':' in mac
         if (message.size() != mac.size() || message != mac) {
             LOG_INFO("mac test result:\tFAIL\n");
             _uiHandle->update_sn_mac_test_result("MAC", "FAIL");
@@ -511,11 +514,12 @@ void Control::print_stress_test_result(vector<string> record)
     update_screen_log("==================================================\n");
 }
 
+/* auto test mac when it is not third product and no stress file */
 void Control::auto_test_mac_or_stress() {    
     if (check_file_exit(STRESS_LOCK_FILE)) {
         LOG_INFO("******************** auto start stress test ********************");
         _funcBase[STRESS]->start_test(_baseInfo);
-    } else if (!get_third_product_state()){
+    } else if (!_is_third_product){
         _display_sn_or_mac = "MAC";
         _uiHandle->show_sn_mac_message_box("MAC");
     }
@@ -528,7 +532,7 @@ int Control::get_test_step()
 
 void Control::init_mes_log()
 {
-    char date[64] = {0,};
+    string date = get_current_time();
     string tmp = "";
     string mac_capital = _hwInfo->mac;
     string sn_capital = _hwInfo->sn;
@@ -543,39 +547,37 @@ void Control::init_mes_log()
     _facArg->ftp_dest_path = tmp;
     LOG_INFO("_facArg->ftp_dest_path:%s", (_facArg->ftp_dest_path).c_str());
     
-    get_current_time(date);
-
     LOG_MES("---------------------Product infomation-----------------------\n");
     LOG_MES("Model: \t%s\n", (_hwInfo->product_name).c_str());
     LOG_MES("SN: \t%s\n", sn_capital.c_str());
     LOG_MES("MAC: \t%s\n", mac_capital.c_str());
-    LOG_MES("DATE: \t%s\n", date);
+    LOG_MES("DATE: \t%s\n", date.c_str());
     LOG_MES("OPERATION: \t%s\n", (_facArg->ftp_job_number).c_str());
     LOG_MES("---------------------Simple test result-----------------------\n");
-    LOG_MES("MEMORY:    NULL\n");
-    LOG_MES("USB:       NULL\n");
-    LOG_MES("NET:       NULL\n");
-    LOG_MES("EDID:      NULL\n");
-    LOG_MES("CPU:       NULL\n");
+    LOG_MES("%s:       NULL\n", INTERFACE_TEST_MES_TAG[I_MEM].c_str());
+    LOG_MES("%s:       NULL\n", INTERFACE_TEST_MES_TAG[I_USB].c_str());
+    LOG_MES("%s:       NULL\n", INTERFACE_TEST_MES_TAG[I_NET].c_str());
+    LOG_MES("%s:      NULL\n", INTERFACE_TEST_MES_TAG[I_EDID].c_str());
+    LOG_MES("%s:       NULL\n", INTERFACE_TEST_MES_TAG[I_CPU].c_str());
     if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
-        LOG_MES("HDD:       NULL\n");
+        LOG_MES("%s:       NULL\n", INTERFACE_TEST_MES_TAG[I_HDD].c_str());
     }
     if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
-        LOG_MES("SSD:       NULL\n");
+        LOG_MES("%s:       NULL\n", INTERFACE_TEST_MES_TAG[I_SSD].c_str());
     }
     if (_baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") {
-        LOG_MES("FAN:       NULL\n");
+        LOG_MES("%s:       NULL\n", INTERFACE_TEST_MES_TAG[I_FAN].c_str());
     }
     if (_baseInfo->wifi_exist != "0" && _baseInfo->wifi_exist != "") {
-        LOG_MES("WIFI:      NULL\n");
+        LOG_MES("%s:      NULL\n", INTERFACE_TEST_MES_TAG[I_WIFI].c_str());
     }
-    LOG_MES("AUDIO:     NULL\n");
-    LOG_MES("DISPLAY:   NULL\n");
+    LOG_MES("%s:     NULL\n", FUNC_TEST_TAG_NAME[F_SOUND].c_str());
+    LOG_MES("%s:   NULL\n", FUNC_TEST_TAG_NAME[F_DISPLAY].c_str());
     if (_baseInfo->bright_level != "0" && _baseInfo->bright_level != "") {
-        LOG_MES("BRIGHTNESS:NULL\n");
+        LOG_MES("%s:    NULL\n", FUNC_TEST_TAG_NAME[F_BRIGHT].c_str());
     }
     if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
-        LOG_MES("CAMERA:    NULL\n");
+        LOG_MES("%s:    NULL\n", FUNC_TEST_TAG_NAME[F_CAMERA].c_str());
     }
     LOG_MES("---------------------Stress test result-----------------------\n");
 }
@@ -590,8 +592,9 @@ void Control::update_mes_log(string tag, string value)
     char line[200] = {0, };  //TODO: char[] line
     size_t sp = 0;
     int first = 1;
-  
-    if ((fp = fopen(MES_FILE, "r")) == NULL) {
+    
+    fp = fopen(MES_FILE, "r");
+    if (fp == NULL) {
         LOG_ERROR("open %s failed", MES_FILE);
         return;
     }
@@ -604,7 +607,7 @@ void Control::update_mes_log(string tag, string value)
         if (first &&((sp = str_line.find(tag)) != str_line.npos)) {
             string value_temp = "";
             value_temp = value + "\n";
-            str_line.replace(sp + 11, value_temp.size(), value_temp);
+            str_line.replace(sp + 11, value_temp.size(), value_temp); // convert NULL to test result in MES_FILE
             first = 0;
         }
         buf += str_line;
@@ -613,7 +616,7 @@ void Control::update_mes_log(string tag, string value)
     fclose(fp);
     fp = fopen(MES_FILE, "w");
     if (fp == NULL) {
-        return ;
+        return;
     }
 
     if (buf != "") {
@@ -633,18 +636,19 @@ void Control::upload_mes_log()
         set_test_result(FUNC_TEST_NAME[F_UPLOAD_MES_LOG], "FAIL", "配置文件有误");
         return;
     } else {
-        if (!combine_fac_log_to_mes(MES_FILE, STRESS_RECORD)) {
+        if (!combine_fac_log_to_mes(MES_FILE, STRESS_RECORD)) { // combine test result and stress record
             update_color_screen_log("拷机记录文件为空\n", "red");
             LOG_MES("no stress test record\n");
             LOG_INFO("NO stress record\n");
         }
         LOG_MES("---------------------Detail test result-----------------------\n");
-        if (!combine_fac_log_to_mes(MES_FILE, LOG_FILE)) {
+        if (!combine_fac_log_to_mes(MES_FILE, LOG_FILE)) { // combine test result and detail log
             LOG_ERROR("combine log failed");
             _uiHandle->confirm_test_result_warning("log文件拼接失败");
             return;
         }
-        string upload_log = "ftp ip:\t\t" + _facArg->ftp_ip + "\n";
+        string upload_log = "";
+        upload_log  = "ftp ip:\t\t" + _facArg->ftp_ip + "\n";
         upload_log += "ftp user:\t\t" + _facArg->ftp_user + "\n";
         upload_log += "ftp passwd:\t\t" + _facArg->ftp_passwd + "\n";
         upload_log += "ftp path:\t\t" + _facArg->ftp_dest_path + "\n";
@@ -652,8 +656,8 @@ void Control::upload_mes_log()
 
         _uiHandle->confirm_test_result_waiting("正在上传中...");
         sleep(1);
-        string response = ftp_send_file(MES_FILE, _facArg);
-        response = response_to_chinese(response);
+        string response = ftp_send_file(MES_FILE, _facArg); // upload log
+        response = response_to_chinese(response);  // translate upload result to chinese
         LOG_INFO("upload log: %s", response.c_str());
         if (response.compare("上传成功") == 0) {
             if (check_file_exit(WHOLE_TEST_FILE)) {
@@ -704,13 +708,9 @@ void Control::set_interface_select_status(string func, bool state)
     for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
         if (func == INTERFACE_TEST_NAME[i]) {
             interfaceTestSelectStatus[i] = state;
-            if (state) {
-                interfaceTestFinish[i] = false;  //TODO-YHT:  = (!state)
-                interfaceTestOver[i]   = false;
-            } else {
-                interfaceTestFinish[i] = true;
-                interfaceTestOver[i]   = true;
-            }
+            /* when select status changed, test over and finish status need change */
+            interfaceTestFinish[i] = (!state);
+            interfaceTestOver[i]   = (!state);
             break;
         }
     }
@@ -767,7 +767,11 @@ void Control::start_update_mes_log(MesInfo* info)
     pthread_create(&tid, NULL, update_mes_log_thread, info);
 }
 
-
+/* 
+** after clicked confirm box: 
+** show result on the right side of button, screen and file log;
+** stress test show record in the screen;
+*/
 void Control::set_test_result_pass_or_fail(string func, string result)
 {
     if (func == FUNC_TEST_NAME[F_STRESS]) {
@@ -800,6 +804,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
     _uiHandle->set_test_result(func, result);
 }
 
+/* whole test, after mac test pass, show sn test box */
 void Control::set_sn_mac_test_result(string sn_mac, string result)
 {
     if (sn_mac == "MAC" && result == "PASS" && check_file_exit(WHOLE_TEST_FILE)) {

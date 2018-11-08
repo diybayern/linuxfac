@@ -123,6 +123,10 @@ bool EdidTest::read_edid(unsigned int controller, char* output) //TODO: char* ou
 
 bool EdidTest::parse_edid(char* buf)   //TODO: char* buf
 {
+    if (buf == NULL) {
+        LOG_ERROR("buf is NULL");
+        return false;
+    }
     int i = 0;
     char check_sum = 0;
 
@@ -163,8 +167,6 @@ i2c_test:
     } else {
         if (ret == AGAIN && failed++ < 5) {
             LOG_ERROR("Failed to read EDID from I2C bus, try again.");
-            screen_log_black += "Failed to read EDID from I2C bus, try again.";
-            screen_log_black += "\t错误：无法从I2C总线读取EDID，请重试\n";
             goto i2c_test;
         }
         if (edid_num == 2) {           
@@ -172,7 +174,7 @@ i2c_test:
             if (ret == AGAIN) {
                 LOG_ERROR("ERROR: Failed to read any EDID information on the buses.\n");
                 screen_log_black += "ERROR: Failed to read any EDID information on the buses.\n";
-                screen_log_black += "\t错误：无法读取总线上的任何EDID信息\n";
+                screen_log_red += "\t错误：无法读取总线上的任何EDID信息\n";
             }
             result = false;
             goto print;

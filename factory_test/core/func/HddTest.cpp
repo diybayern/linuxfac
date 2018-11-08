@@ -1,4 +1,4 @@
-#include "HddTest.h"
+#include "FuncTest.h"
 #include "fac_log.h"
 
 string HddTest::screen_log_black = "";

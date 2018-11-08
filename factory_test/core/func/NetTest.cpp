@@ -33,6 +33,11 @@ NetTest::~NetTest()
 
 bool NetTest::net_get_eth_name(char* eth_name, int size)
 {
+    if (eth_name == NULL || size <= 0) {
+        LOG_ERROR("eth name or size is NULL");
+        return false;
+    }
+
     int i = 0;
     int num = 0;
     int fd = -1;
@@ -40,10 +45,6 @@ bool NetTest::net_get_eth_name(char* eth_name, int size)
     struct ifconf ifconf;
     char buf[512] = { 0, };
     struct ifreq *ifreq = NULL;    
-
-    if (eth_name == NULL) {
-        return false;
-    }
 
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
@@ -80,12 +81,13 @@ bool NetTest::net_get_eth_name(char* eth_name, int size)
 
 bool NetTest::net_get_eth_index(char* eth_name, unsigned int* index)
 {
-    int fd = -1;
-    struct ifreq ifr;
-
-    if (eth_name == NULL) {
+    if (eth_name == NULL || index == NULL) {
+        LOG_ERROR("eth name or index is null");
         return false;
     }
+
+    int fd = -1;
+    struct ifreq ifr;
 
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
@@ -112,12 +114,14 @@ bool NetTest::net_get_eth_index(char* eth_name, unsigned int* index)
 bool NetTest::net_sprintf_mac_addr(unsigned char* src, char* dst)
 {
     if (src == NULL || dst == NULL) {
+        LOG_ERROR("src or dst is NULL");
         return false;
     }
 
     int ret = 0;
     ret = sprintf((char*)dst, "%02x:%02x:%02x:%02x:%02x:%02x", src[0], src[1], src[2], src[3], src[4], src[5]);
     if (ret < 0) {
+        LOG_ERROR("sprintf mac addr failed");
         return false;
     }
 
@@ -126,13 +130,14 @@ bool NetTest::net_sprintf_mac_addr(unsigned char* src, char* dst)
 
 bool NetTest::net_get_mac_addr0(unsigned char* eth_name, unsigned char* hw_buf)
 {
+    if (eth_name == NULL || hw_buf == NULL) {
+        LOG_ERROR("eth name or hw_buf is NULL");
+        return false;
+    }
+
     int fd = -1; 
     struct ifreq ifr;
     unsigned char buf[128] = { 0, };
-
-    if (eth_name == NULL || hw_buf == NULL) {
-        return false;
-    }
 
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
@@ -160,6 +165,11 @@ bool NetTest::net_get_mac_addr0(unsigned char* eth_name, unsigned char* hw_buf)
 
 void* NetTest::net_recv_loopback_msg(void *arg)
 {
+    if (arg == NULL) {
+        LOG_ERROR("arg is NULL");
+        return NULL;
+    }
+    
     int fd = -1;
     int ret = 0;
     int len = 0;
@@ -168,7 +178,7 @@ void* NetTest::net_recv_loopback_msg(void *arg)
     struct sockaddr_ll recv_sll;
 //    struct sockaddr_ll send_sll;
     NetInfo* info = NULL;
-    char buf[128] = { 0, };
+    char buf[128] = { 0, };   //TODO: char[] buf
     unsigned char bc_mac[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
     pthread_detach(pthread_self());
@@ -209,7 +219,8 @@ void* NetTest::net_recv_loopback_msg(void *arg)
 
         // exchange will transform message
         if (memcmp(recv_packet.dst_mac, bc_mac, MAC_ADDR_LEN) != 0) {
-            LOG_INFO("recv roll back msg index=%d\n", recv_packet.index);
+            net_sprintf_mac_addr(recv_packet.src_mac, (char*)buf);
+            LOG_INFO("recv roll back msg index=%d, from mac=%s\n", recv_packet.index, buf);
             info->recv_num++;
         } else {
             // send back
@@ -226,7 +237,7 @@ bool NetTest::init()
 {
     bool ret = false;
     pthread_t pid;
-    NetInfo* info;   //TODO: NetInfo --> char[]
+    NetInfo* info = NULL;   //TODO: NetInfo --> char[]
 
     info = g_net_info;
     if (info == NULL) {
@@ -239,21 +250,24 @@ bool NetTest::init()
     ret = net_get_eth_name((char*)info->eth_name, ETH_NAME_LEN);
     if (ret == false) {
         LOG_ERROR("get eth name failed\n");
-        free(info);
+        delete info;
+        info = NULL;
         return false;
     }
 
     ret = net_get_eth_index((char*)info->eth_name, &info->eth_index);
     if (ret == false) {
         LOG_ERROR("get eth index failed\n");
-        free(info);
+        delete info;
+        info = NULL;
         return false;
     }
 
     ret = net_get_mac_addr0(info->eth_name, info->mac);
     if (ret == false) {
         LOG_ERROR("get mac addr failed\n");
-        free(info);
+        delete info;
+        info = NULL;
         return false;
     }
 
@@ -268,13 +282,19 @@ bool NetTest::init()
     return true;
 }
 
-inline int NetTest::net_eth_no(char *eth_name)
+int NetTest::net_eth_no(char *eth_name)
 {
+    if (eth_name == NULL) {
+        LOG_ERROR("eth name is NULL");
+        return -1;
+    }
+    
     char *p = eth_name;
 
     while (*p) {
-        if (is_digit(p))
+        if (is_digit(p)) {
             break;
+        }
         p++;
     }
     return atoi(p);
@@ -282,6 +302,10 @@ inline int NetTest::net_eth_no(char *eth_name)
 
 bool NetTest::net_get_eth_status(int fd, char *eth_name, unsigned int *status)
 {
+    if (fd < 0 || eth_name == NULL || status == NULL) {
+        LOG_ERROR("fd=%d, eth name or status is wrong", fd);
+        return false;
+    }
     struct ifreq ifr;
 
     memset(&ifr, 0, sizeof(struct ifreq));
@@ -304,6 +328,11 @@ bool NetTest::net_get_eth_status(int fd, char *eth_name, unsigned int *status)
 
 int NetTest::net_test_ioctl(int fd, char *eth_name, void *cmd)
 {
+    if (fd < 0 || eth_name == NULL || cmd == NULL) {
+        LOG_ERROR("fd=%d, eth name or cmd is wrong", fd);
+        return false;
+    }
+
     struct ifreq ifr;
 
     memset(&ifr, 0, sizeof(ifr));
@@ -314,6 +343,11 @@ int NetTest::net_test_ioctl(int fd, char *eth_name, void *cmd)
 
 bool NetTest::net_get_eth_info(NetInfo *info)
 {
+    if (info == NULL) {
+        LOG_ERROR("info is NULL");
+        return false;
+    }
+    
     int fd, ret;
     struct ethtool_cmd ecmd;
     struct ethtool_value edata;
@@ -380,6 +414,10 @@ string NetTest::net_get_duplex_desc(char duplex)
 
 bool NetTest::net_send_msg(char* src_mac, char* dst_mac, unsigned int index, unsigned int seq)
 {
+    if (src_mac == NULL || dst_mac == NULL) {
+        LOG_ERROR("src or dst mac is NULL");
+        return false;
+    }
     int fd = -1;
     int ret = 0;
     MacPacket packet;
@@ -412,21 +450,26 @@ bool NetTest::net_send_msg(char* src_mac, char* dst_mac, unsigned int index, uns
     return true;
 }
 
+/* loop send msg */
 bool NetTest::net_send_broadcast_msg(NetInfo* info, int num)
 {
+    if (info == NULL || num <=0) {
+        LOG_ERROR("info is NULL or num is wrong");
+        return false;
+    }
     int i = 0;
-    bool ret = 0;
+    bool ret = true;
     unsigned char dest_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
     for (i = 0; i < num; i++) {
-        ret |= net_send_msg((char *)info->mac, (char *)dest_mac, info->eth_index, info->seq++);
+        ret &= net_send_msg((char *)info->mac, (char *)dest_mac, info->eth_index, info->seq++);
         usleep(100);
     }
 
     return ret;
 }
 
-bool NetTest::net_test_all(bool test_flag)
+bool NetTest::net_test_all(bool test_flag) //test_flag = false, is third product to get net info without send packet msg
 {
     Control *control = Control::get_control();
     int i = 0;
@@ -466,7 +509,7 @@ bool NetTest::net_test_all(bool test_flag)
         goto error;
     }
     
-    if (test_flag) {
+    if (test_flag) {  //third product does not care whether network linked
         if (info->eth_link) {
             LOG_INFO("Network link detected: \tyes\n");
             screen_log_black += "Network link detected: \t\tyes\n";
@@ -512,26 +555,27 @@ bool NetTest::net_test_all(bool test_flag)
     
     if (test_flag) {
         info->recv_num = 0;
-        net_send_broadcast_msg(info, 100);
+        net_send_broadcast_msg(info, TOTAL_SEND_NUM); //send 100 packet msg
 
         LOG_INFO("before wait 2 seconds, info->recv_num=%d", info->recv_num);
-        // wait for 2 seconds
+        // wait for 2 seconds to recv packet msg
         while (1) {
             i++;
-            if (info->recv_num == 100 || i == 100){
+            if (info->recv_num == TOTAL_SEND_NUM || i == 100){
                 break;
             }
             usleep(20000);
         }
-    
-        if (info->recv_num < 90) {
+    LOG_DEBUG("I = %d", i);
+        if (info->recv_num < ETH_RECV_MIN_NUM) {
             screen_log_red += "\t错误：网口收报个数未达标\n";
             ret = false;
         }
 
-        LOG_INFO("send package num: \t\t100\n");
-        LOG_INFO("recv package num: \t\t%d\n",  info->recv_num);
-        screen_log_black += "send package num: \t\t100\nrecv package num: \t\t" + to_string(info->recv_num) + "\n\n";
+        LOG_INFO("send package num: \t\t%d\n", TOTAL_SEND_NUM);
+        LOG_INFO("recv package num: \t\t%d\n", info->recv_num);
+        screen_log_black += "send package num: \t\t" + to_string(TOTAL_SEND_NUM) 
+                        + "\nrecv package num: \t\t" + to_string(info->recv_num) + "\n\n";
     }
 error:
 

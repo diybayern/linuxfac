@@ -114,7 +114,9 @@ const string GET_CPU_TEMP_SCRIPT = FACTORY_PATH + "get_cpu_temp.sh";
 const string GET_BASEINFO_INI    = FACTORY_PATH + "hwcfg.ini";
 
 const string MEM_UI_LOG          = FACTORY_PATH + "mem_ui_log";
-const string FAC_CONFIG_FILE     = "/tmp/fac_config.conf";
+const string FAC_CONFIG_NAME     = "fac_config.conf";
+const string FAC_CONFIG_FILE     = "/tmp/" + FAC_CONFIG_NAME;
+
 
 const string WIFI_INFO_FILE      = "/tmp/wifi_test_info.tmp";
 const string WIFI_SSID_FILE      = "/tmp/ssid.mac";
@@ -159,10 +161,11 @@ const int BRIGHTNESS_VALUE[6] =
 #define ETH_NAME_LEN            (16)
 #define ETH_STATUS_UP           (0)
 #define ETH_STATUS_DOWN         (1)
+#define ETH_RECV_MIN_NUM        (90)
 
-#define WLAN_NAME_LEN           (16)
 #define TOTAL_SEND_NUM          (100)
-#define RECEIVE_NUM             (70)
+#define WLAN_NAME_LEN           (16)
+#define WLAN_RECV_MIN_NUM       (70)
 #define INTERFACE_NUM           (512)
 
 #define MES_FILE                ("/var/log/factory_test/mes.txt")
@@ -178,6 +181,7 @@ const int BRIGHTNESS_VALUE[6] =
 #define XAWTV_MAX_FAIL_COUNT    (5)
 
 #define MEM_TEST_CAP            ("10M")
+#define MEM_CAP_MIN_PERCENT     (0.9)
 #define STRESS_RECORD_NUM       (10)
 #define STRESS_MEM_CAP_MAX      (100)   /* M */
 #define STRESS_MEM_PERCENT      (0.7)
@@ -331,7 +335,7 @@ typedef struct tagUsbInfo {
 string execute_command(string cmd, bool norm_print);
 int get_random();
 int get_int_value(const string str);
-void get_current_time(char tmp_buf[]);
+string get_current_time();
 void get_current_open_time(TimeInfo* date);
 void diff_running_time(TimeInfo* dst, TimeInfo* src);
 bool check_file_exit(string filename);
