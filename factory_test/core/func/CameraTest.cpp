@@ -37,7 +37,8 @@ unsigned long CameraTest::get_window_id(string winid_file)
     
     return winid;
 }
- 
+
+/* move camera xawtv window to the top right corner (new_x, new_y)*/
 void CameraTest::move_xawtv_window(int new_x, int new_y)
 {
     Display *display = NULL;
@@ -73,13 +74,13 @@ void CameraTest::move_xawtv_window_on_func_test()
 
 void CameraTest::start_camera_xawtv()
 {
-    if (system(CAMERA_START_SCRIPT.c_str()) < 0) {
+    if (system(CAMERA_START_SCRIPT.c_str()) < 0) {  // start camera xawtv window
         LOG_ERROR("system run start_xawtv.sh error!\n");
         return ;
     }
     usleep(50000);
 
-    if (system(CAMERA_CLOSE_SCRIPT.c_str()) < 0) {
+    if (system(CAMERA_CLOSE_SCRIPT.c_str()) < 0) {  // close xawtv welcome window
         LOG_ERROR("system run close_xawtv.sh error!\n");
         return ;
     }
@@ -97,6 +98,7 @@ bool CameraTest::check_if_xawtv_started()
     if (winid == 0) {
         LOG_ERROR("Failed to start xawtv window!\n");
         control->update_screen_log("Failed to start xawtv window!\n");
+        control->update_color_screen_log("\t错误：摄像头启动失败\n", "red");
         return false;
     }
 
@@ -134,14 +136,15 @@ bool CameraTest::camera_test_all()
             failed_count++;
             LOG_ERROR("xawtv started failed count: %d\n", failed_count);
             control->update_screen_log("xawtv started failed count: " + to_string(failed_count) + "\n");
+            control->update_color_screen_log("\t错误：摄像头启动失败" + to_string(failed_count) + "次\n", "red");
         }
-    } while (failed_count < XAWTV_MAX_FAIL_COUNT);
+    } while (failed_count < XAWTV_MAX_FAIL_COUNT); // if xawtv start failed, try 5 times totally
 
     if (!xawtv_ok && failed_count >= XAWTV_MAX_FAIL_COUNT) {
         /* xawtv started failed, just report FAIL result */
         LOG_ERROR("ERROR: Failed to start xawtv, GPU fault may be detected!\n");
         control->update_screen_log("ERROR: Failed to start xawtv, GPU fault may be detected!\n");
-        control->update_screen_log("错误: xawtv启动失败, 可能存在GPU故障!\n");
+        control->update_color_screen_log("\t错误: xawtv启动失败, 可能存在GPU故障!\n", "red");
     }
 
     return false;
@@ -152,7 +155,7 @@ void* CameraTest::test_all(void*)
     Control* control = Control::get_control();
     control->update_screen_log("==================== " + FUNC_TEST_NAME[F_CAMERA] + " ====================\n");
     camera_test_all();    
-    control->confirm_test_result(FUNC_TEST_NAME[F_CAMERA]);
+    control->show_test_confirm_dialog(FUNC_TEST_NAME[F_CAMERA]);
     return NULL;
 }
 
@@ -166,6 +169,7 @@ void CameraTest::start_test(BaseInfo* baseInfo)
     pthread_create(&tid, NULL, test_all, baseInfo);
 }
 
+/* stress test camera if camera exists */
 void CameraTest::start_camera_xawtv_on_stress()
 {
     /* check if camera device exists */
@@ -193,7 +197,7 @@ void CameraTest::start_camera_xawtv_on_stress()
     move_xawtv_window_on_func_test();
 }
 
-
+/* close camera window When the test result is confirmed or the stress test is exited*/
 void CameraTest::close_xawtv_window()
 {
     Display *display = NULL;

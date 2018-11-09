@@ -140,7 +140,7 @@ void Control::init_ui()
         _uiHandle->add_main_label("内存容量:", execute_command("free -m | awk '/Mem/ {print $2}'", true) + "M");
         _uiHandle->add_main_label("HDD容量:", "--");//TODO
         _uiHandle->add_main_label("SSD容量:", "--");//TODO
-        //input -1 to get actual linked edid num in test third product
+        //input -1 to get actual linked edid num
         _uiHandle->add_main_label("EDID信息:", to_string(edid_read_i2c_test(-1)));
         
         string real_total_num = execute_command("lsusb -t | grep \"Mass Storage\" | wc -l", true);
@@ -164,23 +164,20 @@ void Control::init_ui()
             _baseInfo->camera_exist = "1";
             _uiHandle->add_main_label("摄像头信息:", "存在");
         }
-    }
-    
-    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_INTERFACE]);
-    
-    _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_MEM]);
-    
-    if (_is_third_product && _baseInfo->usb_total_num == "0") { // do not test usb when it is third product and no usb
-        interfaceTestSelectStatus[I_USB] = false;
-        interfaceTestFinish[I_USB]       = true;
-        interfaceTestOver[I_USB]         = true;
-    } else {
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_USB]);
-    }
-    
-    _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_NET]);
-    
-    if (_is_third_product) {   // third product does not test EDID and CPU
+        
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_INTERFACE]);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_MEM]);
+        
+        if (_baseInfo->usb_total_num == "0") { // do not need test usb when it is third product and no usb
+            interfaceTestSelectStatus[I_USB] = false;
+            interfaceTestFinish[I_USB]       = true;
+            interfaceTestOver[I_USB]         = true;
+        } else {
+            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_USB]);
+        }
+        
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_NET]);
+        
         interfaceTestSelectStatus[I_EDID] = false;
         interfaceTestFinish[I_EDID]       = true;
         interfaceTestOver[I_EDID]         = true;
@@ -188,80 +185,118 @@ void Control::init_ui()
         interfaceTestSelectStatus[I_CPU]  = false;
         interfaceTestFinish[I_CPU]        = true;
         interfaceTestOver[I_CPU]          = true;
-    } else {
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_EDID]);
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_CPU]);
-    }
-    
-    if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_HDD]);
-    } else {
-        interfaceTestSelectStatus[I_HDD] = false;
-        interfaceTestFinish[I_HDD]       = true;
-        interfaceTestOver[I_HDD]         = true;
-    }
-    
-    if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_SSD]);
-    } else {
-        interfaceTestSelectStatus[I_SSD] = false;
-        interfaceTestFinish[I_SSD]       = true;
-        interfaceTestOver[I_SSD]         = true;
-    }
 
-    if (!_is_third_product && _baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") { // third product's fan_speed is ""
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_FAN]);
-    } else {
+        if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
+            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_HDD]);
+        } else {
+            interfaceTestSelectStatus[I_HDD] = false;
+            interfaceTestFinish[I_HDD]       = true;
+            interfaceTestOver[I_HDD]         = true;
+        }
+
+        if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
+            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_SSD]);
+        } else {
+            interfaceTestSelectStatus[I_SSD] = false;
+            interfaceTestFinish[I_SSD]       = true;
+            interfaceTestOver[I_SSD]         = true;
+        }
+
         interfaceTestSelectStatus[I_FAN] = false;
         interfaceTestFinish[I_FAN]       = true;
         interfaceTestOver[I_FAN]         = true;
-    }
-    
-    if (!_is_third_product && _baseInfo->wifi_exist != "0" && _baseInfo->wifi_exist != "") { // third product does not test wifi
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_WIFI]);
-    } else {
+
         interfaceTestSelectStatus[I_WIFI] = false;
         interfaceTestFinish[I_WIFI]       = true;
         interfaceTestOver[I_WIFI]         = true;
-    }
-    
-    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_SOUND]);
-    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_DISPLAY]);
 
-    if (!_is_third_product && _baseInfo->bright_level != "0" && _baseInfo->bright_level != ""){
-        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_BRIGHT]);
-    } else {
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_SOUND]);
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_DISPLAY]);
+
         funcFinishStatus[F_BRIGHT] = true;
-    }
-    
-    if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
-        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_CAMERA]);
-    } else {
-        funcFinishStatus[F_CAMERA] = true;
-    }
 
-    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_STRESS]);
-    if (!_is_third_product) {
+        if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
+            _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_CAMERA]);
+        } else {
+            funcFinishStatus[F_CAMERA] = true;
+        }
+
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_STRESS]);
+        _uiHandle->add_complete_or_single_test_label("第三方终端");
+        _uiHandle->sync_main_test_ui(true);
+        
+    }else {
+    
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_INTERFACE]);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_MEM]);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_USB]);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_NET]);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_EDID]);
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_CPU]);
+        
+        if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
+            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_HDD]);
+        } else {
+            interfaceTestSelectStatus[I_HDD] = false;
+            interfaceTestFinish[I_HDD]       = true;
+            interfaceTestOver[I_HDD]         = true;
+        }
+
+        if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
+            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_SSD]);
+        } else {
+            interfaceTestSelectStatus[I_SSD] = false;
+            interfaceTestFinish[I_SSD]       = true;
+            interfaceTestOver[I_SSD]         = true;
+        }
+
+        if (_baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") {
+            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_FAN]);
+        } else {
+            interfaceTestSelectStatus[I_FAN] = false;
+            interfaceTestFinish[I_FAN]       = true;
+            interfaceTestOver[I_FAN]         = true;
+        }
+
+        if (_baseInfo->wifi_exist != "0" && _baseInfo->wifi_exist != "") {
+            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_WIFI]);
+        } else {
+            interfaceTestSelectStatus[I_WIFI] = false;
+            interfaceTestFinish[I_WIFI]       = true;
+            interfaceTestOver[I_WIFI]         = true;
+        }
+
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_SOUND]);
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_DISPLAY]);
+
+        if (_baseInfo->bright_level != "0" && _baseInfo->bright_level != "") {
+            _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_BRIGHT]);
+        } else {
+            funcFinishStatus[F_BRIGHT] = true;
+        }
+
+        if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
+            _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_CAMERA]);
+        } else {
+            funcFinishStatus[F_CAMERA] = true;
+        }
+
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_STRESS]);
         _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_UPLOAD_MES_LOG]);
+        
         if (!check_file_exit(WHOLE_TEST_FILE)) {
             _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_NEXT_PROCESS]);
         }    
-    }
 
-    if (_is_third_product) {
-        _uiHandle->add_complete_or_single_test_label("第三方终端");
-    } else if (check_file_exit(WHOLE_TEST_FILE)) {
-        _uiHandle->add_complete_or_single_test_label("整机测试");
-    } else {
-        _uiHandle->add_complete_or_single_test_label("单板测试");
-    }
-    
-    if (_is_third_product) {
-        _uiHandle->sync_main_test_ui(true);
-    } else {
+        if (check_file_exit(WHOLE_TEST_FILE)) {
+            _uiHandle->add_complete_or_single_test_label("整机测试");
+        } else {
+            _uiHandle->add_complete_or_single_test_label("单板测试");
+        }
+
         _uiHandle->sync_main_test_ui(false);
     }
- 
+
     _uiHandle->add_stress_test_label("运行时间");
     _uiHandle->add_stress_test_label("CPU温度");
     _uiHandle->add_stress_test_label("编码状态");
@@ -278,20 +313,22 @@ void Control::init_ui()
     connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_INTERFACE]), SIGNAL(clicked()), this, SLOT(start_interface_test()));           
     connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_SOUND]), SIGNAL(clicked()), this, SLOT(start_sound_test()));
     connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_DISPLAY]), SIGNAL(clicked()), this, SLOT(start_display_test()));
-    if (!_is_third_product && _baseInfo->bright_level != "0" && _baseInfo->bright_level != ""){
+    if (_baseInfo->bright_level != "0" && _baseInfo->bright_level != ""){
         connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_BRIGHT]), SIGNAL(clicked()), this, SLOT(start_bright_test()));
     }
     if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
         connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_CAMERA]), SIGNAL(clicked()), this, SLOT(start_camera_test()));
     }
-    connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_STRESS]), SIGNAL(clicked()), this, SLOT(start_stress_test()));
+
     if (!_is_third_product) {
         connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_UPLOAD_MES_LOG]), SIGNAL(clicked()), this, SLOT(start_upload_log()));
+
+        if (!check_file_exit(WHOLE_TEST_FILE)) {
+            connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_NEXT_PROCESS]), SIGNAL(clicked()), this, SLOT(start_next_process()));
+        }
     }
 
-    if (!_is_third_product && !check_file_exit(WHOLE_TEST_FILE)) {
-        connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_NEXT_PROCESS]), SIGNAL(clicked()), this, SLOT(start_next_process()));
-    }
+    connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_STRESS]), SIGNAL(clicked()), this, SLOT(start_stress_test()));
     connect(_uiHandle, SIGNAL(to_show_test_confirm_dialog(string)), this, SLOT(show_test_confirm_dialog(string)));
     connect(_uiHandle, SIGNAL(sig_ui_handled_test_result(string, string)), this, SLOT(set_test_result_pass_or_fail(string, string)));
     connect(_uiHandle, SIGNAL(sig_ui_handled_sn_mac_test_result(string, string)), this, SLOT(set_sn_mac_test_result(string, string)));
@@ -302,7 +339,7 @@ void Control::init_ui()
     connect(_uiHandle, SIGNAL(sig_ui_factory_delete_event()), this, SLOT(slot_factory_delete_event()));
 }
 
-/* third product show net speed and duplex, just test send and recv msg */
+/* third products show net speed and duplex, just need test send and recv msg */
 string Control::get_third_net_info()
 {
     NetTest* net = (NetTest*)_funcBase[NET];
@@ -316,7 +353,7 @@ string Control::get_third_net_info()
     }
 }
 
-/* try again after test sn or mac FAILed */
+/* try again after sn or mac test failed */
 void Control::retry_sn_mac_test()
 {
     if (_display_sn_or_mac == "MAC") {
@@ -377,8 +414,14 @@ void Control::check_sn_mac_compare_result(string message)
 }
 
 /* show result confirmation box to choose PASS or FAIL ----display, stress */
-void Control::show_test_confirm_dialog(string item)
+void Control::show_test_confirm_dialog(string item) //TODO: combine with confirm_test_result(string)
 {
+    if (item == "") {
+        LOG_ERROR("func name is NULL");
+        return;
+    }
+    
+    LOG_INFO("confirm %s result", item.c_str());
     if (item.compare(FUNC_TEST_NAME[F_STRESS]) == 0) {
         _stress_test_window_quit_status = false;
     }
@@ -470,14 +513,7 @@ void Control::set_test_result(string func, string result, string ui_log)
     _uiHandle->update_screen_log(ui_log);
 }
 
-/* show result confirmation box to choose PASS or FAIL ----sound, camera, brightness */
-void Control::confirm_test_result(string func)
-{
-    LOG_INFO("confirm %s result", func.c_str());
-    _uiHandle->confirm_test_result_dialog(func);
-}
-
-/* Set brightness test result box PASS is or not clickable */
+/* Set PASS button is not clickable before brightness test is finished*/
 void Control::set_brightness_dialog_button_state(bool state)
 {
     LOG_INFO("set_brightness_dialog_button_state");
@@ -492,7 +528,6 @@ void Control::show_main_test_ui()
     auto_test_mac_or_stress();
 }
 
-/* show welcome and stress result record when open factory test software */
 void Control::show_stress_record(){
     update_screen_log("---------------------------------------------------------------------------------------------\n");
     update_screen_log("\t\tWelcome to Factory Test Software\n");
@@ -502,7 +537,7 @@ void Control::show_stress_record(){
     print_stress_test_result(_record);
 }
 
-/* print stress record in screen */
+/* print stress record on screen */
 void Control::print_stress_test_result(vector<string> record) 
 {
     update_screen_log("The last Stress test result is...\n");
@@ -514,7 +549,7 @@ void Control::print_stress_test_result(vector<string> record)
     update_screen_log("==================================================\n");
 }
 
-/* auto test mac when it is not third product and no stress file */
+/* auto test mac when it is not third-part product and there is not stress file */
 void Control::auto_test_mac_or_stress() {    
     if (check_file_exit(STRESS_LOCK_FILE)) {
         LOG_INFO("******************** auto start stress test ********************");
@@ -539,8 +574,8 @@ void Control::init_mes_log()
     
     mac_capital.erase(remove(mac_capital.begin(), mac_capital.end(), ':'), mac_capital.end());
     
-    if (access(MES_FILE, F_OK) == 0) {
-        remove(MES_FILE);
+    if (access(MES_FILE.c_str(), F_OK) == 0) {
+        remove(MES_FILE.c_str());
     }
 
     tmp = _facArg->ftp_dest_path + mac_capital + ".txt";
@@ -593,9 +628,9 @@ void Control::update_mes_log(string tag, string value)
     size_t sp = 0;
     int first = 1;
     
-    fp = fopen(MES_FILE, "r");
+    fp = fopen(MES_FILE.c_str(), "r");
     if (fp == NULL) {
-        LOG_ERROR("open %s failed", MES_FILE);
+        LOG_ERROR("open %s failed", MES_FILE.c_str());
         return;
     }
  
@@ -607,14 +642,14 @@ void Control::update_mes_log(string tag, string value)
         if (first &&((sp = str_line.find(tag)) != str_line.npos)) {
             string value_temp = "";
             value_temp = value + "\n";
-            str_line.replace(sp + 11, value_temp.size(), value_temp); // convert NULL to test result in MES_FILE
+            str_line.replace(sp + 11, value_temp.size(), value_temp); //convert NULL to test result in MES_FILE
             first = 0;
         }
         buf += str_line;
     }
  
     fclose(fp);
-    fp = fopen(MES_FILE, "w");
+    fp = fopen(MES_FILE.c_str(), "w");
     if (fp == NULL) {
         return;
     }
@@ -636,13 +671,13 @@ void Control::upload_mes_log()
         set_test_result(FUNC_TEST_NAME[F_UPLOAD_MES_LOG], "FAIL", "配置文件有误");
         return;
     } else {
-        if (!combine_fac_log_to_mes(MES_FILE, STRESS_RECORD)) { // combine test result and stress record
+        if (!combine_fac_log_to_mes(MES_FILE, STRESS_RECORD)) { // combine test result file and stress record file
             update_color_screen_log("拷机记录文件为空\n", "red");
             LOG_MES("no stress test record\n");
             LOG_INFO("NO stress record\n");
         }
         LOG_MES("---------------------Detail test result-----------------------\n");
-        if (!combine_fac_log_to_mes(MES_FILE, LOG_FILE)) { // combine test result and detail log
+        if (!combine_fac_log_to_mes(MES_FILE, LOG_FILE)) { // combine test result file and detail log file
             LOG_ERROR("combine log failed");
             _uiHandle->confirm_test_result_warning("log文件拼接失败");
             return;
@@ -708,7 +743,7 @@ void Control::set_interface_select_status(string func, bool state)
     for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
         if (func == INTERFACE_TEST_NAME[i]) {
             interfaceTestSelectStatus[i] = state;
-            /* when select status changed, test over and finish status need change */
+            /* when selection status changed, test over and finish status need to be changed */
             interfaceTestFinish[i] = (!state);
             interfaceTestOver[i]   = (!state);
             break;
@@ -770,7 +805,7 @@ void Control::start_update_mes_log(MesInfo* info)
 /* 
 ** after clicked confirm box: 
 ** show result on the right side of button, screen and file log;
-** stress test show record in the screen;
+** stress test show record on the screen;
 */
 void Control::set_test_result_pass_or_fail(string func, string result)
 {
@@ -793,6 +828,11 @@ void Control::set_test_result_pass_or_fail(string func, string result)
                 break;
             }
         }
+        if (fun_id == F_CAMERA) {
+            /* close camera window after test finished */
+            CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
+            camera->close_xawtv_window();
+        }
         _mesInfo->func = FUNC_TEST_TAG_NAME[fun_id];
         _mesInfo->status = result;
         start_update_mes_log(_mesInfo);
@@ -804,7 +844,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
     _uiHandle->set_test_result(func, result);
 }
 
-/* whole test, after mac test pass, show sn test box */
+/* after the mac test is passed, show sn test box (whole test) */
 void Control::set_sn_mac_test_result(string sn_mac, string result)
 {
     if (sn_mac == "MAC" && result == "PASS" && check_file_exit(WHOLE_TEST_FILE)) {

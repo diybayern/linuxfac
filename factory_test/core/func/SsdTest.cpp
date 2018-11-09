@@ -28,7 +28,7 @@ bool SsdTest::check_if_ssd_pass()
     
     memset(ssd_status, 0, CMD_BUF_SIZE);
     int size = 0;
-    if (!get_file_size(SSD_STATUS_FILE, &size)) {
+    if (!get_file_size(SSD_STATUS_FILE, &size)) { // The result of running the ssd_test script is in the ssd_status file
         LOG_ERROR("%s is null\n", SSD_STATUS_FILE.c_str());
         screen_log_black += "ERROR:get ssd status error\n\n";
         screen_log_red += "\t错误：HDD状态获取失败\n";
@@ -44,6 +44,7 @@ bool SsdTest::check_if_ssd_pass()
         LOG_INFO("SSD Test result: \tPASS\n");
         return true;
     } else {
+        /* if ssd test failed, print the fail reason */
         LOG_ERROR("SSD test failed: \t%s\n", ssd_status);
         screen_log_black += "SSD test failed:\t" + (string)ssd_status + "\n\n";
         screen_log_red += "\t错误：" + (string)ssd_status + "\n";

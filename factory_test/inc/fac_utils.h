@@ -111,13 +111,18 @@ const string CAMERA_START_SCRIPT = FACTORY_PATH + "start_xawtv.sh";
 const string CAMERA_CLOSE_SCRIPT = FACTORY_PATH + "close_xawtv.sh";
 const string GET_CPU_TEMP_SCRIPT = FACTORY_PATH + "get_cpu_temp.sh";
 
+const string LOG_PATH            = "/var/log/factory_test";
+const string MES_FILE            = LOG_PATH + "/mes.txt";
+const string STRESS_RECORD       = LOG_PATH + "/stress.log";
+const string LOG_FILE            = LOG_PATH + "/factory.log";
+const string LOG_FILE_BAK        = LOG_PATH + "/factory_bak.log";
+
 const string GET_BASEINFO_INI    = FACTORY_PATH + "hwcfg.ini";
 
-const string MEM_UI_LOG          = FACTORY_PATH + "mem_ui_log";
 const string FAC_CONFIG_NAME     = "fac_config.conf";
 const string FAC_CONFIG_FILE     = "/tmp/" + FAC_CONFIG_NAME;
 
-
+const string MEM_UI_LOG          = FACTORY_PATH + "mem_ui_log";
 const string WIFI_INFO_FILE      = "/tmp/wifi_test_info.tmp";
 const string WIFI_SSID_FILE      = "/tmp/ssid.mac";
 const string WIFI_STATUS_FILE    = "/tmp/wifi.status";
@@ -127,6 +132,7 @@ const string CAMERA_WINID_FILE   = "/tmp/xawtv.winid";
 
 const string USB_MNT_FAC_CONF    = "/mnt/usb_factory_test";
 const string USB_TEST_FILE       = "usbbbbbb_test";
+const string BRIGHT_ACTUAL_FILE  = "/sys/class/backlight/intel_backlight/actual_brightness";
 
 const string DEFAULT_FTP_IP      = "172.21.5.48";
 const string DEFAULT_FTP_USER    = "test";
@@ -167,11 +173,6 @@ const int BRIGHTNESS_VALUE[6] =
 #define WLAN_NAME_LEN           (16)
 #define WLAN_RECV_MIN_NUM       (70)
 #define INTERFACE_NUM           (512)
-
-#define MES_FILE                ("/var/log/factory_test/mes.txt")
-#define STRESS_RECORD           ("/var/log/factory_test/stress.log")
-#define LOG_FILE                ("/var/log/factory_test/factory.log")
-#define LOG_FILE_BAK            ("/var/log/factory_test/factory_bak.log")
 
 #define NEXT_LOCK               ("next")
 #define PCBA_LOCK               ("PCBA")
@@ -359,6 +360,7 @@ string change_float_to_string(float fla);
 void stop_gpu_stress_test();
 void write_stress_record(vector<string> record);
 void read_stress_record(vector<string> *record);
+bool create_stress_test_lock(bool is_next_pro);
 
 
 #endif

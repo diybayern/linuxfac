@@ -331,6 +331,7 @@ bool is_digit(string str)
     return true;
 }
 
+/* read ftp and wifi config from fac_config.conf */
 string read_conf_line(const string conf_path, const string tag)
 {
     if (conf_path == "" || tag == "" || !check_file_exit(conf_path)) {
@@ -339,16 +340,16 @@ string read_conf_line(const string conf_path, const string tag)
     }
     FILE* conf_fp;
     if ((conf_fp = fopen(conf_path.c_str(), "r")) == NULL) {
-        LOG_ERROR("ftp_config.conf open failed\n");
+        LOG_ERROR("%s open failed\n", conf_path.c_str());
         return "";
     } else {
         char match[128];
         char line[CMD_BUF_SIZE];
         char value[128] = {0};             //TODO: char[] match, line,value
-        sprintf(match, "%s=%%s", tag.c_str());
+        sprintf(match, "%s=%%s", tag.c_str()); // format is tag=%s
         while (fgets(line, sizeof(line), conf_fp) != NULL) { //TODO: fgets
             string str = delNL(line);
-            if (str[0] != '#') {//ignore the comment
+            if (str[0] != '#') { //ignore the comment
                 if (str.find(tag) != str.npos) {
                     sscanf(str.c_str(), match, value);
                     return value;
@@ -391,6 +392,7 @@ int get_fac_config_from_conf(const string conf_path, FacArg *fac)
     fac->wifi_enp = str;
 
     /* get ftp config */
+    /* must have ftp path and job number! */
     str = read_conf_line(conf_path, "ftp_dest_path");
     if (str == "") {
         LOG_ERROR("read dest_path failed\n");
@@ -411,9 +413,9 @@ int get_fac_config_from_conf(const string conf_path, FacArg *fac)
         }
     }
     fac->ftp_job_number = str;
-/*    if (ret != 0) {
+    /* if (ret != 0) {
         return ret;  // if job number or path is null, stop read ftp config
-    }*/
+    } */
 
     str = read_conf_line(conf_path, "ftp_ip");
     if (str == "") {
@@ -495,6 +497,7 @@ bool combine_fac_log_to_mes(string sendLogPath, string path)
     return true;
 }
 
+/* ftp upload log file*/
 string ftp_send_file(string local_file_path, FacArg* fac)
 {
     if (local_file_path == "" || fac == NULL) {
@@ -619,7 +622,7 @@ string change_float_to_string(float fla)
     return str.substr(0, i + 3);
 }
 
-/* get cpu resource used status (usr, sys, idle, iowait) */
+/* Get cpu usage status */
 string get_cpu_info(CpuStatus* st_cpu)
 {
     if (st_cpu == NULL) {
@@ -687,7 +690,7 @@ void stop_gpu_stress_test()
     if (system("killall -s 9 heaven_x64") < 0) {
         LOG_ERROR("system cmd run error\n");
     }
-    if (system("killall -s 9 browser_x64") < 0) {
+    if (system("killall -s 9 browser_x64") < 0) { //TODO: confirm browser
         LOG_ERROR("system cmd run error\n");
     }
     if (system("killall -s 9 heaven_x86") < 0) {
@@ -701,7 +704,7 @@ void stop_gpu_stress_test()
     }
 }
 
-/* update stress record to stress.log */
+/* write stress record to stress.log */
 void write_stress_record(vector<string> record)
 {
     if (record.size() == 0) {
@@ -709,8 +712,8 @@ void write_stress_record(vector<string> record)
         return;
     }
     
-    if (access(STRESS_RECORD, F_OK) == 0) {
-        remove(STRESS_RECORD);
+    if (access(STRESS_RECORD.c_str(), F_OK) == 0) {
+        remove(STRESS_RECORD.c_str());
     }
 
     for (unsigned int i = 0; i < record.size(); i++) {
@@ -719,7 +722,7 @@ void write_stress_record(vector<string> record)
 
 }
 
-/* get last stress result, no more than 10 records */
+/* get stress result, no more than 10 records */
 void read_stress_record(vector<string> *record)
 {
     if (record == NULL) {
@@ -730,8 +733,8 @@ void read_stress_record(vector<string> *record)
     FILE* fp = NULL;
     char line[8192] = { 0, };   //TODO: char[] line
 
-    if ((fp = fopen(STRESS_RECORD, "r")) == NULL) {
-        LOG_ERROR("open %s failed\n", STRESS_RECORD);
+    if ((fp = fopen(STRESS_RECORD.c_str(), "r")) == NULL) {
+        LOG_ERROR("open %s failed\n", STRESS_RECORD.c_str());
         return;
     }
 
@@ -745,4 +748,35 @@ void read_stress_record(vector<string> *record)
 
     fclose(fp);
 }
+
+bool create_stress_test_lock(bool is_next_pro)
+{
+    bool ret = true;
+    LOG_INFO("start creating stress lock\n");
+    if (is_next_pro) {
+        ret = write_local_data(STRESS_LOCK_FILE, "w+", (char*)NEXT_LOCK, sizeof(NEXT_LOCK));  // next process
+    } else if (check_file_exit(WHOLE_TEST_FILE)) {
+        ret = write_local_data(STRESS_LOCK_FILE, "w+", (char*)WHOLE_LOCK, sizeof(WHOLE_LOCK)); // whole test
+    } else {
+        ret = write_local_data(STRESS_LOCK_FILE, "w+", (char*)PCBA_LOCK, sizeof(PCBA_LOCK)); // pcba test
+    }
+    if (ret == false) {
+        LOG_ERROR("write lock file failed");
+        return false;
+    }
+    
+    if (system("sync") < 0) {
+        LOG_ERROR("cmd sync error\n");
+        return false;
+    }
+
+    if (check_file_exit(STRESS_LOCK_FILE)) {
+        LOG_INFO("create stress test lock success\n");
+        return true;
+    } else {
+        LOG_ERROR("create stress test lock failed\n");
+        return false;
+    }
+}
+
 

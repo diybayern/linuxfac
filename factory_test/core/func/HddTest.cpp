@@ -16,7 +16,7 @@ bool HddTest::hdd_test_all(string hdd_cap)
         screen_log_black += "ERROR:hdd_test.sh run error\n";
         screen_log_red += "\t错误：HDD测试脚本运行失败\n";
     }
-    if (check_if_hdd_pass()) {
+    if (check_if_hdd_pass()) { // confirm hdd test result
         return true;
     }
     return false;
@@ -24,11 +24,10 @@ bool HddTest::hdd_test_all(string hdd_cap)
 
 bool HddTest::check_if_hdd_pass()
 {
-    char hdd_status[CMD_BUF_SIZE];  //TODO: char[] hdd_status
-    
-    memset(hdd_status, 0, CMD_BUF_SIZE);
+    char hdd_status[CMD_BUF_SIZE] = {0, };  //TODO: char[] hdd_status
     int size = 0;
-    if (!get_file_size(HDD_STATUS_FILE, &size)) {
+    
+    if (!get_file_size(HDD_STATUS_FILE, &size)) { // The result of running the hdd_test script is in the hdd_status file
         LOG_ERROR("%s is null\n", WIFI_SSID_FILE.c_str());
         screen_log_black += "ERROR: get hdd status error\n\n";
         screen_log_red += "\t错误：HDD状态获取失败\n";
@@ -44,6 +43,7 @@ bool HddTest::check_if_hdd_pass()
         LOG_INFO("HDD Test result: \tPASS\n");
         return true;
     } else {
+        /* if hdd test failed, print the fail reason */
         LOG_ERROR("HDD test failed: \t%s\n", hdd_status);
         screen_log_black += "HDD test failed:\t" + (string)hdd_status + "\n\n";
         screen_log_red += "\t错误：" + (string)hdd_status + "\n";

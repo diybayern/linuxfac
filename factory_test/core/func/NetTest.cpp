@@ -509,7 +509,7 @@ bool NetTest::net_test_all(bool test_flag) //test_flag = false, is third product
         goto error;
     }
     
-    if (test_flag) {  //third product does not care whether network linked
+    if (test_flag) {  //Third-part product do not care whether the network is connected.
         if (info->eth_link) {
             LOG_INFO("Network link detected: \tyes\n");
             screen_log_black += "Network link detected: \t\tyes\n";
@@ -566,7 +566,7 @@ bool NetTest::net_test_all(bool test_flag) //test_flag = false, is third product
             }
             usleep(20000);
         }
-    LOG_DEBUG("I = %d", i);
+
         if (info->recv_num < ETH_RECV_MIN_NUM) {
             screen_log_red += "\t错误：网口收报个数未达标\n";
             ret = false;

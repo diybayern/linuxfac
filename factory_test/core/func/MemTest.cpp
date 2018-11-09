@@ -12,8 +12,8 @@ bool MemTest::compare_men_cap(int mem_cap)
         LOG_ERROR("mem cap is wrong");
         return false;
     }
-    float mem_cap_min = mem_cap * 1024 * MEM_CAP_MIN_PERCENT;  // unit: M
-    float mem_cap_max = mem_cap * 1024;
+    float mem_cap_min = mem_cap * 1024 * MEM_CAP_MIN_PERCENT;  // mem cap range should be the theoretical mem_cap * [0.9 ~ 1] 
+    float mem_cap_max = mem_cap * 1024;  // unit: M
     string real_mem_cap = execute_command("free -m | awk '/Mem/ {print $2}'", true);
     if (real_mem_cap == "error") {
         LOG_ERROR("get real mem cap failed");
@@ -33,7 +33,6 @@ bool MemTest::compare_men_cap(int mem_cap)
     }
 }
 
-/* use memtester in scripts test mem stability */
 bool MemTest::mem_stability_test()
 {
     string stable_result;

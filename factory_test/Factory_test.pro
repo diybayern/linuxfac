@@ -46,8 +46,6 @@ HEADERS  += \
     inc/FuncTest.h \
     inc/MemTest.h \
     inc/NetTest.h \
-    inc/HddTest.h \
-    inc/SsdTest.h \
     inc/WifiTest.h \
     inc/SoundTest.h \
     inc/BrightTest.h \

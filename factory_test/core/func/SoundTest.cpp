@@ -551,7 +551,7 @@ void* SoundTest::test_all(void*)
     sleep(3);        //playback 3 seconds
     stop_playback();
     sleep(1);        //wait 1 seconds to show result confirm box 
-    control->confirm_test_result(FUNC_TEST_NAME[F_SOUND]);
+    control->show_test_confirm_dialog(FUNC_TEST_NAME[F_SOUND]);
     
     return NULL;
 }
@@ -566,6 +566,7 @@ void SoundTest::start_test(BaseInfo* baseInfo)
     pthread_create(&tid, NULL, test_all, baseInfo);
 }
 
+/* open pulseaudio when exiting software */
 bool SoundTest::sound_record_restore(BaseInfo* baseInfo)
 {
     if (baseInfo == NULL) {

@@ -26,7 +26,6 @@ public:
     ~Control();
     static Control* _control;
     void set_test_result(string func, string result, string ui_log);
-    void confirm_test_result(string func);
     void set_brightness_dialog_button_state(bool state);
     static Control* get_control();
     void show_main_test_ui();
@@ -53,13 +52,11 @@ public:
     }
     
 
-    BaseInfo* get_base_info()
-    {
+    BaseInfo* get_base_info() {
         return _baseInfo;
     }
 
-    HwInfo* get_hw_info()
-    {
+    HwInfo* get_hw_info() {
         return _hwInfo;
     }
 

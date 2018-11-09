@@ -157,7 +157,7 @@ bool EdidTest::edid_test_all(unsigned int num)
     pthread_mutex_lock(&g_reg_mutex);
 
 i2c_test:
-    ret = edid_read_i2c_test(edid_num);
+    ret = edid_read_i2c_test(edid_num); // get linked edid devices and compare with edid_num
     screen_log_black += get_edid_i2c_screen_log();
     screen_log_red += get_edid_i2c_screen_red();
     if (ret == SUCCESS) {
@@ -225,6 +225,7 @@ print:
     return result;
 }
 
+/* get edid theoretical num */
 int EdidTest::get_edid_num(BaseInfo* baseInfo)
 {
     if (baseInfo == NULL) {
@@ -263,7 +264,7 @@ void* EdidTest::test_all(void *arg)
 
     bool is_pass;
     if (edid_num <= 0) {
-        LOG_ERROR("edid num (0) is wrong");
+        LOG_ERROR("edid num=%d is wrong", edid_num);
         is_pass = false;
     } else {
         LOG_INFO("edid num: %d", edid_num);

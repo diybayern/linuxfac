@@ -17,7 +17,10 @@ void os_log(const char* msg, va_list list)
     int file_size = 0;
 
     pthread_mutex_lock(&mutex);
-    log_file_fp = fopen(LOG_FILE, "a+");
+    if (!check_file_exit(LOG_PATH)) {
+        mkdir(LOG_PATH.c_str(), 0777);
+    }
+    log_file_fp = fopen(LOG_FILE.c_str(), "a+");
 
     if (log_file_fp == NULL) {
         pthread_mutex_unlock(&mutex);
@@ -33,7 +36,7 @@ void os_log(const char* msg, va_list list)
     
     get_file_size(LOG_FILE, &file_size);
     if (file_size >= LOG_MAX_SIZE) {
-        rename(LOG_FILE, LOG_FILE_BAK);
+        rename(LOG_FILE.c_str(), LOG_FILE_BAK.c_str());
     }
 }
 
@@ -111,9 +114,9 @@ void write_mes_log(const char *fmt, ...)
     vsnprintf(buf, 512, fmt, args);
     va_end(args);
 
-    fp = fopen(MES_FILE, "a+");
+    fp = fopen(MES_FILE.c_str(), "a+");
     if (fp == NULL) {
-        LOG_ERROR("Failed to open send log file %s\n", MES_FILE);
+        LOG_ERROR("Failed to open send log file %s\n", MES_FILE.c_str());
         return;
     }
     fprintf(fp, "%s", buf);
@@ -137,9 +140,9 @@ void write_stress_record(const char *fmt, ...)
     vsnprintf(buf, 512, fmt, args);
     va_end(args);
 
-    fp = fopen(STRESS_RECORD, "a+");
+    fp = fopen(STRESS_RECORD.c_str(), "a+");
     if (fp == NULL) {
-        LOG_ERROR("Failed to open send log file %s\n", MES_FILE);
+        LOG_ERROR("Failed to open send log file %s\n", MES_FILE.c_str());
         return;
     }
     fprintf(fp, "%s", buf);

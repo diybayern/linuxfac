@@ -82,13 +82,12 @@ bool WifiTest::wifi_get_wlan_name(char* wlan_name, int size)
 
 bool WifiTest::wifi_get_wlan_index(char* wlan_name, unsigned int* index)
 {
-    int fd = -1;
-    struct ifreq ifr;
-
-    if (wlan_name == NULL) {
-        LOG_ERROR("wlan name is NULL");
+    if (wlan_name == NULL || index == NULL) {
+        LOG_ERROR("wlan name or index is NULL");
         return false;
     }
+    int fd = -1;
+    struct ifreq ifr;
 
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
@@ -114,11 +113,12 @@ bool WifiTest::wifi_get_wlan_index(char* wlan_name, unsigned int* index)
 
 bool WifiTest::wifi_sprintf_mac_addr(unsigned char* src, char* dst)
 {
-    int ret = 0;
     if (src == NULL || dst == NULL) {
         LOG_ERROR("sprintf src or dst mac is null\n");
         return false;
     }
+    
+    int ret = 0;
     ret = sprintf((char*)dst, "%02x:%02x:%02x:%02x:%02x:%02x", src[0], src[1], src[2], src[3], src[4], src[5]);
     if (ret < 0) {
         LOG_ERROR("sprintf mac addr failed\n");
@@ -338,7 +338,8 @@ bool WifiTest::wifi_send_broadcast_msg(WifiInfo* info, int num)
     return ret;
 }
 
-bool WifiTest::wifi_test_send_msg() {
+bool WifiTest::wifi_test_send_msg()
+{
     bool ret = true;
     WifiInfo *info = NULL;
 
