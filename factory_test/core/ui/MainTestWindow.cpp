@@ -3,17 +3,13 @@
 MainTestWindow::MainTestWindow(QWidget *parent)
         : QDialog(parent)
 {
+    setAttribute(Qt::WA_DeleteOnClose);	
     _desktopWidget = QApplication::desktop();
     connect(&updatetimer, SIGNAL(timeout()), this, SLOT(_record_play_audio()));
 }
 
 MainTestWindow::~MainTestWindow()
 {
-    if (_main_test_window) {
-        delete _main_test_window;
-        _main_test_window = NULL;
-    }
-
     if (_grid_main_label_layout != NULL) {
         delete _grid_main_label_layout;
         _grid_main_label_layout = NULL;
@@ -59,11 +55,6 @@ MainTestWindow::~MainTestWindow()
         _hbox_test_count_layout = NULL;
     }
 
-    if (_hbox_checkbox_auto_upload_log != NULL) {
-        delete _hbox_checkbox_auto_upload_log;
-        _hbox_checkbox_auto_upload_log = NULL;
-    }
-
     if (_vbox_test_count_auto_upload_layout != NULL) {
         delete _vbox_test_count_auto_upload_layout;
         _vbox_test_count_auto_upload_layout = NULL;
@@ -104,7 +95,10 @@ MainTestWindow::~MainTestWindow()
         _lab_complete_or_single_test = NULL;
     }
 
-    LOG_INFO("Exit new Factory test!!!!!!");
+    if (_hbox_checkbox_auto_upload_log != NULL) {
+        delete _hbox_checkbox_auto_upload_log;
+        _hbox_checkbox_auto_upload_log = NULL;
+    }
 }
 
 MainTestWindow* MainTestWindow::_main_test_window = NULL;
@@ -127,6 +121,7 @@ void MainTestWindow::closeEvent(QCloseEvent *event)
 {
     emit sig_factory_delete_event();
     event->accept();
+
 }
 
 void MainTestWindow::keyPressEvent(QKeyEvent *event)
