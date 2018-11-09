@@ -9,8 +9,6 @@
 #include "NetTest.h"
 #include "EdidTest.h"
 #include "WifiTest.h"
-//#include "HddTest.h"
-//#include "SsdTest.h"
 #include "BrightTest.h"
 #include "CameraTest.h"
 
