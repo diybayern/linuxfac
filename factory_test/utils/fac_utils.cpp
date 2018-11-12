@@ -4,13 +4,6 @@
 #include <ftplib.h>
 #include <map>
 
-bool interfaceTestSelectStatus[INTERFACE_TEST_NUM] = {1,1,1,1,1,1,1,1,1};//TODO
-bool interfaceTestResult[INTERFACE_TEST_NUM]       = {0,0,0,0,0,0,0,0,0};
-bool interfaceTestOver[INTERFACE_TEST_NUM]         = {0,0,0,0,0,0,0,0,0};
-bool interfaceTestFinish[INTERFACE_TEST_NUM]       = {0,0,0,0,0,0,0,0,0};
-bool funcFinishStatus[FUNC_TEST_NUM]               = {0,0,0,0,0,0,0,0};
-
-
 netbuf* ftp_handle;
 
 /*

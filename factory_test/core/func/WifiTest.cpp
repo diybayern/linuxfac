@@ -14,13 +14,8 @@
 #include <linux/sockios.h>
 
 #include "WifiTest.h"
-#include "fac_log.h"
-#include "fac_utils.h"
 
-extern bool interfaceTestOver[INTERFACE_TEST_NUM];
-
-
-WifiInfo* WifiTest::g_wifi_info = new WifiInfo();
+WebInfo* WifiTest::g_wifi_info = new WebInfo();
 string WifiTest::screen_log_black = "";
 string WifiTest::screen_log_red = "";
 
@@ -96,7 +91,7 @@ bool WifiTest::wifi_get_wlan_index(char* wlan_name, unsigned int* index)
     }
 
     memset(&ifr, 0, sizeof(struct ifreq));
-    strncpy(ifr.ifr_name, wlan_name, WLAN_NAME_LEN);
+    strncpy(ifr.ifr_name, wlan_name, WEB_NAME_LEN);
 
     if (ioctl(fd, SIOCGIFINDEX, &ifr) < 0) {
         LOG_ERROR("(wlan index) ioctl failed\n");
@@ -146,7 +141,7 @@ bool WifiTest::wifi_get_mac_addr(unsigned char* wlan_name, unsigned char* hw_buf
     }
 
     memset(&ifr, 0, sizeof(struct ifreq));
-    strncpy(ifr.ifr_name, (char *)wlan_name, WLAN_NAME_LEN);
+    strncpy(ifr.ifr_name, (char *)wlan_name, WEB_NAME_LEN);
 
     if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) {
         LOG_ERROR("(wlan mac) ioctl failed\n");
@@ -175,12 +170,12 @@ void* WifiTest::wifi_recv_loopback_msg(void *arg)
     int len = 0;
     MacPacket recv_packet;
     struct sockaddr_ll recv_sll;
-    WifiInfo* info = NULL;
+    WebInfo* info = NULL;
     unsigned char buf[128] = { 0, };
     unsigned char bc_mac[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
     pthread_detach(pthread_self());
-    info = (WifiInfo*) arg;
+    info = (WebInfo*) arg;
 
     while (1) {
         fd = socket(PF_PACKET, SOCK_RAW, htons(TEST_PROTO));
@@ -191,7 +186,7 @@ void* WifiTest::wifi_recv_loopback_msg(void *arg)
 
         memset(&recv_sll, 0, sizeof(struct sockaddr_ll));
         recv_sll.sll_family = PF_PACKET;
-        recv_sll.sll_ifindex = info->wlan_index;
+        recv_sll.sll_ifindex = info->index;
         recv_sll.sll_protocol = htons(TEST_PROTO);
 
         ret = bind(fd, (struct sockaddr *) &recv_sll, sizeof(recv_sll));
@@ -225,7 +220,7 @@ void* WifiTest::wifi_recv_loopback_msg(void *arg)
                 info->recv_num++;
             } else {
                 // if broadcast package, send back orientation package
-                wifi_send_msg((char *)info->mac, (char *)recv_packet.src_mac, info->wlan_index, recv_packet.index);
+                wifi_send_msg((char *)info->mac, (char *)recv_packet.src_mac, info->index, recv_packet.index);
 
                 wifi_sprintf_mac_addr(recv_packet.src_mac, (char *)buf);
                 LOG_INFO("send back to %s index=%d\n", buf, recv_packet.index);
@@ -275,7 +270,7 @@ bool WifiTest::init()
 {
     bool ret = 0;
     pthread_t pid;
-    WifiInfo* info = NULL;
+    WebInfo* info = NULL;
 
     info = g_wifi_info;
     if (info == NULL) {
@@ -283,9 +278,9 @@ bool WifiTest::init()
         return false;
     }
 
-    memset(info, 0, sizeof(WifiInfo));
+    memset(info, 0, sizeof(WebInfo));
 
-    ret = wifi_get_wlan_name((char *)info->wlan_name, WLAN_NAME_LEN);
+    ret = wifi_get_wlan_name((char *)info->name, WEB_NAME_LEN);
     if (ret == false) {
         LOG_ERROR("get wlan name failed\n");
         delete info;
@@ -293,7 +288,7 @@ bool WifiTest::init()
         return false;
     }
 
-    ret = wifi_get_wlan_index((char *)info->wlan_name, &info->wlan_index);
+    ret = wifi_get_wlan_index((char *)info->name, &info->index);
     if (ret == false) {
         LOG_ERROR("get wlan index failed\n");
         delete info;
@@ -301,7 +296,7 @@ bool WifiTest::init()
         return false;
     }
 
-    ret = wifi_get_mac_addr(info->wlan_name, info->mac);
+    ret = wifi_get_mac_addr(info->name, info->mac);
     if (ret == false) {
         LOG_ERROR("get mac addr failed\n");
         delete info;
@@ -320,7 +315,7 @@ bool WifiTest::init()
     return true;
 }
 
-bool WifiTest::wifi_send_broadcast_msg(WifiInfo* info, int num)
+bool WifiTest::wifi_send_broadcast_msg(WebInfo* info, int num)
 {
     if (info == NULL || num <= 0) {
         LOG_ERROR("wifi info or num is empty");
@@ -331,7 +326,7 @@ bool WifiTest::wifi_send_broadcast_msg(WifiInfo* info, int num)
     unsigned char dest_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
     for (i = 0; i < num; i++) {
-        ret &= wifi_send_msg((char *)info->mac, (char *)dest_mac, info->wlan_index, info->seq++);
+        ret &= wifi_send_msg((char *)info->mac, (char *)dest_mac, info->index, info->seq++);
         usleep(100);
     }
 
@@ -341,7 +336,7 @@ bool WifiTest::wifi_send_broadcast_msg(WifiInfo* info, int num)
 bool WifiTest::wifi_test_send_msg()
 {
     bool ret = true;
-    WifiInfo *info = NULL;
+    WebInfo *info = NULL;
 
     info = g_wifi_info;
     if (info == NULL) {
@@ -458,6 +453,7 @@ void* WifiTest::test_all(void*)
 {
     Control *control = Control::get_control();
     control->set_interface_test_status(INTERFACE_TEST_NAME[I_WIFI], false);
+    bool* interfaceTestOver = control->get_interface_test_over();
     while (1) {
         //starting wifi test after net test over
         if (interfaceTestOver[I_NET]) {
@@ -492,7 +488,7 @@ void* WifiTest::test_all(void*)
         screen_log_red = INTERFACE_TEST_NAME[I_WIFI] + "结果:\t\t\t失败\n\n" + screen_log_red;
         control->set_interface_test_result(INTERFACE_TEST_NAME[I_WIFI], false); 
     }
-    control->update_screen_log(screen_log_black);
+    control->update_color_screen_log(screen_log_black, "black");
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");
     }

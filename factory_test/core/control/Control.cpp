@@ -3,12 +3,6 @@
 
 #include <algorithm>
 
-extern bool interfaceTestSelectStatus[INTERFACE_TEST_NUM];
-extern bool interfaceTestResult[INTERFACE_TEST_NUM];
-extern bool interfaceTestOver[INTERFACE_TEST_NUM];
-extern bool interfaceTestFinish[INTERFACE_TEST_NUM];
-extern bool funcFinishStatus[FUNC_TEST_NUM];
-
 Control::Control():QObject()
 {
     _funcBase[MEM]            = new MemTest();
@@ -38,7 +32,9 @@ Control::Control():QObject()
     _testStep = STEP_IDLE;
     _interfaceRunStatus = INF_RUNEND;
     
+    init_test_array_status();
     init_base_info();
+    //init_select_status();
     init_hw_info();
     init_fac_config();
     init_mes_log();
@@ -53,49 +49,47 @@ Control* Control::get_control()
     return _control;
 }
 
-Control::~Control()
+void Control::dele_control_new_object()
 {
-    LOG_INFO("~Control()");
     for (int i = 0; i < FUNC_TYPE_NUM; i++) {
         if (_funcBase[i] != NULL) {
-            if (i == NET) {
-                NetTest* net = (NetTest*)_funcBase[NET];
-                net->~NetTest();
-            } else if (i == WIFI) {
-                WifiTest* wifi = (WifiTest*)_funcBase[NET];
-                wifi->~WifiTest();
-            } else if (i == SOUND) {
-                SoundTest* sound = (SoundTest*)_funcBase[NET];
-                sound->~SoundTest();
-            }
             delete _funcBase[i];
             _funcBase[i] = NULL;
         }
     }
 
     if (_baseInfo != NULL) {
-        LOG_INFO("~baseInfo");
         delete _baseInfo;
         _baseInfo = NULL;
+        LOG_INFO("~baseInfo");
     }
         
     if (_hwInfo != NULL) {
-        LOG_INFO("~_hwInfo");
         delete _hwInfo;
         _hwInfo = NULL;
+        LOG_INFO("~_hwInfo");
     }
 
     if (_facArg != NULL) {
-        LOG_INFO("~_facArg");
         delete _facArg;
         _facArg = NULL;
+        LOG_INFO("~_facArg");
     }
 
     if (_mesInfo != NULL) {
-        LOG_INFO("~_mesInfo");
         delete _mesInfo;
         _mesInfo = NULL;
+        LOG_INFO("~_mesInfo");
     }
+}
+
+void Control::init_test_array_status()
+{
+    memset(interfaceTestSelectStatus, true, sizeof(interfaceTestSelectStatus));
+    memset(interfaceTestResult, false, sizeof(interfaceTestResult));
+    memset(interfaceTestOver, false, sizeof(interfaceTestOver));
+    memset(interfaceTestFinish, false, sizeof(interfaceTestFinish));
+    memset(funcFinishStatus, false, sizeof(funcFinishStatus));
 }
 
 void Control::init_base_info()
@@ -136,165 +130,9 @@ void Control::init_ui()
     _uiHandle->add_main_label("MAC地址:", _hwInfo->mac);
 
     if (_is_third_product) {
-        _uiHandle->add_main_label("CPU型号:", _hwInfo->cpu_type);
-        _uiHandle->add_main_label("内存容量:", execute_command("free -m | awk '/Mem/ {print $2}'", true) + "M");
-        _uiHandle->add_main_label("HDD容量:", "--");//TODO
-        _uiHandle->add_main_label("SSD容量:", "--");//TODO
-        //input -1 to get actual linked edid num
-        _uiHandle->add_main_label("EDID信息:", to_string(edid_read_i2c_test(-1)));
-        
-        string real_total_num = execute_command("lsusb -t | grep \"Mass Storage\" | wc -l", true);
-        string real_num_3 = execute_command("lsusb -t | grep \"Mass Storage\" | grep \"5000M\" | wc -l", true);
-        if (real_total_num != "error") {
-            _baseInfo->usb_total_num = real_total_num;
-        } else if (real_num_3 != "error") {
-            _baseInfo->usb_3_num = real_num_3;
-        }
-        _uiHandle->add_main_label("USB信息:", _baseInfo->usb_3_num + "/" + _baseInfo->usb_total_num);
-        _uiHandle->add_main_label("网卡信息:", get_third_net_info());
-
-        string wifi_exist = execute_command("ifconfig -a | grep wlan0", true);
-        if (wifi_exist != "error" && wifi_exist != "") {
-            _baseInfo->wifi_exist = "1";
-            _uiHandle->add_main_label("WIFI信息:", "存在");
-        }
-    
-        string camera_exist = execute_command("xawtv -hwscan 2>&1 | grep OK", true);
-        if ( camera_exist != "error" && camera_exist != "") {
-            _baseInfo->camera_exist = "1";
-            _uiHandle->add_main_label("摄像头信息:", "存在");
-        }
-        
-        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_INTERFACE]);
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_MEM]);
-        
-        if (_baseInfo->usb_total_num == "0") { // do not need test usb when it is third product and no usb
-            interfaceTestSelectStatus[I_USB] = false;
-            interfaceTestFinish[I_USB]       = true;
-            interfaceTestOver[I_USB]         = true;
-        } else {
-            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_USB]);
-        }
-        
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_NET]);
-        
-        interfaceTestSelectStatus[I_EDID] = false;
-        interfaceTestFinish[I_EDID]       = true;
-        interfaceTestOver[I_EDID]         = true;
-        
-        interfaceTestSelectStatus[I_CPU]  = false;
-        interfaceTestFinish[I_CPU]        = true;
-        interfaceTestOver[I_CPU]          = true;
-
-        if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
-            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_HDD]);
-        } else {
-            interfaceTestSelectStatus[I_HDD] = false;
-            interfaceTestFinish[I_HDD]       = true;
-            interfaceTestOver[I_HDD]         = true;
-        }
-
-        if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
-            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_SSD]);
-        } else {
-            interfaceTestSelectStatus[I_SSD] = false;
-            interfaceTestFinish[I_SSD]       = true;
-            interfaceTestOver[I_SSD]         = true;
-        }
-
-        interfaceTestSelectStatus[I_FAN] = false;
-        interfaceTestFinish[I_FAN]       = true;
-        interfaceTestOver[I_FAN]         = true;
-
-        interfaceTestSelectStatus[I_WIFI] = false;
-        interfaceTestFinish[I_WIFI]       = true;
-        interfaceTestOver[I_WIFI]         = true;
-
-        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_SOUND]);
-        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_DISPLAY]);
-
-        funcFinishStatus[F_BRIGHT] = true;
-
-        if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
-            _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_CAMERA]);
-        } else {
-            funcFinishStatus[F_CAMERA] = true;
-        }
-
-        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_STRESS]);
-        _uiHandle->add_complete_or_single_test_label("第三方终端");
-        _uiHandle->sync_main_test_ui(true);
-        
+        init_ui_third_product();
     }else {
-    
-        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_INTERFACE]);
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_MEM]);
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_USB]);
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_NET]);
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_EDID]);
-        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_CPU]);
-        
-        if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
-            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_HDD]);
-        } else {
-            interfaceTestSelectStatus[I_HDD] = false;
-            interfaceTestFinish[I_HDD]       = true;
-            interfaceTestOver[I_HDD]         = true;
-        }
-
-        if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
-            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_SSD]);
-        } else {
-            interfaceTestSelectStatus[I_SSD] = false;
-            interfaceTestFinish[I_SSD]       = true;
-            interfaceTestOver[I_SSD]         = true;
-        }
-
-        if (_baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") {
-            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_FAN]);
-        } else {
-            interfaceTestSelectStatus[I_FAN] = false;
-            interfaceTestFinish[I_FAN]       = true;
-            interfaceTestOver[I_FAN]         = true;
-        }
-
-        if (_baseInfo->wifi_exist != "0" && _baseInfo->wifi_exist != "") {
-            _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_WIFI]);
-        } else {
-            interfaceTestSelectStatus[I_WIFI] = false;
-            interfaceTestFinish[I_WIFI]       = true;
-            interfaceTestOver[I_WIFI]         = true;
-        }
-
-        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_SOUND]);
-        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_DISPLAY]);
-
-        if (_baseInfo->bright_level != "0" && _baseInfo->bright_level != "") {
-            _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_BRIGHT]);
-        } else {
-            funcFinishStatus[F_BRIGHT] = true;
-        }
-
-        if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
-            _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_CAMERA]);
-        } else {
-            funcFinishStatus[F_CAMERA] = true;
-        }
-
-        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_STRESS]);
-        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_UPLOAD_MES_LOG]);
-        
-        if (!check_file_exit(WHOLE_TEST_FILE)) {
-            _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_NEXT_PROCESS]);
-        }    
-
-        if (check_file_exit(WHOLE_TEST_FILE)) {
-            _uiHandle->add_complete_or_single_test_label("整机测试");
-        } else {
-            _uiHandle->add_complete_or_single_test_label("单板测试");
-        }
-
-        _uiHandle->sync_main_test_ui(false);
+        init_ui_idv_or_vdi();
     }
 
     _uiHandle->add_stress_test_label("运行时间");
@@ -339,14 +177,181 @@ void Control::init_ui()
     connect(_uiHandle, SIGNAL(sig_ui_factory_delete_event()), this, SLOT(slot_factory_delete_event()));
 }
 
+void Control::init_ui_idv_or_vdi()
+{
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_INTERFACE]);
+    _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_MEM]);
+    _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_USB]);
+    _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_NET]);
+    _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_EDID]);
+    _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_CPU]);
+    
+    if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_HDD]);
+    } else {
+        interfaceTestSelectStatus[I_HDD] = false;
+        interfaceTestFinish[I_HDD]       = true;
+        interfaceTestOver[I_HDD]         = true;
+    }
+    
+    if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_SSD]);
+    } else {
+        interfaceTestSelectStatus[I_SSD] = false;
+        interfaceTestFinish[I_SSD]       = true;
+        interfaceTestOver[I_SSD]         = true;
+    }
+    
+    if (_baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") {
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_FAN]);
+    } else {
+        interfaceTestSelectStatus[I_FAN] = false;
+        interfaceTestFinish[I_FAN]       = true;
+        interfaceTestOver[I_FAN]         = true;
+    }
+    
+    if (_baseInfo->wifi_exist != "0" && _baseInfo->wifi_exist != "") {
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_WIFI]);
+    } else {
+        interfaceTestSelectStatus[I_WIFI] = false;
+        interfaceTestFinish[I_WIFI]       = true;
+        interfaceTestOver[I_WIFI]         = true;
+    }
+    
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_SOUND]);
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_DISPLAY]);
+    
+    if (_baseInfo->bright_level != "0" && _baseInfo->bright_level != "") {
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_BRIGHT]);
+    } else {
+        funcFinishStatus[F_BRIGHT] = true;
+    }
+    
+    if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_CAMERA]);
+    } else {
+        funcFinishStatus[F_CAMERA] = true;
+    }
+    
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_STRESS]);
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_UPLOAD_MES_LOG]);
+    
+    if (!check_file_exit(WHOLE_TEST_FILE)) {
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_NEXT_PROCESS]);
+    }    
+    
+    if (check_file_exit(WHOLE_TEST_FILE)) {
+        _uiHandle->add_complete_or_single_test_label("整机测试");
+    } else {
+        _uiHandle->add_complete_or_single_test_label("单板测试");
+    }
+    
+    _uiHandle->sync_main_test_ui(false);
+}
+
+void Control::init_ui_third_product()
+{
+    _uiHandle->add_main_label("CPU型号:", _hwInfo->cpu_type);
+    _uiHandle->add_main_label("内存容量:", execute_command("free -m | awk '/Mem/ {print $2}'", true) + "M");
+    _uiHandle->add_main_label("HDD容量:", "--");//TODO
+    _uiHandle->add_main_label("SSD容量:", "--");//TODO
+    //input -1 to get actual linked edid num
+    _uiHandle->add_main_label("EDID信息:", to_string(edid_read_i2c_test(-1)));
+    // get usb status
+    string real_total_num = execute_command("lsusb -t | grep \"Mass Storage\" | wc -l", true);
+    string real_num_3 = execute_command("lsusb -t | grep \"Mass Storage\" | grep \"5000M\" | wc -l", true);
+    if (real_total_num != "error") {
+        _baseInfo->usb_total_num = real_total_num;
+    } 
+    if (real_num_3 != "error") {
+        _baseInfo->usb_3_num = real_num_3;
+    }
+    
+    _uiHandle->add_main_label("USB信息:", _baseInfo->usb_3_num + "/" + _baseInfo->usb_total_num);
+    _uiHandle->add_main_label("网卡信息:", get_third_net_info());
+    // get wifi status
+    string wifi_exist = execute_command("ifconfig -a | grep wlan0", true);
+    if (wifi_exist != "error" && wifi_exist != "") {
+        _baseInfo->wifi_exist = "1";
+        _uiHandle->add_main_label("WIFI信息:", "存在");
+    }
+    // get camera status
+    string camera_exist = execute_command("xawtv -hwscan 2>&1 | grep OK", true);
+    if ( camera_exist != "error" && camera_exist != "") {
+        _baseInfo->camera_exist = "1";
+        _uiHandle->add_main_label("摄像头信息:", "存在");
+    }
+    
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_INTERFACE]);
+    _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_MEM]);
+    
+    if (_baseInfo->usb_total_num == "0") { // do not need test usb when it is third product and no usb
+        interfaceTestSelectStatus[I_USB] = false;
+        interfaceTestFinish[I_USB]       = true;
+        interfaceTestOver[I_USB]         = true;
+    } else {
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_USB]);
+    }
+    
+    _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_NET]);
+    
+    interfaceTestSelectStatus[I_EDID] = false;
+    interfaceTestFinish[I_EDID]       = true;
+    interfaceTestOver[I_EDID]         = true;
+    
+    interfaceTestSelectStatus[I_CPU]  = false;
+    interfaceTestFinish[I_CPU]        = true;
+    interfaceTestOver[I_CPU]          = true;
+    
+    if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_HDD]);
+    } else {
+        interfaceTestSelectStatus[I_HDD] = false;
+        interfaceTestFinish[I_HDD]       = true;
+        interfaceTestOver[I_HDD]         = true;
+    }
+    
+    if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
+        _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_SSD]);
+    } else {
+        interfaceTestSelectStatus[I_SSD] = false;
+        interfaceTestFinish[I_SSD]       = true;
+        interfaceTestOver[I_SSD]         = true;
+    }
+    
+    interfaceTestSelectStatus[I_FAN] = false;
+    interfaceTestFinish[I_FAN]       = true;
+    interfaceTestOver[I_FAN]         = true;
+    
+    interfaceTestSelectStatus[I_WIFI] = false;
+    interfaceTestFinish[I_WIFI]       = true;
+    interfaceTestOver[I_WIFI]         = true;
+    
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_SOUND]);
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_DISPLAY]);
+    
+    funcFinishStatus[F_BRIGHT] = true;
+    
+    if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
+        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_CAMERA]);
+    } else {
+        funcFinishStatus[F_CAMERA] = true;
+    }
+    
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_STRESS]);
+    _uiHandle->add_complete_or_single_test_label("第三方终端");
+    _uiHandle->sync_main_test_ui(true);
+
+}
+
 /* third products show net speed and duplex, just need test send and recv msg */
 string Control::get_third_net_info()
 {
     NetTest* net = (NetTest*)_funcBase[NET];
     bool result = net->net_test_all(false);
     if (result) {
-        NetInfo *info = net->g_net_info;
-        string net_info = to_string(info->eth_speed) + "Mbps, " + net->net_get_duplex_desc(info->eth_duplex);
+        WebInfo *info = net->g_net_info;
+        string net_info = to_string(info->speed) + "Mbps, " + net->net_get_duplex_desc(info->duplex);
         return net_info;
     } else {
         return "--";
@@ -413,7 +418,7 @@ void Control::check_sn_mac_compare_result(string message)
     }
 }
 
-/* show result confirmation box to choose PASS or FAIL ----display, stress */
+/* show result confirmation box to choose PASS or FAIL */
 void Control::show_test_confirm_dialog(string item) //TODO: combine with confirm_test_result(string)
 {
     if (item == "") {
@@ -468,7 +473,7 @@ void Control::start_sound_test()
 void Control::start_display_test()
 {
     LOG_INFO("******************** start display test ********************");
-    update_screen_log("==================== " + FUNC_TEST_NAME[F_DISPLAY] + " ====================\n");
+    update_color_screen_log("==================== " + FUNC_TEST_NAME[F_DISPLAY] + " ====================\n", "black");
     _uiHandle->show_display_ui();
 }
 
@@ -510,7 +515,7 @@ void Control::set_test_result(string func, string result, string ui_log)
         return;
     }
     _uiHandle->set_test_result(func, result);
-    _uiHandle->update_screen_log(ui_log);
+    _uiHandle->update_color_screen_log(ui_log, "black");
 }
 
 /* Set PASS button is not clickable before brightness test is finished*/
@@ -529,9 +534,9 @@ void Control::show_main_test_ui()
 }
 
 void Control::show_stress_record(){
-    update_screen_log("---------------------------------------------------------------------------------------------\n");
-    update_screen_log("\t\tWelcome to Factory Test Software\n");
-    update_screen_log("---------------------------------------------------------------------------------------------\n");
+    update_color_screen_log("---------------------------------------------------------------------------------------------\n", "black");
+    update_color_screen_log("\t\tWelcome to Factory Test Software\n", "black");
+    update_color_screen_log("---------------------------------------------------------------------------------------------\n", "black");
 
     read_stress_record(&_record);
     print_stress_test_result(_record);
@@ -540,13 +545,13 @@ void Control::show_stress_record(){
 /* print stress record on screen */
 void Control::print_stress_test_result(vector<string> record) 
 {
-    update_screen_log("The last Stress test result is...\n");
-    update_screen_log("==================== " + FUNC_TEST_NAME[F_STRESS] + "结果 ====================\n");
+    update_color_screen_log("The last Stress test result is...\n", "black");
+    update_color_screen_log("==================== " + FUNC_TEST_NAME[F_STRESS] + "结果 ====================\n", "black");
 
     for (unsigned int i = 0; i < record.size(); i++) {
-        update_screen_log(record[i]);
+        update_color_screen_log(record[i], "black");
     }
-    update_screen_log("==================================================\n");
+    update_color_screen_log("==================================================\n", "black");
 }
 
 /* auto test mac when it is not third-part product and there is not stress file */
@@ -664,7 +669,8 @@ void Control::update_mes_log(string tag, string value)
 
 void Control::upload_mes_log()
 {
-    update_screen_log("==================== " + FUNC_TEST_NAME[F_UPLOAD_MES_LOG] + " ====================\n");
+    LOG_INFO("---------- start %s ----------\n", FUNC_TEST_TAG_NAME[F_UPLOAD_MES_LOG]);
+    update_color_screen_log("==================== " + FUNC_TEST_NAME[F_UPLOAD_MES_LOG] + " ====================\n", "black");
     if (_fac_config_status != 0) {
         LOG_INFO("fac config is wrong, do not upload");
         _uiHandle->confirm_test_result_warning("配置文件有误");
@@ -687,7 +693,7 @@ void Control::upload_mes_log()
         upload_log += "ftp user:\t\t" + _facArg->ftp_user + "\n";
         upload_log += "ftp passwd:\t\t" + _facArg->ftp_passwd + "\n";
         upload_log += "ftp path:\t\t" + _facArg->ftp_dest_path + "\n";
-        update_screen_log(upload_log);
+        update_color_screen_log(upload_log, "black");
 
         _uiHandle->confirm_test_result_waiting("正在上传中...");
         sleep(1);
@@ -761,11 +767,11 @@ void Control::set_interface_test_status(string func, bool status)
     }
 }
 
-void Control::set_interface_test_finish(string func)
+void Control::set_interface_test_finish(string func, bool status)
 {
     for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
         if (func == INTERFACE_TEST_NAME[i]) {
-            interfaceTestFinish[i] = true;
+            interfaceTestFinish[i] = status;
             break;
         }
     }
@@ -836,7 +842,7 @@ void Control::set_test_result_pass_or_fail(string func, string result)
         _mesInfo->func = FUNC_TEST_TAG_NAME[fun_id];
         _mesInfo->status = result;
         start_update_mes_log(_mesInfo);
-        update_screen_log(FUNC_TEST_NAME[fun_id] + "结果：\t\t\t" + CHINESE_RESULT(result) + "\n");
+        update_color_screen_log(FUNC_TEST_NAME[fun_id] + "结果：\t\t\t" + CHINESE_RESULT(result) + "\n", "black");
         string log_info = FUNC_TEST_TAG_NAME[fun_id] + " test result:\t" + result + "\n";
         LOG_INFO(log_info.c_str());
         funcFinishStatus[fun_id] = BOOL_RESULT(result);
@@ -874,7 +880,7 @@ void Control::factory_delete_event()
     LOG_INFO("factory test delete_event occurred.\n");
     SoundTest* sound = (SoundTest*) _funcBase[SOUND];
     sound->sound_record_restore(_baseInfo);
-    _control->~Control();
+    _control->dele_control_new_object();
 }
 
 

@@ -1,6 +1,4 @@
 #include "CameraTest.h"
-#include "fac_log.h"
-#include "fac_utils.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -97,13 +95,13 @@ bool CameraTest::check_if_xawtv_started()
     winid = get_window_id(CAMERA_WINID_FILE);
     if (winid == 0) {
         LOG_ERROR("Failed to start xawtv window!\n");
-        control->update_screen_log("Failed to start xawtv window!\n");
+        control->update_color_screen_log("Failed to start xawtv window!\n", "black");
         control->update_color_screen_log("\t错误：摄像头启动失败\n", "red");
         return false;
     }
 
     LOG_INFO("xawtv window started OK.\n");
-    control->update_screen_log("xawtv window started OK.\n");
+    control->update_color_screen_log("xawtv window started OK.\n", "black");
     return true;
 }
 
@@ -135,7 +133,7 @@ bool CameraTest::camera_test_all()
             usleep(50000);
             failed_count++;
             LOG_ERROR("xawtv started failed count: %d\n", failed_count);
-            control->update_screen_log("xawtv started failed count: " + to_string(failed_count) + "\n");
+            control->update_color_screen_log("xawtv started failed count: " + to_string(failed_count) + "\n", "black");
             control->update_color_screen_log("\t错误：摄像头启动失败" + to_string(failed_count) + "次\n", "red");
         }
     } while (failed_count < XAWTV_MAX_FAIL_COUNT); // if xawtv start failed, try 5 times totally
@@ -143,7 +141,7 @@ bool CameraTest::camera_test_all()
     if (!xawtv_ok && failed_count >= XAWTV_MAX_FAIL_COUNT) {
         /* xawtv started failed, just report FAIL result */
         LOG_ERROR("ERROR: Failed to start xawtv, GPU fault may be detected!\n");
-        control->update_screen_log("ERROR: Failed to start xawtv, GPU fault may be detected!\n");
+        control->update_color_screen_log("ERROR: Failed to start xawtv, GPU fault may be detected!\n", "black");
         control->update_color_screen_log("\t错误: xawtv启动失败, 可能存在GPU故障!\n", "red");
     }
 
@@ -153,7 +151,7 @@ bool CameraTest::camera_test_all()
 void* CameraTest::test_all(void*)
 {
     Control* control = Control::get_control();
-    control->update_screen_log("==================== " + FUNC_TEST_NAME[F_CAMERA] + " ====================\n");
+    control->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_CAMERA] + " ====================\n", "black");
     camera_test_all();    
     control->show_test_confirm_dialog(FUNC_TEST_NAME[F_CAMERA]);
     return NULL;

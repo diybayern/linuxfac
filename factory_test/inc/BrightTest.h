@@ -1,7 +1,6 @@
 #ifndef _BRIGHT_TEST_H
 #define _BRIGHT_TEST_H
 
-#include "fac_utils.h"
 #include "Control.h"
 #include "FuncBase.h"
 

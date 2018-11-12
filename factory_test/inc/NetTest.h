@@ -5,23 +5,11 @@
 #include "Control.h"
 #include "FuncBase.h"
 
-struct NetInfo {
-    unsigned char mac[MAC_ADDR_LEN];
-    unsigned char eth_name[ETH_NAME_LEN];
-    unsigned int eth_index;
-    unsigned int eth_status;
-    unsigned int eth_link;
-    unsigned int eth_speed;
-    unsigned char eth_duplex;
-    unsigned int seq;
-    unsigned int recv_num;
-};
-
 class NetTest : public FuncBase
 {
 public:
     ~NetTest();
-    static NetInfo* g_net_info;
+    static WebInfo* g_net_info;
     bool init();
     static bool net_test_all(bool test_flag);
     static void* test_all(void*);
@@ -36,11 +24,11 @@ private:
     bool net_get_mac_addr0(unsigned char* eth_name, unsigned char* hw_buf);
     static bool net_sprintf_mac_addr(unsigned char* src, char* dst);
     static void* net_recv_loopback_msg(void *arg);
-    static bool net_get_eth_info(NetInfo *info);
+    static bool net_get_eth_info(WebInfo *info);
     static int net_eth_no(char *eth_name);
     static bool net_get_eth_status(int fd, char *eth_name, unsigned int *status);
     static int net_test_ioctl(int fd, char *eth_name, void *cmd);
-    static bool net_send_broadcast_msg(NetInfo* info, int num);
+    static bool net_send_broadcast_msg(WebInfo* info, int num);
     static bool net_send_msg(char* src_mac, char* dst_mac, unsigned int index, unsigned int seq);
 };
 

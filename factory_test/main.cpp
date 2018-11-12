@@ -2,15 +2,11 @@
 #include <execinfo.h>
 #include <signal.h>
 #include "Control.h"
-#include "fac_utils.h"
-#include "fac_log.h"
-
-extern bool funcFinishStatus[FUNC_TEST_NUM];
-
 
 void* semi_auto_test_control(void*)
 {
     Control* control = Control::get_control();
+    bool* funcFinishStatus = control->get_func_finish_status();
     while (1) {
         int testStep = control->get_test_step();
         usleep(500000);
@@ -53,7 +49,7 @@ void* semi_auto_test_control(void*)
                 
                 case STEP_DISPLAY: {
                     if (funcFinishStatus[F_DISPLAY]) {
-                        if (control->get_base_info()->bright_level != "0" || control->get_base_info()->bright_level != "") {
+                        if (control->get_base_info()->bright_level != "0" && control->get_base_info()->bright_level != "") {
                             LOG_INFO("display_finish OK.\n");
                             control->set_test_step(STEP_BRIGHTNESS);
                             if (!funcFinishStatus[F_BRIGHT]) {
@@ -65,7 +61,7 @@ void* semi_auto_test_control(void*)
                 
                 case STEP_BRIGHTNESS: {
                     if (funcFinishStatus[F_BRIGHT]) {
-                        if (control->get_base_info()->camera_exist != "0" || control->get_base_info()->camera_exist != "") {
+                        if (control->get_base_info()->camera_exist != "0" && control->get_base_info()->camera_exist != "") {
                             LOG_INFO("bright_finish OK.\n");
                             control->set_test_step(STEP_CAMERA);
                             if (!funcFinishStatus[F_CAMERA]) {

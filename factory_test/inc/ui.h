@@ -189,6 +189,8 @@ class MainTestWindow : public QDialog
         QPushButton* _get_interface_test_button();
         QList<InterfaceTestItemPri> if_test_pri_list;
         void _set_interface_test_item_enable(bool state);
+
+        QMutex  qmutext;
     protected:
         void closeEvent(QCloseEvent *event);
         void keyPressEvent(QKeyEvent *event);

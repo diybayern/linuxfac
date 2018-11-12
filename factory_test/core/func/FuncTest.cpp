@@ -1,11 +1,4 @@
 #include "FuncTest.h"
-#include "fac_log.h"
-
-extern bool interfaceTestSelectStatus[INTERFACE_TEST_NUM];
-extern bool interfaceTestResult[INTERFACE_TEST_NUM];
-extern bool interfaceTestOver[INTERFACE_TEST_NUM];
-extern bool interfaceTestFinish[INTERFACE_TEST_NUM];
-extern bool funcFinishStatus[FUNC_TEST_NUM];
 
 pthread_mutex_t g_next_process_lock;
 
@@ -54,7 +47,7 @@ void CpuTest::start_test(BaseInfo* baseInfo)
         screen_log_red = INTERFACE_TEST_NAME[I_CPU] + "结果:\t\t\t失败\n\n" + screen_log_red;
         control->set_interface_test_result(INTERFACE_TEST_NAME[I_CPU], false); 
     }
-    control->update_screen_log(screen_log_black);
+    control->update_color_screen_log(screen_log_black, "black");
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");
     }
@@ -102,7 +95,7 @@ void* FanTest::test_all(void *arg)
         screen_log_red = INTERFACE_TEST_NAME[I_FAN] + "结果:\t\t\t失败\n\n" + screen_log_red;
         control->set_interface_test_result(INTERFACE_TEST_NAME[I_FAN], false);
     }
-    control->update_screen_log(screen_log_black);
+    control->update_color_screen_log(screen_log_black, "black");
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");
     }
@@ -199,7 +192,7 @@ void* StressTest::mem_stress_test(void*)
     string free_mem_cap = execute_command("free -m | awk '/Mem/ {print $4}'", true);
     if (free_mem_cap == "error") {
         LOG_ERROR("get free mem cap error\n");
-        mem_stress_result &= false;
+        mem_stress_result &= false; // every mem test result must be PASS
         mem_stress_status = false;
         return NULL;
     }
@@ -212,7 +205,7 @@ void* StressTest::mem_stress_test(void*)
     string result = execute_command("bash " + MEM_TEST_SCRIPT + " " + to_string(test_mem_cap) + "M", true);
     if (result == "SUCCESS") {
         LOG_INFO("mem stress test result:\tPASS\n");
-        mem_stress_result &= true;
+        mem_stress_result &= true; // every mem test result must be PASS
     } else {
         LOG_ERROR("mem stress test result:\tfailed\n");
         mem_stress_result &= false;
@@ -423,7 +416,7 @@ void NextProcess::next_process_handle(BaseInfo* baseInfo)
         if (WEXITSTATUS(next_process_f) > 0) {
             LOG_ERROR("The disk is abnormal and cannot enter the next process.\n");
             uihandle->confirm_test_result_warning("磁盘异常，无法进入下道工序");
-            control->update_screen_log("磁盘异常，无法进入下道工序");
+            control->update_color_screen_log("磁盘异常，无法进入下道工序", "red");
             pthread_mutex_unlock(&g_next_process_lock);
             return;
         }
@@ -433,11 +426,11 @@ void NextProcess::next_process_handle(BaseInfo* baseInfo)
     if (!create_stress_test_lock(true)) {
         LOG_ERROR("create stress test lock fail!\n");
         uihandle->confirm_test_result_warning("EMMC异常，无法关机！");
-        control->update_screen_log("EMMC异常，无法关机！");
+        control->update_color_screen_log("EMMC异常，无法关机！", "red");
     } else if (execute_command("shutdown -h now", true) == "error") {
         LOG_ERROR("shutdown cmd run error\n");
         uihandle->confirm_test_result_warning("终端异常，无法关机！");
-        control->update_screen_log("终端异常，无法关机！");
+        control->update_color_screen_log("终端异常，无法关机！", "red");
     }
  
     return;
@@ -494,6 +487,12 @@ void* InterfaceTest::test_all(void *arg)
     BaseInfo* baseInfo = (BaseInfo*)arg;
     Control *control = Control::get_control();
     
+    bool* interfaceTestSelectStatus = control->get_interface_select_status();
+    bool* interfaceTestResult = control->get_interface_test_result();
+    bool* interfaceTestOver = control->get_interface_test_over();
+    bool* interfaceTestFinish = control->get_interface_test_finish();
+    bool* funcFinishStatus = control->get_func_finish_status();
+    
     /* if interface test is running, stop it */
     if (control->get_interface_run_status() == INF_RUNNING) {
         LOG_INFO("******************** stop interface test ********************");
@@ -536,7 +535,7 @@ void* InterfaceTest::test_all(void *arg)
 
         real_test_num = i + 1;
         string loop = "\n******************** LOOP: " + to_string(i + 1) + " ********************";
-        control->update_screen_log(loop);
+        control->update_color_screen_log(loop, "black");
         
         for (int j = 0; j < INTERFACE_TEST_NUM; j++) {
             if (interfaceTestSelectStatus[j]) {
@@ -566,27 +565,27 @@ void* InterfaceTest::test_all(void *arg)
         }
     }
 
-    control->update_screen_log("=============== " + FUNC_TEST_NAME[F_INTERFACE] + "结果 ===============");
-    
+    control->update_color_screen_log("=============== " + FUNC_TEST_NAME[F_INTERFACE] + "结果 ===============", "black");
+
+    string total_result = "";
     for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
-        string total_result = "";
         if (interfaceTestSelectStatus[i]) {
             if (interfaceTestFailNum[i] == 0) {
-                total_result = INTERFACE_TEST_MES_TAG[i] + "\tPASS (Time:" + to_string(real_test_num) + ",ERROR:0)";
+                total_result += INTERFACE_TEST_MES_TAG[i] + "\tPASS (Time:" + to_string(real_test_num) + ",ERROR:0)\n";
                 control->update_mes_log(INTERFACE_TEST_MES_TAG[i], "PASS");
                 control->set_func_test_result(INTERFACE_TEST_NAME[i], "PASS");
-                control->set_interface_test_finish(INTERFACE_TEST_NAME[i]);
+                control->set_interface_test_finish(INTERFACE_TEST_NAME[i], true);
             } else {
                 control->update_mes_log(INTERFACE_TEST_MES_TAG[i], "FAIL");
                 control->set_func_test_result(INTERFACE_TEST_NAME[i], "FAIL");
-                total_result = INTERFACE_TEST_MES_TAG[i] + "\tFAIL (Time:" + to_string(real_test_num) + ",ERROR:" 
-                                   + to_string(interfaceTestFailNum[i]) + ")";
+                control->set_interface_test_finish(INTERFACE_TEST_NAME[i], false);
+                total_result += INTERFACE_TEST_MES_TAG[i] + "\tFAIL (Time:" + to_string(real_test_num) + ",ERROR:" 
+                                   + to_string(interfaceTestFailNum[i]) + ")\n";
             }
-            control->update_screen_log(total_result);
         }
     }
-    
-    control->update_screen_log("===============================================");
+    total_result += "===============================================";
+    control->update_color_screen_log(total_result, "black");
     
     /* all interface func test finish,interface test finish */
     bool tmp_test_finish = true;

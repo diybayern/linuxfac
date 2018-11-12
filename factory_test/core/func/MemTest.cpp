@@ -1,6 +1,4 @@
-#include "MemTest.h"
-#include "fac_log.h"
-#include "fac_utils.h"
+#include "FuncTest.h"
 #include <math.h>
 
 string MemTest::screen_log_black = "";
@@ -80,7 +78,7 @@ void* MemTest::test_all(void *arg)
         control->set_interface_test_result(INTERFACE_TEST_NAME[I_MEM], false); 
     }
     remove_local_file(MEM_UI_LOG);
-    control->update_screen_log(screen_log_black);
+    control->update_color_screen_log(screen_log_black, "black");
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");
     }

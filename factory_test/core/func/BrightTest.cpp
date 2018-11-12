@@ -1,6 +1,4 @@
 #include "BrightTest.h"
-#include "fac_log.h"
-#include "fac_utils.h"
 
 #include <sys/inotify.h>
 
@@ -43,7 +41,7 @@ void BrightTest::bright_test_all(string bright_level)
         bright_set_mask |= (1 << bright_cnt); // set bright level num bits, ex: (6) --> 11 1111
     }
     LOG_INFO("begin inotify brightness trigger\n");
-    control->update_screen_log("begin inotify brightness trigger\n");
+    control->update_color_screen_log("begin inotify brightness trigger\n", "black");
     
     for (bright_cnt = 0; bright_cnt < bright_num; bright_cnt++) {
         bright_value = 0;
@@ -70,12 +68,12 @@ void BrightTest::bright_test_all(string bright_level)
         if (ret != -1) {
             bright_set |= (1 << ret);  // set brightness level num, ex: 00 0100 --> 00 1100  ......
             LOG_INFO("PRESS %d: now the brightness is %d, brightness level %d\n", bright_cnt + 1, bright_value, ret + 1);
-            control->update_screen_log("PRESS " + to_string(bright_cnt + 1) + ": now the brightness is "
-                    + to_string(bright_value) + ", brightness level " + to_string(ret + 1));
+            control->update_color_screen_log("PRESS " + to_string(bright_cnt + 1) + ": now the brightness is "
+                    + to_string(bright_value) + ", brightness level " + to_string(ret + 1), "black");
         } else {  // brightness level is not set
             LOG_ERROR("PRESS %d: brightness value is not set, brightness is %d\n",bright_cnt + 1, bright_value);
-            control->update_screen_log("PRESS " + to_string(bright_cnt + 1) + ": brightness value is not set, brightness is "
-                    + to_string(bright_value) + "\n");
+            control->update_color_screen_log("PRESS " + to_string(bright_cnt + 1) + ": brightness value is not set, brightness is "
+                    + to_string(bright_value) + "\n", "black");
             control->update_color_screen_log("\t错误：按压" + to_string(bright_cnt + 1) + ": 亮度值"
                     + to_string(bright_value) + "未设置\n", "red");
             goto error_return;
@@ -88,7 +86,7 @@ void BrightTest::bright_test_all(string bright_level)
     bright_set &= bright_set_mask; // confirm if all levers are tested 
     if (bright_set != bright_set_mask) {
         LOG_ERROR("all the brightness value cannot be corvered within 6 presses\n");
-        control->update_screen_log("all the brightness value cannot be corvered within 6 presses\n");
+        control->update_color_screen_log("all the brightness value cannot be corvered within 6 presses\n", "black");
         control->update_color_screen_log("\t错误：6次亮度变化不能包含所有的亮度等级", "red");
         goto error_return;
     }
@@ -106,7 +104,8 @@ void* BrightTest::test_all(void *arg)
         LOG_ERROR("arg is null");
         return NULL;
     }
-    Control::get_control()->update_screen_log("==================== " + FUNC_TEST_NAME[F_BRIGHT] + " ====================\n");
+    Control::get_control()->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_BRIGHT]
+                + " ====================\n", "black");
     BaseInfo* baseInfo = (BaseInfo*)arg;
     Control::get_control()->show_test_confirm_dialog(FUNC_TEST_NAME[F_BRIGHT]);
     bright_test_all(baseInfo->bright_level);

@@ -44,7 +44,6 @@ HEADERS  += \
     inc/EdidTest.h \
     inc/FuncBase.h \
     inc/FuncTest.h \
-    inc/MemTest.h \
     inc/NetTest.h \
     inc/WifiTest.h \
     inc/SoundTest.h \

@@ -1,7 +1,6 @@
 #ifndef _FUNC_TEST_H
 #define _FUNC_TEST_H
 
-#include "fac_utils.h"
 #include "Control.h"
 #include "FuncBase.h"
 
@@ -9,6 +8,18 @@
 #include <libudev.h>
 #include <stdint.h>
 #include <stdbool.h>
+
+class MemTest : public FuncBase
+{
+public:
+    static bool compare_men_cap(int mem_cap);
+    static bool mem_stability_test();
+    static void *test_all(void *arg);
+    void start_test(BaseInfo* baseInfo);
+private:
+    static string screen_log_black;
+    static string screen_log_red;
+};
 
 class CpuTest : public FuncBase
 {

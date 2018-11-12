@@ -231,7 +231,7 @@ void MainTestWindow::update_color_screen_log(QString info, QString color)
     if (_editInfo == NULL) {
         return ;
     }
-
+    qmutext.lock();
     QColor  rgb;
     if (color.compare("red") == 0) {
         rgb.setRgb(255, 0, 0);
@@ -258,9 +258,10 @@ void MainTestWindow::update_color_screen_log(QString info, QString color)
 
     _string_to_htmlFilter(info);
     _string_to_html(info,rgb);
-    _editInfo->append("");
+    //_editInfo->append("");
     _editInfo->insertHtml(info);
     _editInfo->append("");
+    qmutext.unlock();
 }
 
 void MainTestWindow::_string_to_htmlFilter(QString &str)
@@ -291,12 +292,14 @@ void MainTestWindow::update_screen_log(QString textInfo)
     if (_editInfo == NULL) {
         return ;
     }
-
+    qmutext.lock();
+        
     QColor clrR(0, 0, 0);
     _string_to_htmlFilter(textInfo);
     _string_to_html(textInfo, clrR);
     _editInfo->insertHtml(textInfo);
     _editInfo->append("");
+    qmutext.unlock();
 }
 
 void MainTestWindow::setupUI()

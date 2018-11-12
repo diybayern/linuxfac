@@ -164,13 +164,9 @@ const int BRIGHTNESS_VALUE[6] =
 #define TEST_MAGIC              (0xffffeeee)
 
 #define ETH_LINK_SPEED          (1000) /* Mbps */
-#define ETH_NAME_LEN            (16)
-#define ETH_STATUS_UP           (0)
-#define ETH_STATUS_DOWN         (1)
-#define ETH_RECV_MIN_NUM        (90)
-
+#define WEB_NAME_LEN            (16)
 #define TOTAL_SEND_NUM          (100)
-#define WLAN_NAME_LEN           (16)
+#define ETH_RECV_MIN_NUM        (90)
 #define WLAN_RECV_MIN_NUM       (70)
 #define INTERFACE_NUM           (512)
 
@@ -207,6 +203,11 @@ enum {
     NO_FTP_PATH,
     NO_JOB_NUMBER,
     NO_PATH_AND_NUM
+};
+
+enum EthStatus {
+    ETH_STATUS_UP = 0,
+    ETH_STATUS_DOWN
 };
 
 typedef unsigned long long int uint64;
@@ -294,6 +295,18 @@ struct FacArg{
     string wifi_ssid;
     string wifi_passwd;
     string wifi_enp;
+};
+
+struct WebInfo {
+    unsigned char mac[MAC_ADDR_LEN];
+    unsigned char name[WEB_NAME_LEN];
+    unsigned int index;
+    unsigned int status;
+    unsigned int link;
+    unsigned int speed;
+    unsigned char duplex;
+    unsigned int seq;
+    unsigned int recv_num;
 };
 
 struct MacPacket {

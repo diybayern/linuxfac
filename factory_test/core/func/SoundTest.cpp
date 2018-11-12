@@ -3,8 +3,6 @@
 #include <pthread.h>
 
 #include "SoundTest.h"
-#include "fac_log.h"
-#include "fac_utils.h"
 
 #define DEFAULT_SAMPLERATE     (44100)
 #define DEFAULT_CHANNEL        (2)
@@ -540,7 +538,7 @@ void* SoundTest::test_all(void*)
 {
     Control *control = Control::get_control();
     UiHandle* uihandle = UiHandle::get_uihandle();
-    control->update_screen_log("==================== " + FUNC_TEST_NAME[F_SOUND] + " ====================\n");
+    control->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_SOUND] + " ====================\n", "black");
     uihandle->start_audio_progress_dialog();
     usleep(200000);  //wait for Synchronize progress bar and recording
     start_record();

@@ -1,5 +1,4 @@
 #include "FuncTest.h"
-#include "fac_log.h"
 
 string UsbTest::screen_log_black = "";
 string UsbTest::screen_log_red = "";
@@ -362,7 +361,7 @@ void* UsbTest::test_all(void *arg)
         screen_log_red = INTERFACE_TEST_NAME[I_USB] + "结果:\t\t\t失败\n\n" + screen_log_red;
         control->set_interface_test_result(INTERFACE_TEST_NAME[I_USB], false); 
     }    
-    control->update_screen_log(screen_log_black);
+    control->update_color_screen_log(screen_log_black, "black");
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");
     }

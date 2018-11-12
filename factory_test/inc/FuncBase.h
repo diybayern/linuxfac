@@ -1,7 +1,6 @@
 #ifndef _FUNCBASE_H
 #define _FUNCBASE_H
 
-#include "fac_utils.h"
 #include "fac_log.h"
 
 class FuncBase

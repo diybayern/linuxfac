@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include "fac_utils.h"
-#include "MemTest.h"
 #include "FuncTest.h"
 #include "SoundTest.h"
 #include "NetTest.h"
@@ -23,8 +22,8 @@ class Control : public QObject
 public:
     //explicit Control(QObject *parent = 0);
     Control();
-    ~Control();
     static Control* _control;
+    void dele_control_new_object();
     void set_test_result(string func, string result, string ui_log);
     void set_brightness_dialog_button_state(bool state);
     static Control* get_control();
@@ -61,7 +60,7 @@ public:
     }
 
     void set_interface_test_status(string func, bool status);
-    void set_interface_test_finish(string func);
+    void set_interface_test_finish(string func, bool status);
     void set_interface_test_result(string func, bool status);
 
     int get_interface_test_times() {
@@ -116,19 +115,45 @@ public:
     }
 
     string get_third_net_info();
+
+    bool* get_interface_select_status() {
+        return interfaceTestSelectStatus;
+    }
+    bool* get_interface_test_result() {
+        return interfaceTestResult;
+    }
+    bool* get_interface_test_over() {
+        return interfaceTestOver;
+    }
+    bool* get_interface_test_finish() {
+        return interfaceTestFinish;
+    }
+    bool* get_func_finish_status() {
+        return funcFinishStatus;
+    }
+
     
 private:
+    void init_test_array_status();
     void init_base_info();
     void init_hw_info();
     void init_fac_config();
     void init_ui();
-
+    void init_ui_idv_or_vdi();
+    void init_ui_third_product();
+    
 private:
 
     UiHandle* _uiHandle;
     BaseInfo* _baseInfo;
     HwInfo* _hwInfo;
     MesInfo* _mesInfo;
+    
+    bool interfaceTestSelectStatus[INTERFACE_TEST_NUM];
+    bool interfaceTestResult[INTERFACE_TEST_NUM];
+    bool interfaceTestOver[INTERFACE_TEST_NUM];
+    bool interfaceTestFinish[INTERFACE_TEST_NUM];
+    bool funcFinishStatus[FUNC_TEST_NUM];
     
     int _testStep;
     FuncBase* _funcBase[FUNC_TYPE_NUM];

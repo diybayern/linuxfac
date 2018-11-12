@@ -14,11 +14,8 @@
 #include <linux/sockios.h>
 
 #include "NetTest.h"
-#include "fac_log.h"
-#include "fac_utils.h"
 
-
-NetInfo* NetTest::g_net_info = new NetInfo();
+WebInfo* NetTest::g_net_info = new WebInfo();
 string NetTest::screen_log_black = "";
 string NetTest::screen_log_red = "";
 
@@ -96,7 +93,7 @@ bool NetTest::net_get_eth_index(char* eth_name, unsigned int* index)
     }
 
     memset(&ifr, 0, sizeof(struct ifreq));
-    strncpy(ifr.ifr_name, eth_name, ETH_NAME_LEN);
+    strncpy(ifr.ifr_name, eth_name, WEB_NAME_LEN);
 
     if (ioctl(fd, SIOCGIFINDEX, &ifr) < 0) {
         LOG_ERROR("get eth index failed\n");
@@ -146,7 +143,7 @@ bool NetTest::net_get_mac_addr0(unsigned char* eth_name, unsigned char* hw_buf)
     }
 
     memset(&ifr, 0, sizeof(struct ifreq));
-    strncpy(ifr.ifr_name, (char*)eth_name, ETH_NAME_LEN);
+    strncpy(ifr.ifr_name, (char*)eth_name, WEB_NAME_LEN);
 
     if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) {
         LOG_ERROR("get mac addr failed\n");
@@ -177,12 +174,12 @@ void* NetTest::net_recv_loopback_msg(void *arg)
 //    MacPacket send_packet;
     struct sockaddr_ll recv_sll;
 //    struct sockaddr_ll send_sll;
-    NetInfo* info = NULL;
+    WebInfo* info = NULL;
     char buf[128] = { 0, };   //TODO: char[] buf
     unsigned char bc_mac[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
     pthread_detach(pthread_self());
-    info = (NetInfo*)arg;
+    info = (WebInfo*)arg;
 
     start: fd = socket(PF_PACKET, SOCK_RAW, htons(TEST_PROTO));
     if (fd < 0) {
@@ -192,7 +189,7 @@ void* NetTest::net_recv_loopback_msg(void *arg)
 
     memset(&recv_sll, 0, sizeof(struct sockaddr_ll));
     recv_sll.sll_family = PF_PACKET;
-    recv_sll.sll_ifindex = info->eth_index;
+    recv_sll.sll_ifindex = info->index;
     recv_sll.sll_protocol = htons(TEST_PROTO);
 
     ret = bind(fd, (struct sockaddr*)&recv_sll, sizeof(recv_sll));
@@ -224,7 +221,7 @@ void* NetTest::net_recv_loopback_msg(void *arg)
             info->recv_num++;
         } else {
             // send back
-            net_send_msg((char *)info->mac, (char *)recv_packet.src_mac, info->eth_index, recv_packet.index);
+            net_send_msg((char *)info->mac, (char *)recv_packet.src_mac, info->index, recv_packet.index);
             net_sprintf_mac_addr(recv_packet.src_mac, (char*)buf);
             LOG_ERROR("send back to %s index=%d\n", buf, recv_packet.index);
         }
@@ -237,17 +234,17 @@ bool NetTest::init()
 {
     bool ret = false;
     pthread_t pid;
-    NetInfo* info = NULL;   //TODO: NetInfo --> char[]
+    WebInfo* info = NULL;   //TODO: WebInfo --> char[]
 
     info = g_net_info;
     if (info == NULL) {
-        LOG_ERROR("new NetInfo failed\n");
+        LOG_ERROR("new WebInfo failed\n");
         return false;
     }
 
-    memset(info, 0, sizeof(NetInfo));
+    memset(info, 0, sizeof(WebInfo));
 
-    ret = net_get_eth_name((char*)info->eth_name, ETH_NAME_LEN);
+    ret = net_get_eth_name((char*)info->name, WEB_NAME_LEN);
     if (ret == false) {
         LOG_ERROR("get eth name failed\n");
         delete info;
@@ -255,7 +252,7 @@ bool NetTest::init()
         return false;
     }
 
-    ret = net_get_eth_index((char*)info->eth_name, &info->eth_index);
+    ret = net_get_eth_index((char*)info->name, &info->index);
     if (ret == false) {
         LOG_ERROR("get eth index failed\n");
         delete info;
@@ -263,7 +260,7 @@ bool NetTest::init()
         return false;
     }
 
-    ret = net_get_mac_addr0(info->eth_name, info->mac);
+    ret = net_get_mac_addr0(info->name, info->mac);
     if (ret == false) {
         LOG_ERROR("get mac addr failed\n");
         delete info;
@@ -309,7 +306,7 @@ bool NetTest::net_get_eth_status(int fd, char *eth_name, unsigned int *status)
     struct ifreq ifr;
 
     memset(&ifr, 0, sizeof(struct ifreq));
-    strncpy(ifr.ifr_name, eth_name, ETH_NAME_LEN);
+    strncpy(ifr.ifr_name, eth_name, WEB_NAME_LEN);
     if (ioctl(fd, SIOCGIFFLAGS, &ifr) < 0) {
         LOG_ERROR("get eth status failed: %s\n", strerror(errno));
         return false;
@@ -336,12 +333,12 @@ int NetTest::net_test_ioctl(int fd, char *eth_name, void *cmd)
     struct ifreq ifr;
 
     memset(&ifr, 0, sizeof(ifr));
-    strncpy(ifr.ifr_name, eth_name, ETH_NAME_LEN);
+    strncpy(ifr.ifr_name, eth_name, WEB_NAME_LEN);
     ifr.ifr_data = (char*)cmd;
     return ioctl(fd, SIOCETHTOOL, &ifr);
 }
 
-bool NetTest::net_get_eth_info(NetInfo *info)
+bool NetTest::net_get_eth_info(WebInfo *info)
 {
     if (info == NULL) {
         LOG_ERROR("info is NULL");
@@ -351,16 +348,16 @@ bool NetTest::net_get_eth_info(NetInfo *info)
     int fd, ret;
     struct ethtool_cmd ecmd;
     struct ethtool_value edata;
-    char eth_name[ETH_NAME_LEN];
+    char eth_name[WEB_NAME_LEN];
 
-    if (info == NULL || info->eth_name == NULL) {
+    if (info == NULL || info->name == NULL) {
         LOG_ERROR("pointer NULL error!\n");
         return false;
     }
-    if (strncmp("br", (char*)info->eth_name, 2) == 0) {
-        snprintf(eth_name, ETH_NAME_LEN, "eth%d", net_eth_no((char *)info->eth_name));
+    if (strncmp("br", (char*)info->name, 2) == 0) {
+        snprintf(eth_name, WEB_NAME_LEN, "eth%d", net_eth_no((char *)info->name));
     } else {
-        strcpy(eth_name, (char*)info->eth_name);
+        strcpy(eth_name, (char*)info->name);
     }
 
     fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -369,7 +366,7 @@ bool NetTest::net_get_eth_info(NetInfo *info)
         return false;
     }
 
-    bool flag = net_get_eth_status(fd, (char *)eth_name, &info->eth_status);
+    bool flag = net_get_eth_status(fd, (char *)eth_name, &info->status);
     if (flag == false) {
         close(fd);
         return false;
@@ -382,7 +379,7 @@ bool NetTest::net_get_eth_info(NetInfo *info)
         close(fd);
         return false;
     }
-    info->eth_link = edata.data;
+    info->link = edata.data;
 
     /* Get seed & duplex */
     ecmd.cmd = ETHTOOL_GSET;
@@ -392,9 +389,9 @@ bool NetTest::net_get_eth_info(NetInfo *info)
         close(fd);
         return false;
     }
-    info->eth_speed = (ecmd.speed_hi << 16) | ecmd.speed;
-    info->eth_duplex = ecmd.duplex;
-    LOG_INFO("ethernet card speed: %uMbps, duplex: %i\n", info->eth_speed, info->eth_duplex);
+    info->speed = (ecmd.speed_hi << 16) | ecmd.speed;
+    info->duplex = ecmd.duplex;
+    LOG_INFO("ethernet card speed: %uMbps, duplex: %i\n", info->speed, info->duplex);
 
     close(fd);
     return true;
@@ -451,7 +448,7 @@ bool NetTest::net_send_msg(char* src_mac, char* dst_mac, unsigned int index, uns
 }
 
 /* loop send msg */
-bool NetTest::net_send_broadcast_msg(NetInfo* info, int num)
+bool NetTest::net_send_broadcast_msg(WebInfo* info, int num)
 {
     if (info == NULL || num <=0) {
         LOG_ERROR("info is NULL or num is wrong");
@@ -462,7 +459,7 @@ bool NetTest::net_send_broadcast_msg(NetInfo* info, int num)
     unsigned char dest_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
     for (i = 0; i < num; i++) {
-        ret &= net_send_msg((char *)info->mac, (char *)dest_mac, info->eth_index, info->seq++);
+        ret &= net_send_msg((char *)info->mac, (char *)dest_mac, info->index, info->seq++);
         usleep(100);
     }
 
@@ -474,7 +471,7 @@ bool NetTest::net_test_all(bool test_flag) //test_flag = false, is third product
     Control *control = Control::get_control();
     int i = 0;
     bool ret = 0;
-    NetInfo *info = NULL;
+    WebInfo *info = NULL;
 
     info = g_net_info;
     if (info == NULL) {
@@ -483,12 +480,15 @@ bool NetTest::net_test_all(bool test_flag) //test_flag = false, is third product
         screen_log_black += "ERROR:net init error! get net info failed\n";
         return false;    
     }
-    
-    LOG_INFO("net test start:\n");
-    LOG_INFO("Network card name: \t\t\t%s \n", info->eth_name);
-    screen_log_black += "Network card name: \t\t";
-    screen_log_black += (char*)info->eth_name;
-    screen_log_black += "\n";
+    if (test_flag) {
+        LOG_INFO("net test start:\n");
+        LOG_INFO("Network card name: \t\t\t%s \n", info->name);
+        screen_log_black += "Network card name: \t\t";
+        screen_log_black += (char*)info->name;
+        screen_log_black += "\n";
+    } else {
+        LOG_INFO("third product get net info\n");
+    }
 
     ret = net_get_eth_info(info);
     if (ret == false) {
@@ -498,7 +498,7 @@ bool NetTest::net_test_all(bool test_flag) //test_flag = false, is third product
         goto error;
     }
 
-    if (info->eth_status == ETH_STATUS_UP) {
+    if (info->status == ETH_STATUS_UP) {
         LOG_INFO("Network card status: \tup\n");
         screen_log_black += "Network card status: \t\tup\n";
     } else {
@@ -510,7 +510,7 @@ bool NetTest::net_test_all(bool test_flag) //test_flag = false, is third product
     }
     
     if (test_flag) {  //Third-part product do not care whether the network is connected.
-        if (info->eth_link) {
+        if (info->link) {
             LOG_INFO("Network link detected: \tyes\n");
             screen_log_black += "Network link detected: \t\tyes\n";
         } else {
@@ -522,34 +522,37 @@ bool NetTest::net_test_all(bool test_flag) //test_flag = false, is third product
         }
     }
     
-    if (info->eth_speed == 0
-            || info->eth_speed == (unsigned short)(-1)
-            || info->eth_speed == (unsigned int)(-1)) {
+    if (info->speed == 0
+            || info->speed == (unsigned short)(-1)
+            || info->speed == (unsigned int)(-1)) {
         LOG_ERROR("Network card speed: \tUnknown!\n");
         screen_log_black += "Network card speed: \t\tUnknown!\n";
         screen_log_red += "\t错误：网卡速率未知\n";
         ret = false;
     } else {
-        LOG_INFO("Network card speed: \t%uMbps\n", info->eth_speed);
-        screen_log_black += "Network card speed: \t\t" + to_string(info->eth_speed) + "Mbps\n";
-        if (!control->get_third_product_state() && info->eth_speed != ETH_LINK_SPEED) {
+        LOG_INFO("Network card speed: \t%uMbps\n", info->speed);
+        screen_log_black += "Network card speed: \t\t" + to_string(info->speed) + "Mbps\n";
+        /* third product do not need test net speed */
+        if (!control->get_third_product_state() && info->speed != ETH_LINK_SPEED) {
             LOG_ERROR("ERROR: Network speed must be %uMbps, but current is %uMbps\n",
-                                        ETH_LINK_SPEED, info->eth_speed);
+                                        ETH_LINK_SPEED, info->speed);
             screen_log_black += "\tERROR: Network speed must be " + to_string(ETH_LINK_SPEED)
-                        + "Mbps, but current is " + to_string(info->eth_speed) + "Mbps\n";
+                        + "Mbps, but current is " + to_string(info->speed) + "Mbps\n";
             screen_log_red += "\t错误：网卡速率必须为" + to_string(ETH_LINK_SPEED)
-                        + "Mbps,但检测到速率为" + to_string(info->eth_speed) + "Mbps\n";
+                        + "Mbps,但检测到速率为" + to_string(info->speed) + "Mbps\n";
             ret = false;
         }
     }
 
-    screen_log_black += "Network card duplex: \t\t" + net_get_duplex_desc(info->eth_duplex) + "\n";
-    LOG_INFO("Network card duplex: \t\t%s\n", (net_get_duplex_desc(info->eth_duplex)).c_str());
-    if (!control->get_third_product_state() && info->eth_duplex != DUPLEX_FULL) {
+    screen_log_black += "Network card duplex: \t\t" + net_get_duplex_desc(info->duplex) + "\n";
+    LOG_INFO("Network card duplex: \t\t%s\n", (net_get_duplex_desc(info->duplex)).c_str());
+    if (!control->get_third_product_state() && info->duplex != DUPLEX_FULL) {
         screen_log_black += "\tERROR: Network duplex must be Full, but current is "
-                    + net_get_duplex_desc(info->eth_duplex) + "\n";
-        screen_log_red += "\t错误：网卡必须为Full全双工，但检测到网卡为" + net_get_duplex_desc(info->eth_duplex) + "\n";
-        LOG_ERROR("ERROR: Network duplex must be Full, but current is %s\n", (net_get_duplex_desc(info->eth_duplex)).c_str());
+                    + net_get_duplex_desc(info->duplex) + "\n";
+        screen_log_red += "\t错误：网卡必须为Full全双工，但检测到网卡为"
+                    + net_get_duplex_desc(info->duplex) + "\n";
+        LOG_ERROR("ERROR: Network duplex must be Full, but current is %s\n",
+                    (net_get_duplex_desc(info->duplex)).c_str());
         ret = false;
     }
     
@@ -600,7 +603,7 @@ void* NetTest::test_all(void*)
         screen_log_red = INTERFACE_TEST_NAME[I_NET] + "结果：\t\t\t失败\n\n" + screen_log_red;
         control->set_interface_test_result(INTERFACE_TEST_NAME[I_NET], false);
     }
-    control->update_screen_log(screen_log_black);
+    control->update_color_screen_log(screen_log_black, "black");
     if (screen_log_red != "") {
         control->update_color_screen_log(screen_log_red, "red");
     }
