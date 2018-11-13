@@ -96,7 +96,7 @@ function connect_wifi_with_wpacli()
         wpa_cli -i wlan0 set_network $NETWORK_ID psk "\"$PASSWD\""
     elif [ $IS_WEP_PASSWD -eq 1 ]; then
         wpa_cli -i wlan0 set_network $NETWORK_ID key_mgmt NONE
-        wpa_cli -i wlan0 set_network $NETWORK_ID wep_key0 "\"$PASSWD\""
+        wpa_cli -i wlan0 set_network $NETWORK_ID wep_key0 $PASSWD
     else
         wpa_cli -i wlan0 set_network $NETWORK_ID key_mgmt NONE
     fi

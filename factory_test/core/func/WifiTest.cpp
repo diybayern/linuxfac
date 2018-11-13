@@ -394,7 +394,7 @@ bool WifiTest::check_if_wifi_connect_pass()
         screen_log_red += "\t错误：WiFi信息获取失败\n";
         return false;
     }
-    LOG_INFO("WIFI INFO:%s\n", wifi_info);
+    LOG_INFO("WIFI INFO:%s", wifi_info);
     screen_log_black += "WIFI INFO:" + (string)wifi_info + "\n";
 
 
@@ -441,7 +441,7 @@ bool WifiTest::check_if_wifi_connect_pass()
             screen_log_red += "\t错误：IP不可用\n";
             return false;
         } else {
-            LOG_ERROR("WIFI fail reason: \t%s\n", wifi_status);
+            LOG_ERROR("WIFI fail reason: \t%s", wifi_status);
             screen_log_black += "WIFI fail reason: \t" + (string)wifi_status + "\n";
             screen_log_red += "\t错误：" + (string)wifi_status + "\n";
             return false;
@@ -468,7 +468,7 @@ void* WifiTest::test_all(void*)
     screen_log_black += "==================== " + INTERFACE_TEST_NAME[I_WIFI] + " ====================\n";
     bool is_pass = false;
     FacArg* _facArg = control->get_fac_arg();
-    string cmd = "bash " + WIFI_TEST_SCRIPT + + " " + _facArg->wifi_ssid + " " + _facArg->wifi_passwd + " " + _facArg->wifi_enp;
+    string cmd = "bash " + WIFI_TEST_SCRIPT + " " + _facArg->wifi_ssid + " " + _facArg->wifi_passwd + " " + _facArg->wifi_enp;
     if (system(cmd.c_str()) < 0){
         LOG_ERROR("ERROR:wifi_test.sh run error!\n");
         screen_log_black += "wifi_test.sh run error!\n";

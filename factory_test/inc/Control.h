@@ -116,8 +116,8 @@ public:
 
     string get_third_net_info();
 
-    bool* get_interface_select_status() {
-        return interfaceTestSelectStatus;
+    bool* get_infc_func_select_status() {
+        return InfcFuncTestSelectStatus;
     }
     bool* get_interface_test_result() {
         return interfaceTestResult;
@@ -136,6 +136,7 @@ public:
 private:
     void init_test_array_status();
     void init_base_info();
+    void init_select_status();
     void init_hw_info();
     void init_fac_config();
     void init_ui();
@@ -149,7 +150,7 @@ private:
     HwInfo* _hwInfo;
     MesInfo* _mesInfo;
     
-    bool interfaceTestSelectStatus[INTERFACE_TEST_NUM];
+    bool InfcFuncTestSelectStatus[FUNC_TYPE_NUM];
     bool interfaceTestResult[INTERFACE_TEST_NUM];
     bool interfaceTestOver[INTERFACE_TEST_NUM];
     bool interfaceTestFinish[INTERFACE_TEST_NUM];

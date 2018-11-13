@@ -21,6 +21,31 @@ private:
     static string screen_log_red;
 };
 
+class UsbTest : public FuncBase
+{
+public:
+    static bool usb_num_test(string total_num, string num_3);
+    static bool get_dev_mount_point(struct udev_device* dev, char* dst);
+    static struct udev_device* get_child(struct udev* udev, struct udev_device* parent, string subsystem);
+    static void get_usb_mass_storage(USB_INFO_T* info);
+    static bool usb_test_mount(string block, string dir);
+    static bool usb_test_write(string dir, string file_name);
+    static bool usb_test_read(string dir, string file_name);
+    static bool usb_test_umount(string dir);
+    static bool usb_test_write_read(USB_INFO_T* info);
+    static bool usb_test_all(int num);
+    static void *test_all(void *arg);
+    void start_test(BaseInfo* baseInfo);
+
+    bool usb_test_read_status();
+    bool usb_test_read_cfg(USB_INFO_T* info);
+    bool usb_test_read_config(string dir);
+private:
+    static string screen_log_black;
+    static string screen_log_red;
+
+};
+
 class CpuTest : public FuncBase
 {
 public:
@@ -67,31 +92,12 @@ private:
     static string screen_log_red;
 };
 
-class UsbTest : public FuncBase
+class InterfaceTest : public FuncBase
 {
 public:
-    static bool usb_num_test(string total_num, string num_3);
-    static bool get_dev_mount_point(struct udev_device* dev, char* dst);
-    static struct udev_device* get_child(struct udev* udev, struct udev_device* parent, string subsystem);
-    static void get_usb_mass_storage(USB_INFO_T* info);
-    static bool usb_test_mount(string block, string dir);
-    static bool usb_test_write(string dir, string file_name);
-    static bool usb_test_read(string dir, string file_name);
-    static bool usb_test_umount(string dir);
-    static bool usb_test_write_read(USB_INFO_T* info);
-    static bool usb_test_all(int num);
-    static void *test_all(void *arg);
+    static void* test_all(void *arg);
     void start_test(BaseInfo* baseInfo);
-
-    bool usb_test_read_status();
-    bool usb_test_read_cfg(USB_INFO_T* info);
-    bool usb_test_read_config(string dir);
-private:
-    static string screen_log_black;
-    static string screen_log_red;
-
 };
-
 
 class StressTest : public FuncBase
 {
@@ -112,6 +118,12 @@ private:
     static string stress_result;
 };
 
+class UploadMesLog : public FuncBase
+{
+public:
+    static void* test_all(void*);
+    void start_test(BaseInfo* baseInfo);
+};
 
 class NextProcess : public FuncBase
 {
@@ -121,22 +133,6 @@ public:
     static void next_process_handle(BaseInfo* baseInfo);
     void init();
 };
-
-class UploadMesLog : public FuncBase
-{
-public:
-    static void* test_all(void*);
-    void start_test(BaseInfo* baseInfo);
-};
-
-class InterfaceTest : public FuncBase
-{
-public:
-    static void* test_all(void *arg);
-    void start_test(BaseInfo* baseInfo);
-};
-
-
 
 #endif
 

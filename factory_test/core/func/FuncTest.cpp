@@ -113,6 +113,142 @@ void FanTest::start_test(BaseInfo* baseInfo)
     pthread_create(&tid, NULL, test_all, baseInfo);
 }
 
+void* InterfaceTest::test_all(void *arg)
+{
+    if (arg == NULL) {
+        LOG_ERROR("arg is null");
+        return NULL;
+    }
+    BaseInfo* baseInfo = (BaseInfo*)arg;
+    Control *control = Control::get_control();
+    
+    bool* interfaceTestSelectStatus = control->get_infc_func_select_status();
+    bool* interfaceTestResult = control->get_interface_test_result();
+    bool* interfaceTestOver = control->get_interface_test_over();
+    bool* interfaceTestFinish = control->get_interface_test_finish();
+    bool* funcFinishStatus = control->get_func_finish_status();
+    
+    /* if interface test is running, stop it */
+    if (control->get_interface_run_status() == INF_RUNNING) {
+        LOG_INFO("******************** stop interface test ********************");
+        control->set_interface_run_status(INF_BREAK);
+        control->get_ui_handle()->ui_set_interface_test_state(INF_BREAK);
+        return NULL;
+    }
+    
+    if (funcFinishStatus[F_INTERFACE]) {
+        LOG_INFO("interface test has finished, do not need test again");
+        return NULL;
+    }
+
+    /* if conf file is wrong, not test */
+    if (!control->get_third_product_state()) {
+        if (control->get_auto_upload_mes_status() && control->get_fac_config_status() != 0) {
+            control->get_ui_handle()->confirm_test_result_warning("配置文件有误");
+            return NULL;
+        }
+    }
+
+    if (control->get_interface_run_status() == INF_RUNEND) {
+        LOG_INFO("******************** start interface test ********************");
+        control->set_interface_run_status(INF_RUNNING);
+        control->get_ui_handle()->ui_set_interface_test_state(INF_RUNNING);
+    }    
+    
+    FuncBase** FuncBase = control->get_funcbase();
+
+    int interfaceTestFailNum[INTERFACE_TEST_NUM] = {0, };
+    
+    int test_num = control->get_interface_test_times();
+    int real_test_num = 0;
+    int interface_run_status = INF_RUNNING;
+    for (int i = 0; i < test_num || test_num == 0; i++) {
+        interface_run_status = control->get_interface_run_status();
+        if (interface_run_status == INF_BREAK) {
+            break;
+        }
+
+        real_test_num = i + 1;
+        string loop = "\n******************** LOOP: " + to_string(i + 1) + " ********************";
+        control->update_color_screen_log(loop, "black");
+        
+        for (int j = 0; j < INTERFACE_TEST_NUM; j++) {
+            if (interfaceTestSelectStatus[j]) {
+                string log_info = "---------- start " + INTERFACE_TEST_MES_TAG[j] + " test ----------\n";
+                LOG_INFO(log_info.c_str());
+                FuncBase[j]->start_test(baseInfo);
+            }
+        }
+        
+        while (1) {
+            sleep(1);
+            bool tmp_test_over = true;
+            for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
+                tmp_test_over &= interfaceTestOver[i];
+                if (!tmp_test_over) {
+                    break;
+                }
+            }
+            if (tmp_test_over) {
+                for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
+                    if (!interfaceTestResult[i]) {
+                        interfaceTestFailNum[i]++;
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    control->update_color_screen_log("=============== " + FUNC_TEST_NAME[F_INTERFACE] + "结果 ===============", "black");
+
+    string total_result = "";
+    for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
+        if (interfaceTestSelectStatus[i]) {
+            if (interfaceTestFailNum[i] == 0) {
+                total_result += INTERFACE_TEST_MES_TAG[i] + "\tPASS (Time:" + to_string(real_test_num) + ",ERROR:0)\n";
+                control->update_mes_log(INTERFACE_TEST_MES_TAG[i], "PASS");
+                control->set_func_test_result(INTERFACE_TEST_NAME[i], "PASS");
+                control->set_interface_test_finish(INTERFACE_TEST_NAME[i], true);
+            } else {
+                control->update_mes_log(INTERFACE_TEST_MES_TAG[i], "FAIL");
+                control->set_func_test_result(INTERFACE_TEST_NAME[i], "FAIL");
+                control->set_interface_test_finish(INTERFACE_TEST_NAME[i], false);
+                total_result += INTERFACE_TEST_MES_TAG[i] + "\tFAIL (Time:" + to_string(real_test_num) + ",ERROR:" 
+                                   + to_string(interfaceTestFailNum[i]) + ")\n";
+            }
+        }
+    }
+    total_result += "===============================================";
+    control->update_color_screen_log(total_result, "black");
+    
+    /* all interface func test finish,interface test finish */
+    bool tmp_test_finish = true;
+    for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
+        tmp_test_finish &= interfaceTestFinish[i];
+        if (!tmp_test_finish) {
+            break;
+        }
+    }
+    if (tmp_test_finish) {
+         funcFinishStatus[F_INTERFACE] = true;
+    }
+    
+    control->set_interface_run_status(INF_RUNEND);
+    control->get_ui_handle()->ui_set_interface_test_state(INF_RUNEND);
+    return NULL;
+}
+
+void InterfaceTest::start_test(BaseInfo* baseInfo)
+{
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
+    pthread_t tid;
+    pthread_create(&tid, NULL, test_all, baseInfo);
+}
+
 
 int  StressTest::mem_stress_test_num = 0;
 bool StressTest::mem_stress_status = false;
@@ -390,6 +526,23 @@ string StressTest::get_stress_result_record()
     return stress_result;
 }
 
+void UploadMesLog::start_test(BaseInfo* baseInfo)
+{
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
+    pthread_t tid;
+    pthread_create(&tid, NULL, test_all, baseInfo);
+}
+
+void* UploadMesLog::test_all(void*)
+{
+    Control* control = Control::get_control();
+    control->upload_mes_log();
+    return NULL;
+}
+
 void NextProcess::next_process_handle(BaseInfo* baseInfo) 
 {
     if (baseInfo == NULL) {
@@ -420,13 +573,13 @@ void NextProcess::next_process_handle(BaseInfo* baseInfo)
             pthread_mutex_unlock(&g_next_process_lock);
             return;
         }
-    } 
+    }
     pthread_mutex_unlock(&g_next_process_lock);
     /* create stress lock file, and then shoutdown */
     if (!create_stress_test_lock(true)) {
         LOG_ERROR("create stress test lock fail!\n");
-        uihandle->confirm_test_result_warning("EMMC异常，无法关机！");
-        control->update_color_screen_log("EMMC异常，无法关机！", "red");
+        uihandle->confirm_test_result_warning("文件异常，无法关机！");
+        control->update_color_screen_log("文件异常，无法关机！", "red");
     } else if (execute_command("shutdown -h now", true) == "error") {
         LOG_ERROR("shutdown cmd run error\n");
         uihandle->confirm_test_result_warning("终端异常，无法关机！");
@@ -460,159 +613,5 @@ void NextProcess::start_test(BaseInfo* baseInfo)
 void NextProcess::init(){
     pthread_mutex_init(&g_next_process_lock, NULL);
 }
-
-void UploadMesLog::start_test(BaseInfo* baseInfo)
-{
-    if (baseInfo == NULL) {
-        LOG_ERROR("baseInfo is null");
-        return;
-    }
-    pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
-}
-
-void* UploadMesLog::test_all(void*)
-{
-    Control* control = Control::get_control();
-    control->upload_mes_log();
-    return NULL;
-}
-
-void* InterfaceTest::test_all(void *arg)
-{
-    if (arg == NULL) {
-        LOG_ERROR("arg is null");
-        return NULL;
-    }
-    BaseInfo* baseInfo = (BaseInfo*)arg;
-    Control *control = Control::get_control();
-    
-    bool* interfaceTestSelectStatus = control->get_interface_select_status();
-    bool* interfaceTestResult = control->get_interface_test_result();
-    bool* interfaceTestOver = control->get_interface_test_over();
-    bool* interfaceTestFinish = control->get_interface_test_finish();
-    bool* funcFinishStatus = control->get_func_finish_status();
-    
-    /* if interface test is running, stop it */
-    if (control->get_interface_run_status() == INF_RUNNING) {
-        LOG_INFO("******************** stop interface test ********************");
-        control->set_interface_run_status(INF_BREAK);
-        control->get_ui_handle()->ui_set_interface_test_state(INF_BREAK);
-        return NULL;
-    }
-    
-    if (funcFinishStatus[F_INTERFACE]) {
-        LOG_INFO("interface test has finished, do not need test again");
-        return NULL;
-    }
-
-    /* if conf file is wrong, not test */
-    if (!control->get_third_product_state()) {
-        if (control->get_auto_upload_mes_status() && control->get_fac_config_status() != 0) {
-            control->get_ui_handle()->confirm_test_result_warning("配置文件有误");
-            return NULL;
-        }
-    }
-
-    if (control->get_interface_run_status() == INF_RUNEND) {
-        LOG_INFO("******************** start interface test ********************");
-        control->set_interface_run_status(INF_RUNNING);
-        control->get_ui_handle()->ui_set_interface_test_state(INF_RUNNING);
-    }    
-    
-    FuncBase** FuncBase = control->get_funcbase();
-
-    int interfaceTestFailNum[INTERFACE_TEST_NUM] = {0, };
-    
-    int test_num = control->get_interface_test_times();
-    int real_test_num = 0;
-    int interface_run_status = INF_RUNNING;
-    for (int i = 0; i < test_num || test_num == 0; i++) {
-        interface_run_status = control->get_interface_run_status();
-        if (interface_run_status == INF_BREAK) {
-            break;
-        }
-
-        real_test_num = i + 1;
-        string loop = "\n******************** LOOP: " + to_string(i + 1) + " ********************";
-        control->update_color_screen_log(loop, "black");
-        
-        for (int j = 0; j < INTERFACE_TEST_NUM; j++) {
-            if (interfaceTestSelectStatus[j]) {
-                string log_info = "---------- start " + INTERFACE_TEST_MES_TAG[j] + " test ----------\n";
-                LOG_INFO(log_info.c_str());
-                FuncBase[j]->start_test(baseInfo);
-            }
-        }
-        
-        while (1) {
-            sleep(1);
-            bool tmp_test_over = true;
-            for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
-                tmp_test_over &= interfaceTestOver[i];
-                if (!tmp_test_over) {
-                    break;
-                }
-            }
-            if (tmp_test_over) {
-                for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
-                    if (!interfaceTestResult[i]) {
-                        interfaceTestFailNum[i]++;
-                    }
-                }
-                break;
-            }
-        }
-    }
-
-    control->update_color_screen_log("=============== " + FUNC_TEST_NAME[F_INTERFACE] + "结果 ===============", "black");
-
-    string total_result = "";
-    for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
-        if (interfaceTestSelectStatus[i]) {
-            if (interfaceTestFailNum[i] == 0) {
-                total_result += INTERFACE_TEST_MES_TAG[i] + "\tPASS (Time:" + to_string(real_test_num) + ",ERROR:0)\n";
-                control->update_mes_log(INTERFACE_TEST_MES_TAG[i], "PASS");
-                control->set_func_test_result(INTERFACE_TEST_NAME[i], "PASS");
-                control->set_interface_test_finish(INTERFACE_TEST_NAME[i], true);
-            } else {
-                control->update_mes_log(INTERFACE_TEST_MES_TAG[i], "FAIL");
-                control->set_func_test_result(INTERFACE_TEST_NAME[i], "FAIL");
-                control->set_interface_test_finish(INTERFACE_TEST_NAME[i], false);
-                total_result += INTERFACE_TEST_MES_TAG[i] + "\tFAIL (Time:" + to_string(real_test_num) + ",ERROR:" 
-                                   + to_string(interfaceTestFailNum[i]) + ")\n";
-            }
-        }
-    }
-    total_result += "===============================================";
-    control->update_color_screen_log(total_result, "black");
-    
-    /* all interface func test finish,interface test finish */
-    bool tmp_test_finish = true;
-    for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
-        tmp_test_finish &= interfaceTestFinish[i];
-        if (!tmp_test_finish) {
-            break;
-        }
-    }
-    if (tmp_test_finish) {
-         funcFinishStatus[F_INTERFACE] = true;
-    }
-    
-    control->set_interface_run_status(INF_RUNEND);
-    control->get_ui_handle()->ui_set_interface_test_state(INF_RUNEND);
-    return NULL;
-}
-
-void InterfaceTest::start_test(BaseInfo* baseInfo)
-{
-    if (baseInfo == NULL) {
-        LOG_ERROR("baseInfo is null");
-        return;
-    }
-    pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
-}
-
 
 

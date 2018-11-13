@@ -29,12 +29,12 @@ Control::Control():QObject()
     _facArg                   = new FacArg;
     _mesInfo                  = new MesInfo;
 
-    _testStep = STEP_IDLE;
-    _interfaceRunStatus = INF_RUNEND;
+    _testStep                 = STEP_IDLE;
+    _interfaceRunStatus       = INF_RUNEND;
     
     init_test_array_status();
     init_base_info();
-    //init_select_status();
+    init_select_status();
     init_hw_info();
     init_fac_config();
     init_mes_log();
@@ -85,7 +85,7 @@ void Control::dele_control_new_object()
 
 void Control::init_test_array_status()
 {
-    memset(interfaceTestSelectStatus, true, sizeof(interfaceTestSelectStatus));
+    memset(InfcFuncTestSelectStatus, true, sizeof(InfcFuncTestSelectStatus));
     memset(interfaceTestResult, false, sizeof(interfaceTestResult));
     memset(interfaceTestOver, false, sizeof(interfaceTestOver));
     memset(interfaceTestFinish, false, sizeof(interfaceTestFinish));
@@ -114,6 +114,29 @@ void Control::init_base_info()
         LOG_INFO("this is third product\n");
     } else {
         _is_third_product = false;
+    }
+}
+
+void Control::init_select_status()
+{
+    if (_baseInfo->hdd_cap == "0" || _baseInfo->hdd_cap == "") {
+        InfcFuncTestSelectStatus[HDD] = false;
+    }
+    if (_baseInfo->ssd_cap == "0" || _baseInfo->ssd_cap == "") {
+        InfcFuncTestSelectStatus[SSD] = false;
+    }
+    if (_baseInfo->fan_speed == "0" || _baseInfo->fan_speed == "") {
+        InfcFuncTestSelectStatus[FAN] = false;
+    }
+    if (_baseInfo->wifi_exist == "0" || _baseInfo->wifi_exist == "") {
+        InfcFuncTestSelectStatus[WIFI] = false;
+    }
+    
+    if (_baseInfo->bright_level == "0" || _baseInfo->bright_level == "") {
+        InfcFuncTestSelectStatus[BRIGHT] = false;
+    }
+    if (_baseInfo->camera_exist == "0" || _baseInfo->camera_exist == "") {
+        InfcFuncTestSelectStatus[CAMERA] = false;
     }
 }
 
@@ -151,10 +174,10 @@ void Control::init_ui()
     connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_INTERFACE]), SIGNAL(clicked()), this, SLOT(start_interface_test()));           
     connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_SOUND]), SIGNAL(clicked()), this, SLOT(start_sound_test()));
     connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_DISPLAY]), SIGNAL(clicked()), this, SLOT(start_display_test()));
-    if (_baseInfo->bright_level != "0" && _baseInfo->bright_level != ""){
+    if (InfcFuncTestSelectStatus[BRIGHT]) {
         connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_BRIGHT]), SIGNAL(clicked()), this, SLOT(start_bright_test()));
     }
-    if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
+    if (InfcFuncTestSelectStatus[CAMERA]) {
         connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_CAMERA]), SIGNAL(clicked()), this, SLOT(start_camera_test()));
     }
 
@@ -186,48 +209,44 @@ void Control::init_ui_idv_or_vdi()
     _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_EDID]);
     _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_CPU]);
     
-    if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
+    if (InfcFuncTestSelectStatus[HDD]) {
         _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_HDD]);
     } else {
-        interfaceTestSelectStatus[I_HDD] = false;
-        interfaceTestFinish[I_HDD]       = true;
-        interfaceTestOver[I_HDD]         = true;
+        interfaceTestFinish[I_HDD] = true;
+        interfaceTestOver[I_HDD]   = true;
     }
     
-    if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
+    if (InfcFuncTestSelectStatus[SSD]) {
         _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_SSD]);
     } else {
-        interfaceTestSelectStatus[I_SSD] = false;
-        interfaceTestFinish[I_SSD]       = true;
-        interfaceTestOver[I_SSD]         = true;
+        interfaceTestFinish[I_SSD] = true;
+        interfaceTestOver[I_SSD]   = true;
     }
     
-    if (_baseInfo->fan_speed != "0" && _baseInfo->fan_speed != "") {
+    if (InfcFuncTestSelectStatus[FAN]) {
         _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_FAN]);
     } else {
-        interfaceTestSelectStatus[I_FAN] = false;
-        interfaceTestFinish[I_FAN]       = true;
-        interfaceTestOver[I_FAN]         = true;
+        interfaceTestFinish[I_FAN] = true;
+        interfaceTestOver[I_FAN]   = true;
     }
     
-    if (_baseInfo->wifi_exist != "0" && _baseInfo->wifi_exist != "") {
+    if (InfcFuncTestSelectStatus[WIFI]) {
         _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_WIFI]);
     } else {
-        interfaceTestSelectStatus[I_WIFI] = false;
-        interfaceTestFinish[I_WIFI]       = true;
-        interfaceTestOver[I_WIFI]         = true;
+        interfaceTestFinish[I_WIFI] = true;
+        interfaceTestOver[I_WIFI]   = true;
     }
     
     _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_SOUND]);
     _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_DISPLAY]);
     
-    if (_baseInfo->bright_level != "0" && _baseInfo->bright_level != "") {
+    if (InfcFuncTestSelectStatus[BRIGHT]) {
         _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_BRIGHT]);
     } else {
         funcFinishStatus[F_BRIGHT] = true;
     }
     
-    if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
+    if (InfcFuncTestSelectStatus[CAMERA]) {
         _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_CAMERA]);
     } else {
         funcFinishStatus[F_CAMERA] = true;
@@ -238,12 +257,9 @@ void Control::init_ui_idv_or_vdi()
     
     if (!check_file_exit(WHOLE_TEST_FILE)) {
         _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_NEXT_PROCESS]);
-    }    
-    
-    if (check_file_exit(WHOLE_TEST_FILE)) {
-        _uiHandle->add_complete_or_single_test_label("整机测试");
-    } else {
         _uiHandle->add_complete_or_single_test_label("单板测试");
+    } else {
+        _uiHandle->add_complete_or_single_test_label("整机测试");
     }
     
     _uiHandle->sync_main_test_ui(false);
@@ -279,6 +295,7 @@ void Control::init_ui_third_product()
     string camera_exist = execute_command("xawtv -hwscan 2>&1 | grep OK", true);
     if ( camera_exist != "error" && camera_exist != "") {
         _baseInfo->camera_exist = "1";
+        InfcFuncTestSelectStatus[CAMERA] = true;
         _uiHandle->add_main_label("摄像头信息:", "存在");
     }
     
@@ -286,53 +303,49 @@ void Control::init_ui_third_product()
     _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_MEM]);
     
     if (_baseInfo->usb_total_num == "0") { // do not need test usb when it is third product and no usb
-        interfaceTestSelectStatus[I_USB] = false;
-        interfaceTestFinish[I_USB]       = true;
-        interfaceTestOver[I_USB]         = true;
+        InfcFuncTestSelectStatus[USB] = false;
+        interfaceTestFinish[I_USB]    = true;
+        interfaceTestOver[I_USB]      = true;
     } else {
         _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_USB]);
     }
     
     _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_NET]);
     
-    interfaceTestSelectStatus[I_EDID] = false;
-    interfaceTestFinish[I_EDID]       = true;
-    interfaceTestOver[I_EDID]         = true;
+    InfcFuncTestSelectStatus[EDID] = false;
+    interfaceTestFinish[I_EDID]    = true;
+    interfaceTestOver[I_EDID]      = true;
     
-    interfaceTestSelectStatus[I_CPU]  = false;
-    interfaceTestFinish[I_CPU]        = true;
-    interfaceTestOver[I_CPU]          = true;
+    InfcFuncTestSelectStatus[CPU] = false;
+    interfaceTestFinish[I_CPU]    = true;
+    interfaceTestOver[I_CPU]      = true;
     
-    if (_baseInfo->hdd_cap != "0" && _baseInfo->hdd_cap != "") {
+    if (InfcFuncTestSelectStatus[HDD]) {
         _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_HDD]);
     } else {
-        interfaceTestSelectStatus[I_HDD] = false;
-        interfaceTestFinish[I_HDD]       = true;
-        interfaceTestOver[I_HDD]         = true;
+        interfaceTestFinish[I_HDD] = true;
+        interfaceTestOver[I_HDD]   = true;
     }
     
-    if (_baseInfo->ssd_cap != "0" && _baseInfo->ssd_cap != "") {
+    if (InfcFuncTestSelectStatus[SSD]) {
         _uiHandle->add_interface_test_button(INTERFACE_TEST_NAME[I_SSD]);
     } else {
-        interfaceTestSelectStatus[I_SSD] = false;
-        interfaceTestFinish[I_SSD]       = true;
-        interfaceTestOver[I_SSD]         = true;
+        interfaceTestFinish[I_SSD] = true;
+        interfaceTestOver[I_SSD]   = true;
     }
     
-    interfaceTestSelectStatus[I_FAN] = false;
-    interfaceTestFinish[I_FAN]       = true;
-    interfaceTestOver[I_FAN]         = true;
+    interfaceTestFinish[I_FAN] = true;
+    interfaceTestOver[I_FAN]   = true;
     
-    interfaceTestSelectStatus[I_WIFI] = false;
-    interfaceTestFinish[I_WIFI]       = true;
-    interfaceTestOver[I_WIFI]         = true;
+    interfaceTestFinish[I_WIFI] = true;
+    interfaceTestOver[I_WIFI]   = true;
     
     _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_SOUND]);
     _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_DISPLAY]);
     
     funcFinishStatus[F_BRIGHT] = true;
     
-    if (_baseInfo->camera_exist != "0" && _baseInfo->camera_exist != "") {
+    if (InfcFuncTestSelectStatus[CAMERA]) {
         _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_CAMERA]);
     } else {
         funcFinishStatus[F_CAMERA] = true;
@@ -748,7 +761,7 @@ void Control::set_interface_select_status(string func, bool state)
 
     for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
         if (func == INTERFACE_TEST_NAME[i]) {
-            interfaceTestSelectStatus[i] = state;
+            InfcFuncTestSelectStatus[i] = state;
             /* when selection status changed, test over and finish status need to be changed */
             interfaceTestFinish[i] = (!state);
             interfaceTestOver[i]   = (!state);
