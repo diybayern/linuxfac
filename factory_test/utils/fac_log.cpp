@@ -83,8 +83,8 @@ void __write_log(write_log_callback func, const char *fname, const char *functio
     } else {
         snprintf(tmp, buf_left, "%s", fmt);
         if (fmt[len_fmt - 1] != '\n') {
-            tmp[len_fmt]    = '\n';
-            tmp[len_fmt + 1]  = '\0';
+            tmp[len_fmt] = '\n';
+            tmp[len_fmt + 1] = '\0';
         }
         buf = msg;
     }

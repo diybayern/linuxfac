@@ -438,8 +438,8 @@ void Control::show_test_confirm_dialog(string item) //TODO: combine with confirm
         LOG_ERROR("func name is NULL");
         return;
     }
-    
-    LOG_INFO("confirm %s result", item.c_str());
+    LOG_INFO("confirm result");
+    //LOG_INFO("confirm %s result", item.c_str()); // item is a chinese string, log file could be abnormal
     if (item.compare(FUNC_TEST_NAME[F_STRESS]) == 0) {
         _stress_test_window_quit_status = false;
     }
@@ -682,7 +682,7 @@ void Control::update_mes_log(string tag, string value)
 
 void Control::upload_mes_log()
 {
-    LOG_INFO("---------- start %s ----------\n", FUNC_TEST_TAG_NAME[F_UPLOAD_MES_LOG]);
+    LOG_INFO("---------- start %s ----------\n", FUNC_TEST_TAG_NAME[F_UPLOAD_MES_LOG].c_str());
     update_color_screen_log("==================== " + FUNC_TEST_NAME[F_UPLOAD_MES_LOG] + " ====================\n", "black");
     if (_fac_config_status != 0) {
         LOG_INFO("fac config is wrong, do not upload");
@@ -711,8 +711,8 @@ void Control::upload_mes_log()
         _uiHandle->confirm_test_result_waiting("正在上传中...");
         sleep(1);
         string response = ftp_send_file(MES_FILE, _facArg); // upload log
+        LOG_INFO("upload log result: %s", response.c_str());
         response = response_to_chinese(response);  // translate upload result to chinese
-        LOG_INFO("upload log: %s", response.c_str());
         if (response.compare("上传成功") == 0) {
             if (check_file_exit(WHOLE_TEST_FILE)) {
                 _uiHandle->confirm_test_result_success("上传成功", "关机");

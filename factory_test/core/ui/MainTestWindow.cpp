@@ -258,9 +258,10 @@ void MainTestWindow::update_color_screen_log(QString info, QString color)
 
     _string_to_htmlFilter(info);
     _string_to_html(info,rgb);
-    //_editInfo->append("");
+    _editInfo->append("");
     _editInfo->insertHtml(info);
     _editInfo->append("");
+    _editInfo->moveCursor(QTextCursor::End);
     qmutext.unlock();
 }
 

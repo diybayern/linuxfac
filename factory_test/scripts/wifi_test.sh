@@ -258,6 +258,7 @@ done
 
 # check wifi connected or not
 if [ $CONNECT_SUCCESS -ne 1 ];  then
+    echo "connect wifi test failed!" | tee $FACTORY_SHELL_LOG
     echo "wifi连接失败!" | tee $WIFI_TEST_RESULT
     rm $FACTORY_WIFI_TEST_LOCK
     close_wifi

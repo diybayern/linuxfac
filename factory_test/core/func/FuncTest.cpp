@@ -200,9 +200,7 @@ void* InterfaceTest::test_all(void *arg)
         }
     }
 
-    control->update_color_screen_log("=============== " + FUNC_TEST_NAME[F_INTERFACE] + "结果 ===============", "black");
-
-    string total_result = "";
+    string total_result = "=============== " + FUNC_TEST_NAME[F_INTERFACE] + "结果 ===============\n";
     for (int i = 0; i < INTERFACE_TEST_NUM; i++) {
         if (interfaceTestSelectStatus[i]) {
             if (interfaceTestFailNum[i] == 0) {
