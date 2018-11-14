@@ -105,7 +105,7 @@ void* BrightTest::test_all(void *arg)
         return NULL;
     }
     Control::get_control()->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_BRIGHT]
-                + " ====================\n", "black");
+                + " ====================", "black");
     BaseInfo* baseInfo = (BaseInfo*)arg;
     Control::get_control()->show_test_confirm_dialog(FUNC_TEST_NAME[F_BRIGHT]);
     bright_test_all(baseInfo->bright_level);

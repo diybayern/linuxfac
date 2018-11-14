@@ -64,6 +64,10 @@ if [ -n "$1" ]; then
     fi
 fi
 
+if [ ! -d /var/log/factory_test ]; then
+    mkdir /var/log/factory_test
+fi
+    
 cd /usr/local/bin/factory
 ./factory_test $1 > /var/log/factory_test/factorytest_stdout.log 2>&1
 rm -f /tmp/whole_test

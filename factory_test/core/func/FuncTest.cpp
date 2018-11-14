@@ -123,10 +123,10 @@ void* InterfaceTest::test_all(void *arg)
     Control *control = Control::get_control();
     
     bool* interfaceTestSelectStatus = control->get_infc_func_select_status();
-    bool* interfaceTestResult = control->get_interface_test_result();
-    bool* interfaceTestOver = control->get_interface_test_over();
-    bool* interfaceTestFinish = control->get_interface_test_finish();
-    bool* funcFinishStatus = control->get_func_finish_status();
+    bool* interfaceTestResult       = control->get_interface_test_result();
+    bool* interfaceTestOver         = control->get_interface_test_over();
+    bool* interfaceTestFinish       = control->get_interface_test_finish();
+    bool* funcFinishStatus          = control->get_func_finish_status();
     
     /* if interface test is running, stop it */
     if (control->get_interface_run_status() == INF_RUNNING) {
@@ -326,7 +326,7 @@ void* StressTest::mem_stress_test(void*)
     string free_mem_cap = execute_command("free -m | awk '/Mem/ {print $4}'", true);
     if (free_mem_cap == "error") {
         LOG_ERROR("get free mem cap error\n");
-        mem_stress_result &= false; // every mem test result must be PASS
+        mem_stress_result = false;
         mem_stress_status = false;
         return NULL;
     }
@@ -339,10 +339,9 @@ void* StressTest::mem_stress_test(void*)
     string result = execute_command("bash " + MEM_TEST_SCRIPT + " " + to_string(test_mem_cap) + "M", true);
     if (result == "SUCCESS") {
         LOG_INFO("mem stress test result:\tPASS\n");
-        mem_stress_result &= true; // every mem test result must be PASS
     } else {
         LOG_ERROR("mem stress test result:\tfailed\n");
-        mem_stress_result &= false;
+        mem_stress_result = false;
     }
     mem_stress_status = false; // mem stress test finished
     
@@ -459,21 +458,25 @@ void* StressTest::test_all(void* arg)
                 uihandle->set_stress_test_pass_or_fail("FAIL");
             }
         }
+        
         /* If the last stress test is abnormally powered down, a warning box is displayed. */
         if (control->get_pcba_whole_lock_state() && STRESS_ERROR_TIME(tmp_dst)) {
             uihandle->confirm_test_result_warning("上次拷机退出异常");
         }
+        
         /* after stress test 30 mins, mem test starting*/
         if (STRESS_MEMTEST_START(tmp_dst) && !mem_stress_status) {
-            get_current_open_time(&mem_src);
+            mem_src = mem_dst;  //get_current_open_time(&mem_src);
             pthread_create(&pid_mem, NULL, mem_stress_test, NULL);
         }
+        
         /* after mem test started, test again every 10 mins */
         diff_running_time(&mem_dst, &mem_src);
-        if (STRESS_MEMTEST_ITV(mem_dst) && !mem_stress_status) {
-            get_current_open_time(&mem_src);
+        if (mem_stress_test_num > 0 && STRESS_MEMTEST_ITV(mem_dst) && !mem_stress_status) {
+            mem_src = mem_dst;  //get_current_open_time(&mem_src);
             pthread_create(&pid_mem, NULL, mem_stress_test, NULL);
         }
+        
         /* After the first test, update the mem test result NULL to PASS/FAIL */
         if (mem_stress_test_num == 1 && !mem_stress_status && mem_stress_result) {
             mem_result_str = "PASS";

@@ -151,7 +151,7 @@ bool CameraTest::camera_test_all()
 void* CameraTest::test_all(void*)
 {
     Control* control = Control::get_control();
-    control->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_CAMERA] + " ====================\n", "black");
+    control->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_CAMERA] + " ====================", "black");
     camera_test_all();    
     control->show_test_confirm_dialog(FUNC_TEST_NAME[F_CAMERA]);
     return NULL;

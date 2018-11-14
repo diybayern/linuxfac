@@ -538,7 +538,7 @@ void* SoundTest::test_all(void*)
 {
     Control *control = Control::get_control();
     UiHandle* uihandle = UiHandle::get_uihandle();
-    control->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_SOUND] + " ====================\n", "black");
+    control->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_SOUND] + " ====================", "black");
     uihandle->start_audio_progress_dialog();
     usleep(200000);  //wait for Synchronize progress bar and recording
     start_record();

@@ -486,7 +486,7 @@ void Control::start_sound_test()
 void Control::start_display_test()
 {
     LOG_INFO("******************** start display test ********************");
-    update_color_screen_log("==================== " + FUNC_TEST_NAME[F_DISPLAY] + " ====================\n", "black");
+    update_color_screen_log("==================== " + FUNC_TEST_NAME[F_DISPLAY] + " ====================", "black");
     _uiHandle->show_display_ui();
 }
 
@@ -683,7 +683,7 @@ void Control::update_mes_log(string tag, string value)
 void Control::upload_mes_log()
 {
     LOG_INFO("---------- start %s ----------\n", FUNC_TEST_TAG_NAME[F_UPLOAD_MES_LOG].c_str());
-    update_color_screen_log("==================== " + FUNC_TEST_NAME[F_UPLOAD_MES_LOG] + " ====================\n", "black");
+    update_color_screen_log("==================== " + FUNC_TEST_NAME[F_UPLOAD_MES_LOG] + " ====================", "black");
     if (_fac_config_status != 0) {
         LOG_INFO("fac config is wrong, do not upload");
         _uiHandle->confirm_test_result_warning("配置文件有误");
