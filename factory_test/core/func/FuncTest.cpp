@@ -473,7 +473,7 @@ void* StressTest::test_all(void* arg)
         /* after mem test started, test again every 10 mins */
         diff_running_time(&mem_dst, &mem_src);
         if (mem_stress_test_num > 0 && STRESS_MEMTEST_ITV(mem_dst) && !mem_stress_status) {
-            mem_src = mem_dst;  //get_current_open_time(&mem_src);
+            get_current_open_time(&mem_src);
             pthread_create(&pid_mem, NULL, mem_stress_test, NULL);
         }
         
