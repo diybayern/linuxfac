@@ -17,9 +17,6 @@ void os_log(const char* msg, va_list list)
     int file_size = 0;
 
     pthread_mutex_lock(&mutex);
-    if (!check_file_exit(LOG_PATH)) {
-        mkdir(LOG_PATH.c_str(), 0777);
-    }
     log_file_fp = fopen(LOG_FILE.c_str(), "a+");
 
     if (log_file_fp == NULL) {
