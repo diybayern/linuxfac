@@ -247,6 +247,25 @@ void InterfaceTest::start_test(BaseInfo* baseInfo)
     pthread_create(&tid, NULL, test_all, baseInfo);
 }
 
+void* PowerTest::test_all(void*)
+{
+    Control *control = Control::get_control();
+    control->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_POWER] + " ====================", "black");
+
+    control->show_test_confirm_dialog(FUNC_TEST_NAME[F_POWER]);
+    
+    return NULL;
+}
+
+void PowerTest::start_test(BaseInfo* baseInfo)
+{
+    if (baseInfo == NULL) {
+        LOG_ERROR("baseInfo is null");
+        return;
+    }
+    pthread_t tid;
+    pthread_create(&tid, NULL, test_all, baseInfo);
+}
 
 int  StressTest::mem_stress_test_num = 0;
 bool StressTest::mem_stress_status = false;

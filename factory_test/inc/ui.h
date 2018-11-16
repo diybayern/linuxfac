@@ -186,7 +186,7 @@ class MainTestWindow : public QDialog
 
         bool _is_auto_upload_checked = true;
 
-        QPushButton* _get_interface_test_button();
+        QPushButton* _get_func_test_button(QString func);
         QList<InterfaceTestItemPri> if_test_pri_list;
         void _set_interface_test_item_enable(bool state);
 
@@ -224,6 +224,7 @@ class MainTestWindow : public QDialog
         void slot_update_stress_test_pass_or_fail(QString result);
         void update_sn_mac_state(QString sn_mac, QString result);
         void slot_set_brightness_dialog_button_state(bool state);
+        void slot_set_upload_mes_button_state(bool state);
         void slot_recv_result_from_scangun();
         
     private slots:

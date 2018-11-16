@@ -16,6 +16,7 @@ Control::Control():QObject()
     _funcBase[WIFI]           = new WifiTest();
     _funcBase[INTERFACE]      = new InterfaceTest();
     _funcBase[SOUND]          = new SoundTest();
+    _funcBase[POWER]          = new PowerTest();
     _funcBase[BRIGHT]         = new BrightTest();
     _funcBase[CAMERA]         = new CameraTest();
     _funcBase[STRESS]         = new StressTest();
@@ -174,6 +175,7 @@ void Control::init_ui()
     connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_INTERFACE]), SIGNAL(clicked()), this, SLOT(start_interface_test()));           
     connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_SOUND]), SIGNAL(clicked()), this, SLOT(start_sound_test()));
     connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_DISPLAY]), SIGNAL(clicked()), this, SLOT(start_display_test()));
+    connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_POWER]), SIGNAL(clicked()), this, SLOT(start_power_test()));
     if (InfcFuncTestSelectStatus[BRIGHT]) {
         connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_BRIGHT]), SIGNAL(clicked()), this, SLOT(start_bright_test()));
     }
@@ -184,9 +186,9 @@ void Control::init_ui()
     if (!_is_third_product) {
         connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_UPLOAD_MES_LOG]), SIGNAL(clicked()), this, SLOT(start_upload_log()));
 
-        if (!check_file_exit(WHOLE_TEST_FILE)) {
+        /*if (!check_file_exit(WHOLE_TEST_FILE)) {
             connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_NEXT_PROCESS]), SIGNAL(clicked()), this, SLOT(start_next_process()));
-        }
+        }*/
     }
 
     connect(_uiHandle->get_qobject(FUNC_TEST_NAME[F_STRESS]), SIGNAL(clicked()), this, SLOT(start_stress_test()));
@@ -239,6 +241,7 @@ void Control::init_ui_idv_or_vdi()
     
     _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_SOUND]);
     _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_DISPLAY]);
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_POWER]);
     
     if (InfcFuncTestSelectStatus[BRIGHT]) {
         _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_BRIGHT]);
@@ -256,7 +259,7 @@ void Control::init_ui_idv_or_vdi()
     _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_UPLOAD_MES_LOG]);
     
     if (!check_file_exit(WHOLE_TEST_FILE)) {
-        _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_NEXT_PROCESS]);
+        //_uiHandle->add_main_test_button(FUNC_TEST_NAME[F_NEXT_PROCESS]);
         _uiHandle->add_complete_or_single_test_label("单板测试");
     } else {
         _uiHandle->add_complete_or_single_test_label("整机测试");
@@ -342,6 +345,7 @@ void Control::init_ui_third_product()
     
     _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_SOUND]);
     _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_DISPLAY]);
+    _uiHandle->add_main_test_button(FUNC_TEST_NAME[F_POWER]);
     
     funcFinishStatus[F_BRIGHT] = true;
     
@@ -490,6 +494,12 @@ void Control::start_display_test()
     _uiHandle->show_display_ui();
 }
 
+void Control::start_power_test()
+{
+    LOG_INFO("******************** start power test ********************");
+    _funcBase[POWER]->start_test(_baseInfo);
+}
+
 void Control::start_bright_test()
 {
     LOG_INFO("******************** start bright test ********************");
@@ -508,11 +518,11 @@ void Control::start_stress_test()
     _funcBase[STRESS]->start_test(_baseInfo);
 }
 
-void Control::start_next_process()
+/*void Control::start_next_process()
 {
     LOG_INFO("******************** start next process ********************");
     _funcBase[NEXT_PROCESS]->start_test(_baseInfo);
-}
+}*/
 
 void Control::start_upload_log()
 {
@@ -538,6 +548,12 @@ void Control::set_brightness_dialog_button_state(bool state)
     _uiHandle->set_brightness_dialog_button_state(state);
 }
 
+void Control::set_upload_mes_button_state(bool state)
+{
+    LOG_INFO("set_upload_mes_button_state");
+    _uiHandle->set_upload_mes_button_state(state);
+}
+
 void Control::show_main_test_ui()
 {
     init_ui();
@@ -547,9 +563,9 @@ void Control::show_main_test_ui()
 }
 
 void Control::show_stress_record(){
-    update_color_screen_log("---------------------------------------------------------------------------------------------\n", "black");
-    update_color_screen_log("\t\tWelcome to Factory Test Software\n", "black");
-    update_color_screen_log("---------------------------------------------------------------------------------------------\n", "black");
+    update_color_screen_log("---------------------------------------------------------------------------------------------", "black");
+    update_color_screen_log("\t\tWelcome to Factory Test Software", "black");
+    update_color_screen_log("---------------------------------------------------------------------------------------------", "black");
 
     read_stress_record(&_record);
     print_stress_test_result(_record);

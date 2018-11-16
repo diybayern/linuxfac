@@ -20,16 +20,16 @@
 using std::string;
 using namespace std;
 
-#define   FUNC_TYPE_NUM       (16)
+#define   FUNC_TYPE_NUM       (17)
 #define   INTERFACE_TEST_NUM  (9)
-#define   FUNC_TEST_NUM       (8)
+#define   FUNC_TEST_NUM       (9)
 
 
 //注意顺序
 const string INTERFACE_TEST_NAME[INTERFACE_TEST_NUM]    = {"内存测试", "USB测试", "网口测试", "EDID测试", "CPU测试", "HDD测试", "SSD测试", "FAN测试", "WIFI测试"};
 const string INTERFACE_TEST_MES_TAG[INTERFACE_TEST_NUM] = {"MEM", "USB", "NET", "EDID", "CPU", "HDD", "SSD", "FAN", "WIFI"};
-const string FUNC_TEST_NAME[FUNC_TEST_NUM]              = {"接口测试", "音频测试", "显示测试", "亮度测试", "摄像头测试", "拷机测试", "上传日志", "下道工序"};
-const string FUNC_TEST_TAG_NAME[FUNC_TEST_NUM]          = {"INTERFACE", "SOUND", "DISPLAY", "BRIGHT", "CAMERA", "STRESS", "UPLOAD_MES_LOG", "NEXT_PROCESS"};
+const string FUNC_TEST_NAME[FUNC_TEST_NUM]              = {"接口测试", "音频测试", "显示测试", "电源测试", "亮度测试", "摄像头测试", "拷机测试", "上传日志", "下道工序"};
+const string FUNC_TEST_TAG_NAME[FUNC_TEST_NUM]          = {"INTERFACE", "SOUND", "DISPLAY", "POWER", "BRIGHT", "CAMERA", "STRESS", "UPLOAD_MES_LOG", "NEXT_PROCESS"};
 
 enum FuncType {
     MEM = 0,
@@ -44,6 +44,7 @@ enum FuncType {
     INTERFACE,//must behind interface test func
     SOUND,
     BRIGHT,
+    POWER,
     CAMERA,
     STRESS,
     UPLOAD_MES_LOG,
@@ -67,6 +68,7 @@ enum FuncTestType {
     F_INTERFACE = 0,
     F_SOUND,
     F_DISPLAY,
+    F_POWER,
     F_BRIGHT,
     F_CAMERA,
     F_STRESS,
@@ -94,6 +96,7 @@ enum TestStep {
     STEP_INTERFACE,
     STEP_SOUND,
     STEP_DISPLAY,
+    STEP_POWER,
     STEP_BRIGHTNESS,
     STEP_CAMERA,
     STEP_STRESS,

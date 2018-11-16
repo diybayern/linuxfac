@@ -21,8 +21,9 @@ void* semi_auto_test_control(void*)
                 }
 
             }
-            if (tmp_func_finish) {
-                if (control->get_auto_upload_mes_status() && !control->get_third_product_state()) {
+            if (!control->get_third_product_state() && tmp_func_finish) {
+                control->set_upload_mes_button_state(true);
+                if (control->get_auto_upload_mes_status()) {
                     control->upload_mes_log();
                 }
             }
@@ -50,6 +51,16 @@ void* semi_auto_test_control(void*)
                 
                 case STEP_DISPLAY: {
                     if (funcFinishStatus[F_DISPLAY]) {
+                        LOG_INFO("display_finish OK.\n");
+                        control->set_test_step(STEP_POWER);
+                        if (!funcFinishStatus[F_POWER]) {
+                            control->start_power_test();
+                        }
+                    }
+                } break;
+
+                case STEP_POWER: {
+                    if (funcFinishStatus[F_POWER]) {
                         if (InfcFuncTestSelectStatus[BRIGHT]) {
                             LOG_INFO("display_finish OK.\n");
                             control->set_test_step(STEP_BRIGHTNESS);
@@ -59,7 +70,7 @@ void* semi_auto_test_control(void*)
                         }
                     }
                 } break;
-                
+
                 case STEP_BRIGHTNESS: {
                     if (funcFinishStatus[F_BRIGHT]) {
                         if (InfcFuncTestSelectStatus[CAMERA]) {

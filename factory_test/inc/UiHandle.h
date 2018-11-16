@@ -38,6 +38,7 @@ class UiHandle: public QObject
         void show_sn_mac_comparison_result(string sn_mac, string result);
         void update_sn_mac_test_result(string sn_mac, string result);
         void set_brightness_dialog_button_state(bool state);
+        void set_upload_mes_button_state(bool state);
         bool get_g_decode_status() {return _g_decode_status;}
         void set_g_decode_status(bool status) {_g_decode_status = status;}
         int get_screen_width();
@@ -77,6 +78,7 @@ class UiHandle: public QObject
         void sig_ui_retry_sn_mac();
         void to_update_sn_mac_state(QString sn_mac, QString result);
         void to_set_brightness_dialog_button_state(bool state);
+        void to_set_upload_mes_button_state(bool state);
         void sig_ui_factory_delete_event();
 
     public slots:

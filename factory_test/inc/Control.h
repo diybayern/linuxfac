@@ -26,6 +26,7 @@ public:
     void dele_control_new_object();
     void set_test_result(string func, string result, string ui_log);
     void set_brightness_dialog_button_state(bool state);
+    void set_upload_mes_button_state(bool state);
     static Control* get_control();
     void show_main_test_ui();
     void auto_test_mac_or_stress();
@@ -173,11 +174,12 @@ public slots:
     void start_interface_test();
     void start_sound_test();
     void start_display_test();
+    void start_power_test();
     void start_bright_test();
     void start_camera_test();
     void start_stress_test();
     void start_upload_log();
-    void start_next_process();
+    //void start_next_process();
     void show_test_confirm_dialog(string item);
     void set_interface_select_status(string func, bool state);
     void set_test_result_pass_or_fail(string func, string result);

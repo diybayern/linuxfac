@@ -499,6 +499,9 @@ void MainTestWindow::_create_main_test_layout()
             QLabel *label = new QLabel;
             _grid_main_test_layout->addWidget(button, i, 0);
             _grid_main_test_layout->addWidget(label, i, 1);
+            if (iteminfo.name.compare("上传日志") == 0) {
+                button->setEnabled(false);
+            }
             iteminfo.button = button;
             iteminfo.label = label;
             _insert_item_record(iteminfo);
@@ -547,6 +550,9 @@ void MainTestWindow::_create_main_test_layout()
                  _grid_main_test_layout->addWidget(button, i + _interface_test_list.count(), 0);
                  _grid_main_test_layout->addWidget(label, i + _interface_test_list.count(), 1);
                  iteminfo.name = _main_test_item_list.at(i).itemname;
+                 if (iteminfo.name.compare("上传日志") == 0) {
+                     button->setEnabled(false);
+                 }
                  iteminfo.button = button;
                  iteminfo.label = label;
                  _insert_item_record(iteminfo);
@@ -691,14 +697,14 @@ void MainTestWindow::slot_finish_show_display_window(bool state)
     }
 }
 
-QPushButton* MainTestWindow::_get_interface_test_button()
+QPushButton* MainTestWindow::_get_func_test_button(QString func)
 {
     if (itemlist.isEmpty()) {
         return NULL;
     }
 
     foreach (ItemCheck item, itemlist) {
-        if (item.name.compare("接口测试") == 0) {
+        if (item.name.compare(func) == 0) {
             return (QPushButton*)item.button;
         }
     }
@@ -712,31 +718,34 @@ void MainTestWindow::_set_interface_test_item_enable(bool state)
     }
 
     foreach (InterfaceTestItemPri item, if_test_pri_list) {
-        if (state == true) {
+        /*if (state == true) {
             item.checkbox->setEnabled(true);
         } else {
             item.checkbox->setEnabled(false);
-        }
+        }*/
+        
+        item.checkbox->setEnabled(state);
     }
 }
 
 void MainTestWindow::slot_set_interface_test_state(int state)
 {
-    if (_get_interface_test_button() == NULL) {
+    QString name = "接口测试";
+    if (_get_func_test_button(name) == NULL) {
         return ;
     }
 
     if (state == UI_INF_RUNNING) {
-        _get_interface_test_button()->setText("结束");
+        _get_func_test_button(name)->setText("结束");
         _set_interface_test_item_enable(false);
 
     } else if (state == UI_INF_RUNEND) {
-        _get_interface_test_button()->setEnabled(true);
-        _get_interface_test_button()->setText("接口测试");
+        _get_func_test_button(name)->setEnabled(true);
+        _get_func_test_button(name)->setText("接口测试");
         _set_interface_test_item_enable(true);
 
     } else { //UI_INF_BREAK
-        _get_interface_test_button()->setEnabled(false);
+        _get_func_test_button(name)->setEnabled(false);
         _set_interface_test_item_enable(false);
     }
 }
@@ -772,6 +781,15 @@ void MainTestWindow::slot_set_brightness_dialog_button_state(bool state)
             g_form->bt_ok->setEnabled(state);
         }
     }
+}
+
+void MainTestWindow::slot_set_upload_mes_button_state(bool state)
+{
+    QString name = "上传日志";
+    if (_get_func_test_button(name) == NULL) {
+        return ;
+    }
+    _get_func_test_button(name)->setEnabled(state);
 }
 
 void MainTestWindow::slot_recv_result_from_scangun()

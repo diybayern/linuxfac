@@ -99,6 +99,13 @@ public:
     void start_test(BaseInfo* baseInfo);
 };
 
+class PowerTest : public FuncBase
+{
+public:
+    static void *test_all(void*);
+    void start_test(BaseInfo* baseInfo);
+};
+
 class StressTest : public FuncBase
 {
 public:
