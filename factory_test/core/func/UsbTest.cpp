@@ -185,7 +185,7 @@ bool UsbTest::usb_test_write(string dir, string file_name)
     int i = 0;
     bool ret = false;
     string name = "";
-    int buf[USB_WRITE_LEN] = { 0, };
+    int buf[USB_WRITE_LEN] = {0, };
 
     for (i = 0; i < USB_WRITE_LEN; i++) {
         buf[i] = i;
@@ -212,7 +212,7 @@ bool UsbTest::usb_test_read(string dir, string file_name)
     int i = 0;
     bool ret = false;
     string name = "";
-    int buf[USB_WRITE_LEN] = { 0, };
+    int buf[USB_WRITE_LEN] = {0, };
 
     name = dir + "/" + file_name;
     ret = read_local_data(name, (char*)buf, USB_WRITE_LEN * sizeof(int));

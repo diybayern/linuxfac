@@ -46,6 +46,7 @@ class UiHandle: public QObject
         bool get_auto_upload_check_state();
         string get_test_count();
         QObject *get_qobject(string name);
+        QObject *obj;
 
     private:
         static UiHandle* _ui_handle;

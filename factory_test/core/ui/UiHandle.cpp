@@ -238,7 +238,8 @@ void UiHandle::slot_g_decode_status(bool status)
 
 QObject* UiHandle::get_qobject(string name)
 {
-    QObject *obj = new QObject;
+    obj = new QObject;
+    LOG_DEBUG("get_qobject %s", name);
     for (int i = 0 ; i < MainTestWindow::get_main_test_window()->itemlist.count(); i++) {
 
         string objname = (MainTestWindow::get_main_test_window()->itemlist.at(i).name).toStdString();

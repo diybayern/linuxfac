@@ -52,7 +52,7 @@ void* semi_auto_test_control(void*)
                 case STEP_DISPLAY: {
                     if (funcFinishStatus[F_DISPLAY]) {
                         LOG_INFO("display_finish OK.\n");
-                        control->set_test_step(STEP_POWER);
+                        /*control->set_test_step(STEP_POWER);
                         if (!funcFinishStatus[F_POWER]) {
                             control->start_power_test();
                         }
@@ -61,8 +61,8 @@ void* semi_auto_test_control(void*)
 
                 case STEP_POWER: {
                     if (funcFinishStatus[F_POWER]) {
+                        LOG_INFO("power_finish OK.\n");*/
                         if (InfcFuncTestSelectStatus[BRIGHT]) {
-                            LOG_INFO("display_finish OK.\n");
                             control->set_test_step(STEP_BRIGHTNESS);
                             if (!funcFinishStatus[F_BRIGHT]) {
                                 control->start_bright_test();
@@ -73,8 +73,8 @@ void* semi_auto_test_control(void*)
 
                 case STEP_BRIGHTNESS: {
                     if (funcFinishStatus[F_BRIGHT]) {
+                        LOG_INFO("bright_finish OK.\n");
                         if (InfcFuncTestSelectStatus[CAMERA]) {
-                            LOG_INFO("bright_finish OK.\n");
                             control->set_test_step(STEP_CAMERA);
                             if (!funcFinishStatus[F_CAMERA]) {
                                 control->start_camera_test();
