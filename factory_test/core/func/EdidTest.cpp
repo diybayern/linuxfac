@@ -223,25 +223,27 @@ print:
     return result;
 }
 
-/* get edid theoretical num */
-int EdidTest::get_edid_num(BaseInfo* baseInfo)
+bool EdidTest::lcd_info_test(BaseInfo *baseInfo)
 {
     if (baseInfo == NULL) {
-        LOG_ERROR("baseinfo is null");
-        return 0;
+        LOG_ERROR("baseInfo is null");
+        return false;
     }
     
-    int vga = 0, hdmi = 0;
-    
-    if (baseInfo->vga_exist != "" && baseInfo->vga_exist != "0") {
-        vga = get_int_value(baseInfo->vga_exist);
+    string real_lcd = execute_command("xrandr -q | grep \"*+\" | awk 'NR==1{print $1}'", true);
+    if (real_lcd == "error") {
+        LOG_ERROR("get real LCD info error");
+        return false;
+    } else if (real_lcd == baseInfo->lcd_info) {
+        LOG_INFO("LCD resolution is %s", real_lcd);
+        screen_log_black += "current screen resolution is " + real_lcd;
+        return true;
+    } else {
+        LOG_ERROR("current LCD=%s, not optimal=%s", real_lcd.c_str(), (baseInfo->lcd_info).c_str());
+        screen_log_black += "ERROR: LCD optimal resolution is " + baseInfo->lcd_info + ", but current is " + real_lcd + "\n";
+        screen_log_red += "\t错误：LCD最优分辨率为" + baseInfo->lcd_info + "，但当前分辨率为" + real_lcd + "\n";
+        return false;
     }
-
-    if (baseInfo->hdmi_exist != "" && baseInfo->hdmi_exist != "0") {
-        hdmi = get_int_value(baseInfo->hdmi_exist);
-    }
-    
-    return vga + hdmi;
 }
 
 void* EdidTest::test_all(void *arg)
@@ -256,9 +258,13 @@ void* EdidTest::test_all(void *arg)
     control->set_interface_test_status(INTERFACE_TEST_NAME[I_EDID], false);
     screen_log_black = "";
     screen_log_red = "";
-    
     screen_log_black += "==================== " + INTERFACE_TEST_NAME[I_EDID] + " ====================\n";
-    int edid_num = get_edid_num(baseInfo);
+    
+    int lcd = 0;
+    if (baseInfo->lcd_info != "" && baseInfo->lcd_info != "0") {
+        lcd = 1;
+    }
+    int edid_num = get_int_value(baseInfo->vga_exist) + get_int_value(baseInfo->hdmi_exist) + lcd;
 
     bool is_pass;
     if (edid_num <= 0) {
@@ -267,6 +273,11 @@ void* EdidTest::test_all(void *arg)
     } else {
         LOG_INFO("edid num: %d", edid_num);
         is_pass = edid_test_all(edid_num);
+    }
+
+    if (is_pass && lcd == 1) {
+        /* test LCD optimal resolution */
+        is_pass = lcd_info_test(baseInfo);
     }
     
     if (is_pass) {

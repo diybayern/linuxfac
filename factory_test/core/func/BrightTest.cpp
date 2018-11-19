@@ -72,10 +72,8 @@ void BrightTest::bright_test_all(string bright_level)
                     + to_string(bright_value) + ", brightness level " + to_string(ret + 1), "black");
         } else {  // brightness level is not set
             LOG_ERROR("PRESS %d: brightness value is not set, brightness is %d\n",bright_cnt + 1, bright_value);
-            control->update_color_screen_log("PRESS " + to_string(bright_cnt + 1) + ": brightness value is not set, brightness is "
-                    + to_string(bright_value) + "\n", "black");
-            control->update_color_screen_log("\t´íÎó£º°´Ñ¹" + to_string(bright_cnt + 1) + ": ÁÁ¶ÈÖµ"
-                    + to_string(bright_value) + "Î´ÉèÖÃ\n", "red");
+            control->update_color_screen_log("\té”™è¯¯ï¼šæŒ‰å‹" + to_string(bright_cnt + 1) + ": äº®åº¦å€¼"
+                    + to_string(bright_value) + "æœªè®¾ç½®\n", "red");
             goto error_return;
         }
 
@@ -86,8 +84,7 @@ void BrightTest::bright_test_all(string bright_level)
     bright_set &= bright_set_mask; // confirm if all levers are tested 
     if (bright_set != bright_set_mask) {
         LOG_ERROR("all the brightness value cannot be corvered within 6 presses\n");
-        control->update_color_screen_log("all the brightness value cannot be corvered within 6 presses\n", "black");
-        control->update_color_screen_log("\t´íÎó£º6´ÎÁÁ¶È±ä»¯²»ÄÜ°üº¬ËùÓĞµÄÁÁ¶ÈµÈ¼¶", "red");
+        control->update_color_screen_log("\té”™è¯¯ï¼š6æ¬¡äº®åº¦å˜åŒ–ä¸èƒ½åŒ…å«æ‰€æœ‰çš„äº®åº¦ç­‰çº§", "red");
         goto error_return;
     }
 error_return:

@@ -23,7 +23,7 @@ private:
     static bool do_vbe_ddc_service(unsigned BX, reg_frame* regs);
     static bool do_vbe_service(unsigned int AX, unsigned int BX, reg_frame* regs);
     static bool parse_edid(char* buf);
-    static int get_edid_num(BaseInfo* baseInfo);
+    static bool lcd_info_test(BaseInfo *baseInfo);
 };
 
 #endif
