@@ -117,6 +117,7 @@ public:
     static void stop_cpuburn_stress();
     static void* mem_stress_test(void*);
     static void stop_mem_stress_test();
+    static bool create_abnormal_exit_num_file(int* num);
     string get_stress_result_record();
 private:
     static int  mem_stress_test_num;

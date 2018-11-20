@@ -30,9 +30,9 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const QString button, 
         _lb_text_w = 500;
 
     } else if (mode == Warnning || mode == Success || mode == SNMAC_Success || mode == SNMAC_Error || mode == DOING) {
-        _dialog_w = 400;
+        _dialog_w = 460;
         _dialog_h = 220;
-        _lb_text_w = 200;
+        _lb_text_w = 260;
 
     } else if (mode == SNMAC) {
         _dialog_w = 500;
@@ -164,9 +164,9 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const QString button, 
             bt_cancle = new QPushButton(frame);
             bt_cancle->setObjectName(QString::fromUtf8("bt_cancel"));
             if (mode == NOICON) {
-                bt_cancle->setGeometry(QRect(150, 150, 100, 40));
+                bt_cancle->setGeometry(QRect(180, 150, 100, 40));
             } else {
-                bt_cancle->setGeometry(QRect(150, 150, 100, 40));
+                bt_cancle->setGeometry(QRect(180, 150, 100, 40));
             }
 
             bt_cancle->setFont(font);
@@ -176,7 +176,7 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const QString button, 
         } else if (mode == Success) {
             bt_confirm = new QPushButton(frame);
             bt_confirm->setObjectName(QString::fromUtf8("bt_confirm"));
-            bt_confirm->setGeometry(QRect(150, 150, 100, 40));
+            bt_confirm->setGeometry(QRect(180, 150, 100, 40));
             bt_confirm->setFont(font);
             bt_confirm->setText(button);
             connect(bt_confirm, SIGNAL(clicked()), this, SLOT(proButtonConfirm()));
@@ -188,14 +188,14 @@ MessageForm::MessageForm(QWidget *parent, const int mode, const QString button, 
 
             bt_snmac_cancel = new QPushButton(frame);
             bt_snmac_cancel->setObjectName(QString::fromUtf8("bt_snmac_cancel"));
-            bt_snmac_cancel->setGeometry(QRect(250, 150, 80, 30));
+            bt_snmac_cancel->setGeometry(QRect(280, 150, 80, 30));
             bt_snmac_cancel->setFont(font_snmac_state);
             bt_snmac_cancel->setText(tr("取消"));
             connect(bt_snmac_cancel, SIGNAL(clicked()), this, SLOT(proButtonSnmacCancel()));
 
             bt_snmac_retry = new QPushButton(frame);
             bt_snmac_retry->setObjectName(QString::fromUtf8("bt_snmac_retry"));
-            bt_snmac_retry->setGeometry(QRect(70, 150, 80, 30));
+            bt_snmac_retry->setGeometry(QRect(100, 150, 80, 30));
             bt_snmac_retry->setFont(font_snmac_state);
             bt_snmac_retry->setText(tr("重试"));
             connect(bt_snmac_retry, SIGNAL(clicked()), this, SLOT(proButtonSNMACRetry()));

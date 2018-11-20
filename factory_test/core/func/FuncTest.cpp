@@ -300,6 +300,7 @@ bool StressTest::start_cpuburn_stress()
     int ret;
     int processornum = 0;
 
+    LOG_INFO("start cpuburn");
     result = execute_command("cat /proc/cpuinfo| grep \"processor\"| wc -l", true);
     if (result != "error") {
         LOG_INFO("cpuprocessor num is %s\n", result.c_str());
@@ -327,6 +328,7 @@ bool StressTest::start_cpuburn_stress()
 
 void StressTest::stop_cpuburn_stress()
 {
+    LOG_INFO("stop cpuburn");
     int ret = 0;
     ret = system("killall burnP6");
     if (ret < 0) {
@@ -374,20 +376,52 @@ void StressTest::stop_mem_stress_test()
     }
 }
 
+bool StressTest::create_abnormal_exit_num_file(int* num)
+{
+    if (check_file_exit(STRESS_DOWN_NUM)) {
+        string exit_num = execute_command("cat " + STRESS_DOWN_NUM, true);
+        if (exit_num == "error") {
+            LOG_ERROR("read abnormal exit");
+            return false;
+        }
+        *num = get_int_value(exit_num) + 1;
+        write_local_data(STRESS_DOWN_NUM, "w+", (to_string(*num)).c_str(), sizeof(int));
+    } else {
+        (*num)++;
+        write_local_data(STRESS_DOWN_NUM, "w+", (to_string(*num)).c_str(), sizeof(int));
+    }
+        
+    if (system("sync") < 0) {
+        LOG_ERROR("cmd sync error\n");
+        return false;
+    }
+    
+    if (check_file_exit(STRESS_DOWN_NUM)) {
+        LOG_INFO("create stress abnormal exit num file success\n");
+        return true;
+    } else {
+        LOG_ERROR("create stress abnormal exit num file failed\n");
+        return false;
+    }
+
+}
+
 void* StressTest::test_all(void* arg)
 {
     if (arg == NULL) {
         LOG_ERROR("arg is null");
         return NULL;
     }
-    BaseInfo* baseInfo = (BaseInfo*)arg;
-    Control*  control  = Control::get_control();
-    UiHandle* uihandle = UiHandle::get_uihandle();
+    BaseInfo* baseInfo   = (BaseInfo*)arg;
+    Control*  control    = Control::get_control();
+    UiHandle* uihandle   = UiHandle::get_uihandle();
     
-    TimeInfo init_time = {0,0,0,0};
-    TimeInfo tmp_dst   = {0,0,0,0};
-    TimeInfo mem_src   = {0,0,0,0};
-    TimeInfo mem_dst   = {0,0,0,0};
+    TimeInfo init_time   = {0,0,0,0};
+    TimeInfo tmp_dst     = {0,0,0,0};
+    TimeInfo mem_src     = {0,0,0,0};
+    TimeInfo mem_dst     = {0,0,0,0};
+    TimeInfo cpuburn_src = {0,0,0,0};
+    TimeInfo cpuburn_dst = {0,0,0,0};
     
     string datebuf = "";
     CpuStatus st_cpu = {0,0,0,0,0,0,0,0,0,0,0};
@@ -400,7 +434,9 @@ void* StressTest::test_all(void* arg)
     mem_stress_result = true;
     bool encode = true;
     bool decode = true;
-    
+
+    int abnormal_exit = 0;
+    bool cpuburn_test = true;
     FuncBase** _funcBase = control->get_funcbase();
     CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
 
@@ -410,9 +446,17 @@ void* StressTest::test_all(void* arg)
         string stress_lock_state = execute_command("cat " + STRESS_LOCK_FILE, true); // confirm data in lock file
         LOG_INFO("auto stress lock file is: %s", stress_lock_state.c_str());
         remove_local_file(STRESS_LOCK_FILE);
+        
         if (stress_lock_state == WHOLE_LOCK || stress_lock_state == PCBA_LOCK) { // abnormal exited 
             control->set_pcba_whole_lock_state(true);
-            LOG_INFO("last stress test exit error\n");            
+            /* create file to save abnormal exit number */
+            if (!create_abnormal_exit_num_file(&abnormal_exit)) {
+                uihandle->confirm_test_result_warning("计数文件创建异常");
+                LOG_ERROR("create stress abnormal exit num file failed\n");
+                return NULL;
+            }
+            LOG_INFO("stress test exit error: %d times\n", abnormal_exit);
+
         } else if (stress_lock_state == NEXT_LOCK) { // next process exited
             LOG_INFO("next process -> stress test\n");
         } else { // unknown lock file
@@ -462,15 +506,22 @@ void* StressTest::test_all(void* arg)
             if (check_file_exit(STRESS_LOCK_FILE)) {
                 remove_local_file(STRESS_LOCK_FILE); // delete lock file
             }
-
+            if (check_file_exit(STRESS_DOWN_NUM)) {
+                remove_local_file(STRESS_DOWN_NUM); // delete power down number file
+            }
             break;
         }
         
         get_current_open_time(&tmp_dst);
-        mem_dst = tmp_dst;
+        cpuburn_dst = tmp_dst;
+        mem_dst     = tmp_dst;
+        
         diff_running_time(&tmp_dst, &init_time); // get stress test time
-        if (STRESS_TIME_ENOUGH(tmp_dst)) { // after 4 hour, show stress result and delete the lock file
+        if (STRESS_TIME_ENOUGH(tmp_dst)) { // after 4 hour, show stress result, delete the lock file and power down number file
             remove_local_file(STRESS_LOCK_FILE);
+            if (check_file_exit(STRESS_DOWN_NUM)) {
+                remove_local_file(STRESS_DOWN_NUM); // delete power down number file
+            }
             if (encode && decode && mem_stress_result) {
                 uihandle->set_stress_test_pass_or_fail("PASS");
             } else {
@@ -480,27 +531,38 @@ void* StressTest::test_all(void* arg)
         
         /* If the last stress test is abnormally powered down, a warning box is displayed. */
         if (control->get_pcba_whole_lock_state() && STRESS_ERROR_TIME(tmp_dst)) {
-            uihandle->confirm_test_result_warning("上次拷机退出异常");
+            uihandle->confirm_test_result_warning("拷机异常退出：" + to_string(abnormal_exit) + "次");
         }
-        
-        /* after stress test 30 mins, mem test starting*/
-        if (STRESS_MEMTEST_START(tmp_dst) && !mem_stress_status) {
-            mem_src = mem_dst;  //get_current_open_time(&mem_src);
-            pthread_create(&pid_mem, NULL, mem_stress_test, NULL);
-        }
-        
-        /* after mem test started, test again every 10 mins */
+
+        /* cpuburn test again every 30 mins */
+        diff_running_time(&cpuburn_dst, &cpuburn_src); // get stress test time
+        if (STRESS_HALF_HOUR_TEST(cpuburn_dst)) {
+            if (cpuburn_test) {
+                cpuburn_test = false;
+                cpuburn_src = mem_dst; // get current time
+                mem_src = mem_dst;
+                stop_cpuburn_stress(); // stop cpuburn
+                pthread_create(&pid_mem, NULL, mem_stress_test, NULL); // start memtester
+            } else {
+                cpuburn_test = true;
+                cpuburn_src = mem_dst; // get current time
+                stop_mem_stress_test();
+                start_cpuburn_stress();
+            }
+        } 
+
+        /* memtester test again every 10 mins after cpuburn test stoped */
         diff_running_time(&mem_dst, &mem_src);
-        if (mem_stress_test_num > 0 && STRESS_MEMTEST_ITV(mem_dst) && !mem_stress_status) {
+        if (!cpuburn_test && STRESS_MEMTEST_ITV(mem_dst) && !mem_stress_status) {
             get_current_open_time(&mem_src);
             pthread_create(&pid_mem, NULL, mem_stress_test, NULL);
         }
         
         /* After the first test, update the mem test result NULL to PASS/FAIL */
-        if (mem_stress_test_num == 1 && !mem_stress_status && mem_stress_result) {
+        if (mem_stress_test_num == 1 && !mem_stress_status && mem_stress_result && mem_result_str == "NULL") {
             mem_result_str = "PASS";
             uihandle->update_stress_label_value("Mem压力测试", mem_result_str);
-        } else if (!mem_stress_result){
+        } else if (!mem_stress_result && mem_result_str != "FAIL"){
             /* If the mem test fails, set the mem and the stress test result to fail */
             mem_result_str = "FAIL";
             uihandle->update_stress_label_value("Mem压力测试", mem_result_str);

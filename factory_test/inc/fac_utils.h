@@ -117,6 +117,7 @@ const string GET_CPU_TEMP_SCRIPT = FACTORY_PATH + "get_cpu_temp.sh";
 const string LOG_PATH            = "/var/log/factory_test";
 const string MES_FILE            = LOG_PATH + "/mes.txt";
 const string STRESS_RECORD       = LOG_PATH + "/stress.log";
+const string STRESS_DOWN_NUM     = LOG_PATH + "/stress_abormal_exit_num";
 const string LOG_FILE            = LOG_PATH + "/factory.log";
 const string LOG_FILE_BAK        = LOG_PATH + "/factory_bak.log";
 
@@ -124,6 +125,7 @@ const string GET_BASEINFO_INI    = FACTORY_PATH + "hwcfg.ini";
 
 const string FAC_CONFIG_NAME     = "fac_config.conf";
 const string FAC_CONFIG_FILE     = "/tmp/" + FAC_CONFIG_NAME;
+const string WHOLE_TEST_FILE     = "/tmp/whole_test";
 
 const string MEM_UI_LOG          = FACTORY_PATH + "mem_ui_log";
 const string WIFI_INFO_FILE      = "/tmp/wifi_test_info.tmp";
@@ -134,66 +136,61 @@ const string SSD_STATUS_FILE     = "/tmp/ssd.status";
 const string CAMERA_WINID_FILE   = "/tmp/xawtv.winid";
 
 const string USB_MNT_FAC_CONF    = "/mnt/usb_factory_test";
-const string USB_TEST_FILE       = "usbbbbbb_test";
+const string USB_TEST_FILE       = "usb_file_test";
 const string BRIGHT_ACTUAL_FILE  = "/sys/class/backlight/intel_backlight/actual_brightness";
-
-const string DEFAULT_FTP_IP      = "172.21.5.48";
-const string DEFAULT_FTP_USER    = "test";
-const string DEFAULT_FTP_PASSWD  = "test";
 
 const int BRIGHTNESS_VALUE[6] = 
 {
     7, 17, 27, 37, 47, 57,
 };
 
-#define LOG_MAX_SIZE            (5 << 20)
-#define LOG_MAX_LEN             (1024)
-#define LINE_SZ                 (1024)
+#define LOG_MAX_SIZE             (5 << 20)
+#define LOG_MAX_LEN              (1024)
+#define LINE_SZ                  (1024)
 
-#define TIME_MAX_LEN            (50)
+#define TIME_MAX_LEN             (50)
 
-#define USB_MOU_KEY_NUM         (2)     /* mouse and keyboard */
-#define USB_SCANNER_NUM         (1)     /* scanner */
-#define USB_MAX_NUM             (10)
-#define USB_BLOCK_LEN           (16)
-#define USB_VENDOR_LEN          (64)
-#define USB_WRITE_LEN           (1024 * 1024)
-#define USB_PATH_LEN            (1024)
-#define USB_SPEED_LEN           (32)
+#define USB_MOU_KEY_NUM          (2)     /* mouse and keyboard */
+#define USB_SCANNER_NUM          (1)     /* scanner */
+#define USB_MAX_NUM              (10)
+#define USB_BLOCK_LEN            (16)
+#define USB_VENDOR_LEN           (64)
+#define USB_WRITE_LEN            (1024 * 1024)
+#define USB_PATH_LEN             (1024)
+#define USB_SPEED_LEN            (32)
 
-#define MAC_ADDR_LEN            (6)
-#define CMD_BUF_SIZE            (256)
-#define TEST_PROTO              (0xaaaa)
-#define TEST_MAGIC              (0xffffeeee)
+#define MAC_ADDR_LEN             (6)
+#define CMD_BUF_SIZE             (256)
+#define TEST_PROTO               (0xaaaa)
+#define TEST_MAGIC               (0xffffeeee)
 
-#define ETH_LINK_SPEED          (1000) /* Mbps */
-#define WEB_NAME_LEN            (16)
-#define TOTAL_SEND_NUM          (100)
-#define ETH_RECV_MIN_NUM        (90)
-#define WLAN_RECV_MIN_NUM       (70)
-#define INTERFACE_NUM           (512)
+#define ETH_LINK_SPEED           (1000) /* Mbps */
+#define WEB_NAME_LEN             (16)
+#define TOTAL_SEND_NUM           (100)
+#define ETH_RECV_MIN_NUM         (90)
+#define WLAN_RECV_MIN_NUM        (70)
+#define INTERFACE_NUM            (512)
 
-#define NEXT_LOCK               ("next")
-#define PCBA_LOCK               ("PCBA")
-#define WHOLE_LOCK              ("whole")
-#define WHOLE_TEST_FILE         ("/tmp/whole_test")
+#define NEXT_LOCK                ("next")
+#define PCBA_LOCK                ("PCBA")
+#define WHOLE_LOCK               ("whole")
 
-#define XAWTV_MAX_FAIL_COUNT    (5)
+#define XAWTV_MAX_FAIL_COUNT     (5)
 
-#define MEM_TEST_CAP            ("10M")
-#define MEM_CAP_MIN_PERCENT     (0.9)
-#define STRESS_RECORD_NUM       (10)
-#define STRESS_MEM_CAP_MAX      (100)   /* M */
-#define STRESS_MEM_PERCENT      (0.7)
+#define MEM_TEST_CAP             ("10M")
+#define MEM_CAP_MIN_PERCENT      (0.9)
+#define STRESS_RECORD_NUM        (10)
+#define STRESS_MEM_CAP_MAX       (100)   /* M */
+#define STRESS_MEM_PERCENT       (0.7)
 
-#define STRESS_TIME_ENOUGH(x)   ((x).day == 0 && (x).hour == 4 && (x).minute == 0 && (x).second >= 0 && (x).second <= 1)
-#define STRESS_ERROR_TIME(x)    ((x).day == 0 && (x).hour == 0 && (x).minute == 0 && (x).second >= 3 && (x).second <= 4)
-#define STRESS_MEMTEST_START(x) ((x).day == 0 && (x).hour == 0 && (x).minute == 30 && (x).second >= 0 && (x).second <= 1)
-#define STRESS_MEMTEST_ITV(x)   ((x).day == 0 && (x).hour == 0 && (x).minute == 10 && (x).second >= 0 && (x).second <= 1)
+#define STRESS_TIME_ENOUGH(x)    ((x).day == 0 && (x).hour == 4 && (x).minute == 0 && (x).second >= 0 && (x).second <= 1)
+#define STRESS_ERROR_TIME(x)     ((x).day == 0 && (x).hour == 0 && (x).minute == 0 && (x).second >= 3 && (x).second <= 4)
+#define STRESS_HALF_HOUR_TEST(x) ((x).day == 0 && (x).hour == 0 && (x).minute == 30 && (x).second >= 0 && (x).second <= 1)
+#define STRESS_MEMTEST_ITV(x)    ((x).day == 0 && (x).hour == 0 && (x).minute == 10 && (x).second >= 0 && (x).second <= 1)
 
-#define STRING_RESULT(x)        ((x) ? "PASS" : "FAIL")
-#define BOOL_RESULT(x)          ((x) == "PASS" ? true : false)
-#define CHINESE_RESULT(x)       ((x) == "PASS" ? "成功" : "失败")
+#define STRING_RESULT(x)         ((x) ? "PASS" : "FAIL")
+#define BOOL_RESULT(x)           ((x) == "PASS" ? true : false)
+#define CHINESE_RESULT(x)        ((x) == "PASS" ? "成功" : "失败")
 
 enum {
     SUCCESS = 0,
@@ -357,7 +354,7 @@ void get_current_open_time(TimeInfo* date);
 void diff_running_time(TimeInfo* dst, TimeInfo* src);
 bool check_file_exit(string filename);
 bool get_file_size(string filename, int *size);
-bool write_local_data(string filename, string mod, char* buf, int size);
+bool write_local_data(string filename, string mod, const char* buf, int size);
 bool read_local_data(string filename, char* buf, int size);
 bool remove_local_file(string filename);
 void get_hwinfo(HwInfo* hwInfo);

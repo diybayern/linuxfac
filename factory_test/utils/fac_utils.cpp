@@ -151,8 +151,13 @@ bool get_file_size(string filename, int *size)
     return true;
 }
 
-bool write_local_data(string filename, string mod, char* buf, int size) //TODO: char* buf
+bool write_local_data(string filename, string mod, const char* buf, int size) //TODO: char* buf
 {
+    if (filename == "" || buf == NULL || size == 0) {
+        LOG_ERROR("parameters is wrong");
+        return false;
+    }
+
     int count = 0;
     FILE * outfile = NULL;
 
@@ -406,28 +411,26 @@ int get_fac_config_from_conf(const string conf_path, FacArg *fac)
         }
     }
     fac->ftp_job_number = str;
-    /* if (ret != 0) {
+
+    if (ret != 0) {
         return ret;  // if job number or path is null, stop read ftp config
-    } */
+    }
 
     str = read_conf_line(conf_path, "ftp_ip");
     if (str == "") {
-        str = DEFAULT_FTP_IP;
-        LOG_INFO("use default ftp_ip\n");
+        LOG_INFO("ftp_ip is empty\n");
     }
     fac->ftp_ip = str;
 
     str = read_conf_line(conf_path, "ftp_username");
     if (str == "") {
-        str = DEFAULT_FTP_USER;
-        LOG_INFO("use default ftp_username\n");
+        LOG_INFO("ftp_username is empty\n");
     }
     fac->ftp_user = str;
 
     str = read_conf_line(conf_path, "ftp_passwd");
     if (str == "") {
-        str = DEFAULT_FTP_PASSWD;
-        LOG_INFO("use default ftp_passwd\n");
+        LOG_INFO("ftp_passwd is empty\n");
     }
     fac->ftp_passwd = str;
 
