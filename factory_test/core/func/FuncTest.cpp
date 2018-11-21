@@ -378,6 +378,11 @@ void StressTest::stop_mem_stress_test()
 
 bool StressTest::create_abnormal_exit_num_file(int* num)
 {
+    if (num == NULL) {
+        LOG_ERROR("num is NUMM");
+        return false;
+    }
+
     if (check_file_exit(STRESS_DOWN_NUM)) {
         string exit_num = execute_command("cat " + STRESS_DOWN_NUM, true);
         if (exit_num == "error") {
@@ -385,12 +390,16 @@ bool StressTest::create_abnormal_exit_num_file(int* num)
             return false;
         }
         *num = get_int_value(exit_num) + 1;
-        write_local_data(STRESS_DOWN_NUM, "w+", (to_string(*num)).c_str(), sizeof(int));
     } else {
         (*num)++;
-        write_local_data(STRESS_DOWN_NUM, "w+", (to_string(*num)).c_str(), sizeof(int));
     }
-        
+    
+    string chr_num = to_string(*num);
+    if (!write_local_data(STRESS_DOWN_NUM, "w+", chr_num.c_str(), chr_num.size())) {
+        LOG_ERROR("write abnormal exit num file error");
+        return false;
+    }
+    
     if (system("sync") < 0) {
         LOG_ERROR("cmd sync error\n");
         return false;
