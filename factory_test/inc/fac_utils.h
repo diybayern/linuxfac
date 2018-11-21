@@ -126,6 +126,7 @@ const string GET_BASEINFO_INI    = FACTORY_PATH + "hwcfg.ini";
 const string FAC_CONFIG_NAME     = "fac_config.conf";
 const string FAC_CONFIG_FILE     = "/tmp/" + FAC_CONFIG_NAME;
 const string WHOLE_TEST_FILE     = "/tmp/whole_test";
+const string EDID_LCD_FILE       = "/tmp/xrandr.out";
 
 const string MEM_UI_LOG          = FACTORY_PATH + "mem_ui_log";
 const string WIFI_INFO_FILE      = "/tmp/wifi_test_info.tmp";

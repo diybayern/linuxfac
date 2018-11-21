@@ -492,6 +492,8 @@ void* StressTest::test_all(void* arg)
     start_cpuburn_stress();
     
     get_current_open_time(&init_time);
+    cpuburn_src = init_time;
+    mem_src     = init_time;
     while(true) {
         /* Press the right mouse button to exit stress test */
         if (!control->is_stress_test_window_quit_safely()) {

@@ -230,18 +230,27 @@ bool EdidTest::lcd_info_test(BaseInfo *baseInfo)
         return false;
     }
     
-    string real_lcd = execute_command("xrandr -q | grep \"*+\" | awk 'NR==1{print $1}'", true);
+    string real_lcd = "";
+    if (check_file_exit(EDID_LCD_FILE)) {
+        real_lcd = execute_command("cat " + EDID_LCD_FILE + " | grep eDP1", true);
+    } else {
+        real_lcd = execute_command("xrandr -q | grep eDP1", true);
+    }
+    
     if (real_lcd == "error") {
         LOG_ERROR("get real LCD info error");
         return false;
-    } else if (real_lcd == baseInfo->lcd_info) {
-        LOG_INFO("LCD resolution is %s", real_lcd);
-        screen_log_black += "current screen resolution is " + real_lcd;
+    }
+    
+    int idx = real_lcd.find(baseInfo->lcd_info);
+    if (idx != -1) {
+        LOG_INFO("LCD resolution is %s", baseInfo->lcd_info);
+        screen_log_black += "current screen resolution is " + baseInfo->lcd_info + "\n\n";
         return true;
     } else {
         LOG_ERROR("current LCD=%s, not optimal=%s", real_lcd.c_str(), (baseInfo->lcd_info).c_str());
-        screen_log_black += "ERROR: LCD optimal resolution is " + baseInfo->lcd_info + ", but current is " + real_lcd + "\n";
-        screen_log_red += "\t错误：LCD最优分辨率为" + baseInfo->lcd_info + "，但当前分辨率为" + real_lcd + "\n";
+        screen_log_black += "ERROR: LCD optimal resolution is not " + baseInfo->lcd_info + "\n\n";
+        screen_log_red += "\t错误：检测到LCD最优分辨率不为" + baseInfo->lcd_info + "\n";
         return false;
     }
 }

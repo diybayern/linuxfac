@@ -25,6 +25,7 @@ void* semi_auto_test_control(void*)
                 control->set_upload_mes_button_state(true);
                 if (control->get_auto_upload_mes_status()) {
                     control->upload_mes_log();
+                    continue;
                 }
             }
             
