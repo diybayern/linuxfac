@@ -94,11 +94,6 @@ MainTestWindow::~MainTestWindow()
         delete _lab_complete_or_single_test;
         _lab_complete_or_single_test = NULL;
     }
-
-    if (_hbox_checkbox_auto_upload_log != NULL) {
-        delete _hbox_checkbox_auto_upload_log;
-        _hbox_checkbox_auto_upload_log = NULL;
-    }
 }
 
 MainTestWindow* MainTestWindow::_main_test_window = NULL;
@@ -107,6 +102,11 @@ MainTestWindow* MainTestWindow::get_main_test_window()
     if (!_main_test_window) {
         _main_test_window = new MainTestWindow();
     }
+    return _main_test_window;
+}
+
+MainTestWindow* MainTestWindow::g_get_main_test_window()
+{
     return _main_test_window;
 }
 

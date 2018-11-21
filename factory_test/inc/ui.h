@@ -115,6 +115,7 @@ class MainTestWindow : public QDialog
         QList<ItemCheck> itemlist;
         bool get_auto_upload_check_state();
         static MainTestWindow* get_main_test_window();
+        static MainTestWindow* g_get_main_test_window();
         int get_current_res_h;
         int get_current_res_w;
         QList<StressTestItem> stress_test_item_list;

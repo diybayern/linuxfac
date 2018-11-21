@@ -88,6 +88,12 @@ void Control::dele_control_new_object()
         UiHandle::get_uihandle()->obj = NULL;
         LOG_INFO("~qobject");
     }
+    
+    if (MainTestWindow::g_get_main_test_window() != NULL) {
+        delete MainTestWindow::g_get_main_test_window();
+        LOG_INFO("~MainTestWindow");
+    }
+    
 }
 
 void Control::init_test_array_status()
