@@ -17,7 +17,7 @@ StressTestWindow* StressTestWindow::g_get_stress_test_window()
 StressTestWindow::StressTestWindow(QWidget *parent)
     : QWidget(parent)
 {
-    setWindowFlags(Qt::Window | Qt::WindowDoesNotAcceptFocus);
+    setWindowFlags(Qt::Widget | Qt::WindowDoesNotAcceptFocus);
     if (this->objectName().isEmpty()) {
         this->setObjectName(QString::fromUtf8("StressTestWindow"));
     }
@@ -103,6 +103,11 @@ StressTestWindow::StressTestWindow(QWidget *parent)
         info.name = item;
         info.label = st_lab_value;
         stress_test_info_list.append(info);
+       
+        Stress_Test_label stl;
+        stl.st_lab = st_lab;
+        stl.st_lab_value = st_lab_value;
+        stress_test_label_list.append(stl);
     }
     _form_box->setSpacing(20);
     _form_box->setMargin(20);
@@ -122,6 +127,17 @@ StressTestWindow::StressTestWindow(QWidget *parent)
 StressTestWindow::~StressTestWindow()
 {
     LOG_INFO("~StressTestWindow.");
+    foreach (Stress_Test_label stl, stress_test_label_list) {
+        if (stl.st_lab != NULL) {
+            delete stl.st_lab;
+            stl.st_lab = NULL;
+        }
+
+        if (stl.st_lab_value != NULL) {
+            delete stl.st_lab_value;
+            stl.st_lab_value = NULL;
+        }
+    }    
 }
 
 QPixmap StressTestWindow::_text2Pixmap(QString text, QColor color)

@@ -271,6 +271,12 @@ class Stress_Test_Info
         QLabel *label;
 };
 
+class Stress_Test_label
+{
+    public:
+        QLabel* st_lab;
+        QLabel* st_lab_value;
+};
 
 class StressTestWindow : public QWidget
 {
@@ -284,6 +290,7 @@ public:
     void finish_stress_window();
     void _set_picture(QPixmap& pix);
     QList<Stress_Test_Info> stress_test_info_list;
+    QList<Stress_Test_label> stress_test_label_list;
     void update_stress_label_value(QString item, QString result);
     void update_stress_test_pass_or_fail(QString result);
     QLabel *_lb_video;
