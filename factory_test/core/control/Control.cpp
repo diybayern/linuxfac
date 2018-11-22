@@ -300,7 +300,7 @@ void Control::init_ui_third_product()
         _baseInfo->usb_3_num = real_num_3;
     }
     
-    _uiHandle->add_main_label("USB3.0个数/USB总数:", _baseInfo->usb_3_num + "/" + _baseInfo->usb_total_num);
+    _uiHandle->add_main_label("USB信息:", _baseInfo->usb_3_num + "/" + _baseInfo->usb_total_num + "  (USB3.0个数/USB总数)");
     _uiHandle->add_main_label("网卡信息:", get_third_net_info());
     // get wifi status
     string wifi_exist = execute_command("ifconfig -a | grep wlan0", true);
