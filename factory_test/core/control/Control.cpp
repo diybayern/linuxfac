@@ -286,9 +286,9 @@ void Control::init_ui_third_product()
 {
     _uiHandle->add_main_label("CPU型号:", _hwInfo->cpu_type);
     _uiHandle->add_main_label("内存容量:", execute_command("free -m | awk '/Mem/ {print $2}'", true) + "M");
-    _uiHandle->add_main_label("HDD容量:", "--");//TODO
-    _uiHandle->add_main_label("SSD容量:", "--");//TODO
-    //input -1 to get actual linked edid num
+//    _uiHandle->add_main_label("HDD容量:", "--");//TODO
+//    _uiHandle->add_main_label("SSD容量:", "--");//TODO
+    /* input -1 to get actual linked edid num */
     _uiHandle->add_main_label("EDID信息:", to_string(edid_read_i2c_test(-1)));
     // get usb status
     string real_total_num = execute_command("lsusb -t | grep \"Mass Storage\" | wc -l", true);
