@@ -80,4 +80,4 @@ LIBS += -L/usr/local/include \
         -lswresample \
         -lswscale
 
-LIBS += -lx86 -lasound -ludev -lpthread -lavcodec -lavformat -lswscale -lavutil -lswresample -lva -lva-x11 -rdynamic -lm -lpng -lX11 -lftp
+LIBS += -lx86 -lasound -ludev -lpthread -lavcodec -lavformat -lswscale -lavutil -lswresample -lva -lva-x11 -rdynamic -lm -lpng -lX11 -lftp -ldl

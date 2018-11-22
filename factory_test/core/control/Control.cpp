@@ -286,8 +286,8 @@ void Control::init_ui_third_product()
 {
     _uiHandle->add_main_label("CPU型号:", _hwInfo->cpu_type);
     _uiHandle->add_main_label("内存容量:", execute_command("free -m | awk '/Mem/ {print $2}'", true) + "M");
-    _uiHandle->add_main_label("HDD容量:", "--");//TODO
-    _uiHandle->add_main_label("SSD容量:", "--");//TODO
+//    _uiHandle->add_main_label("HDD容量:", "--");//TODO
+//    _uiHandle->add_main_label("SSD容量:", "--");//TODO
     //input -1 to get actual linked edid num
     _uiHandle->add_main_label("EDID信息:", to_string(edid_read_i2c_test(-1)));
     // get usb status
@@ -300,7 +300,7 @@ void Control::init_ui_third_product()
         _baseInfo->usb_3_num = real_num_3;
     }
     
-    _uiHandle->add_main_label("USB3.0个数/USB总数:", _baseInfo->usb_3_num + "/" + _baseInfo->usb_total_num);
+    _uiHandle->add_main_label("USB信息:", _baseInfo->usb_3_num + "/" + _baseInfo->usb_total_num + "  (USB3.0个数/USB总数)");
     _uiHandle->add_main_label("网卡信息:", get_third_net_info());
     // get wifi status
     string wifi_exist = execute_command("ifconfig -a | grep wlan0", true);

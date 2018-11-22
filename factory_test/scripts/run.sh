@@ -67,7 +67,10 @@ fi
 if [ ! -d /var/log/factory_test ]; then
     mkdir /var/log/factory_test
 fi
-    
+
+. /etc/setrootdevinfo
+mount -o ro ${rootdevp}3 /recovery/
+
 cd /usr/local/bin/factory
 ./factory_test $1 > /var/log/factory_test/factorytest_stdout.log 2>&1
 rm -f /tmp/whole_test

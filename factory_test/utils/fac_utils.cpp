@@ -549,7 +549,7 @@ string lower_to_capital(string lower_str)
 int get_cpu_freq_by_id(int id)
 {
     bool ret = false;
-    string cmd = "cat /sys/devices/system/cpu/cpu" + to_string(id) + "/cpufreq/cpuinfo_cur_freq";
+    string cmd = "cat /sys/devices/system/cpu/cpu" + to_string(id) + "/cpufreq/scaling_cur_freq";  //cpuinfo_cur_freq
     string str = execute_command(cmd, false);
     if (str == "error") {
         return 0;
