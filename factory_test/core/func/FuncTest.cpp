@@ -300,7 +300,7 @@ bool StressTest::start_cpuburn_stress()
     int ret;
     int processornum = 0;
 
-    LOG_INFO("start cpuburn");
+    LOG_INFO("---------- start cpuburn ----------");
     result = execute_command("cat /proc/cpuinfo| grep \"processor\"| wc -l", true);
     if (result != "error") {
         LOG_INFO("cpuprocessor num is %s\n", result.c_str());
@@ -382,7 +382,7 @@ bool StressTest::create_abnormal_exit_num_file(int* num)
         LOG_ERROR("num is NUMM");
         return false;
     }
-
+    LOG_INFO("start update %s", STRESS_DOWN_NUM.c_str());
     if (check_file_exit(STRESS_DOWN_NUM)) {
         string exit_num = execute_command("cat " + STRESS_DOWN_NUM, true);
         if (exit_num == "error") {
@@ -446,6 +446,7 @@ void* StressTest::test_all(void* arg)
 
     int abnormal_exit = 0;
     bool cpuburn_test = true;
+    bool warning_box = false;
     FuncBase** _funcBase = control->get_funcbase();
     CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
 
@@ -541,7 +542,8 @@ void* StressTest::test_all(void* arg)
         }
         
         /* If the last stress test is abnormally powered down, a warning box is displayed. */
-        if (control->get_pcba_whole_lock_state() && STRESS_ERROR_TIME(tmp_dst)) {
+        if (control->get_pcba_whole_lock_state() && STRESS_ERROR_TIME(tmp_dst) && !warning_box) {
+            warning_box = true; //warning box just show once
             uihandle->confirm_test_result_warning("拷机异常退出：" + to_string(abnormal_exit) + "次");
         }
 

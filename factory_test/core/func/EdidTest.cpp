@@ -290,7 +290,7 @@ void* EdidTest::test_all(void *arg)
     }
     
     if (is_pass) {
-        screen_log_black += INTERFACE_TEST_NAME[I_EDID] + "结果:\t\t\t成功\n\n";
+        screen_log_black += INTERFACE_TEST_NAME[I_EDID] + "结果:\t\t\t成功\n";
         control->set_interface_test_result(INTERFACE_TEST_NAME[I_EDID], true);
     } else {
         screen_log_red = INTERFACE_TEST_NAME[I_EDID] + "结果:\t\t\t失败\n\n" + screen_log_red;
