@@ -12,7 +12,7 @@
 #define RECORD                 (SND_PCM_STREAM_CAPTURE)
 
 #define RECORD_FRAME_SIZE      (64)
-#define PLAYBACK_FRAME_SIZE    (1024)
+#define PLAYBACK_FRAME_SIZE    (1024)    // It is a experienced value
 #define SOUND_RECORD_FILE      ("/tmp/sound.wav")
 #define DEFAULT_CARD_NAME      ("default")
 
@@ -188,7 +188,7 @@ err_record:
         free(buf);
         buf = NULL;
     }
-    close_sound_card(info);
+    close_sound_card(info); // must waiting for while loop stopped
 
     return NULL;
 }
@@ -237,6 +237,7 @@ void* SoundTest::playback_loop(void *arg)
     }
 
     while (gStatus == SOUND_PLAYBACK_START) {
+
         //LOG_INFO("in the playback_loop \n");
         memset(buf, 0x00, buffer_size);
         ret = fread(buf, buffer_size, 1, infile);
@@ -272,7 +273,6 @@ err_playback:
         free(buf);
         buf = NULL;
     }
-    close_sound_card(info);
     remove(SOUND_RECORD_FILE);
 
     return NULL;
@@ -474,6 +474,8 @@ bool SoundTest::stop_playback()
     gStatus = SOUND_PLAYBACK_STOP;
     pthread_mutex_unlock(&gMutex);
     LOG_INFO("sound test playback stop");
+
+    close_sound_card(g_playback_info);
 
     return true;
 }
