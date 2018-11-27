@@ -475,7 +475,7 @@ bool SoundTest::stop_playback()
     pthread_mutex_unlock(&gMutex);
     LOG_INFO("sound test playback stop");
 
-    close_sound_card(g_playback_info);
+    close_sound_card(g_playback_info); // must waiting for playback ended
 
     return true;
 }

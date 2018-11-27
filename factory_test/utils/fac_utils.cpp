@@ -308,7 +308,13 @@ void get_baseinfo(BaseInfo* baseInfo, const string info)
     baseInfo->camera_exist  = tmap["CAM"];
     baseInfo->vga_exist     = tmap["VGA"];
     baseInfo->hdmi_exist    = tmap["HDMI"]; 
-    baseInfo->lcd_info      = tmap["LCD"];
+
+    string lcd_info         = tmap["LCD"];
+    if (lcd_info != "" && lcd_info != "0" && lcd_info.find("X") != lcd_info.npos) {
+        lcd_info.replace(lcd_info.find("X"), 1, "x");
+    }
+    baseInfo->lcd_info      = lcd_info;
+
 }
 
 bool is_digit(string str)

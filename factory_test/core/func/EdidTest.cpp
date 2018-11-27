@@ -244,13 +244,13 @@ bool EdidTest::lcd_info_test(BaseInfo *baseInfo)
     
     int idx = real_lcd.find(baseInfo->lcd_info);
     if (idx != -1) {
-        LOG_INFO("LCD resolution is %s", baseInfo->lcd_info);
-        screen_log_black += "current screen resolution is " + baseInfo->lcd_info + "\n\n";
+        LOG_INFO("LCD resolution is %s", real_lcd.c_str());
+        screen_log_black += "current screen resolution is " + real_lcd + "\n\n";
         return true;
     } else {
         LOG_ERROR("current LCD=%s, not optimal=%s", real_lcd.c_str(), (baseInfo->lcd_info).c_str());
-        screen_log_black += "ERROR: LCD optimal resolution is not " + baseInfo->lcd_info + "\n\n";
-        screen_log_red += "\t错误：检测到LCD最优分辨率不为" + baseInfo->lcd_info + "\n";
+        screen_log_black += "ERROR: LCD resolution should be " + baseInfo->lcd_info + ",\n\t\tcurrent is " + real_lcd + "\n\n";
+        screen_log_red += "\t错误：检测到LCD分辨率不为" + baseInfo->lcd_info + "\n";
         return false;
     }
 }
