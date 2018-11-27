@@ -419,7 +419,7 @@ bool UsbTest::usb_test_read_cfg(USB_INFO_T* info)
     string path = USB_MNT_FAC_CONF;
 
     (void) mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-
+    LOG_INFO("try to get fac_config.conf from %d USB", info->dev_num);
     for (i = 0; i < info->dev_num; i++) {
 
         usb_test_mount(info->dev[i].block, path);

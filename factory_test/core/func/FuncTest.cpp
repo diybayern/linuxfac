@@ -169,9 +169,9 @@ void* InterfaceTest::test_all(void *arg)
         }
 
         real_test_num = i + 1;
-        string loop = "\n******************** LOOP: " + to_string(i + 1) + " ********************";
-        control->update_color_screen_log(loop, "black");
+        string loop = "******************** LOOP: " + to_string(i + 1) + " ********************";
         LOG_INFO(loop.c_str());
+        control->update_color_screen_log("\n" + loop, "black");
         
         for (int j = 0; j < INTERFACE_TEST_NUM; j++) {
             if (interfaceTestSelectStatus[j]) {
