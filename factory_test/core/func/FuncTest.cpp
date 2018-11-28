@@ -422,16 +422,18 @@ void* StressTest::test_all(void* arg)
         LOG_ERROR("arg is null");
         return NULL;
     }
-    BaseInfo* baseInfo   = (BaseInfo*)arg;
-    Control*  control    = Control::get_control();
-    UiHandle* uihandle   = UiHandle::get_uihandle();
+    BaseInfo* baseInfo    = (BaseInfo*)arg;
+    Control*  control     = Control::get_control();
+    UiHandle* uihandle    = UiHandle::get_uihandle();
     
-    TimeInfo init_time   = {0,0,0,0};
-    TimeInfo tmp_dst     = {0,0,0,0};
-    TimeInfo mem_src     = {0,0,0,0};
-    TimeInfo mem_dst     = {0,0,0,0};
-    TimeInfo cpuburn_src = {0,0,0,0};
-    TimeInfo cpuburn_dst = {0,0,0,0};
+    TimeInfo init_time    = {0,0,0,0};
+    TimeInfo tmp_dst      = {0,0,0,0};
+    TimeInfo mem_src      = {0,0,0,0};
+    TimeInfo mem_dst      = {0,0,0,0};
+    TimeInfo cpuburn_src  = {0,0,0,0};
+    TimeInfo cpuburn_dst  = {0,0,0,0};
+    TimeInfo cmd_time_src = {0,0,0,0};
+    TimeInfo cmd_time_dst = {0,0,0,0};
     
     string datebuf = "";
     CpuStatus st_cpu = {0,0,0,0,0,0,0,0,0,0,0};
@@ -446,8 +448,9 @@ void* StressTest::test_all(void* arg)
     bool decode = true;
 
     int abnormal_exit = 0;
-    bool cpuburn_test = true;
-    bool warning_box = false;
+    bool cpuburn_test = true;  // true means cpuburn test, false means memtester 
+    bool warning_box  = false; // whether show abnormal exit warning box
+    bool time_enough  = false; // whether show result and remove lock file after running 4 hours
     FuncBase** _funcBase = control->get_funcbase();
     CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
 
@@ -526,11 +529,13 @@ void* StressTest::test_all(void* arg)
         }
         
         get_current_open_time(&tmp_dst);
-        cpuburn_dst = tmp_dst;
-        mem_dst     = tmp_dst;
+        cpuburn_dst  = tmp_dst;
+        mem_dst      = tmp_dst;
+        cmd_time_src = tmp_dst;
         
         diff_running_time(&tmp_dst, &init_time); // get stress test time
-        if (STRESS_TIME_ENOUGH(tmp_dst)) { // after 4 hour, show stress result, delete the lock file and power down number file
+        if (STRESS_TIME_ENOUGH(tmp_dst) && !time_enough) { // after 4 hour, show stress result, delete the lock file and power down number file
+            time_enough = true;
             remove_local_file(STRESS_LOCK_FILE);
             if (check_file_exit(STRESS_DOWN_NUM)) {
                 remove_local_file(STRESS_DOWN_NUM); // delete power down number file
@@ -551,15 +556,14 @@ void* StressTest::test_all(void* arg)
         /* cpuburn test again every 30 mins */
         diff_running_time(&cpuburn_dst, &cpuburn_src); // get stress test time
         if (STRESS_HALF_HOUR_TEST(cpuburn_dst)) {
+            cpuburn_src = mem_dst; // get current time
             if (cpuburn_test) {
                 cpuburn_test = false;
-                cpuburn_src = mem_dst; // get current time
                 mem_src = mem_dst;
                 stop_cpuburn_stress(); // stop cpuburn
                 pthread_create(&pid_mem, NULL, mem_stress_test, NULL); // start memtester
             } else {
                 cpuburn_test = true;
-                cpuburn_src = mem_dst; // get current time
                 stop_mem_stress_test();
                 start_cpuburn_stress();
             }
@@ -601,8 +605,12 @@ void* StressTest::test_all(void* arg)
         uihandle->update_stress_label_value("CPU频率", get_current_cpu_freq());
         uihandle->update_stress_label_value("Mem", get_mem_info());
         uihandle->update_stress_label_value("Cpu", get_cpu_info(&st_cpu));
-        
-        sleep(1);
+
+        get_current_open_time(&cmd_time_dst);
+        diff_running_time(&cmd_time_dst, &cmd_time_src);
+        if (STRESS_UPDATE_INFO(cmd_time_dst)) {
+            sleep(5 - cmd_time_dst.second);
+        } 
     }
     return NULL;
 }

@@ -184,10 +184,11 @@ const int BRIGHTNESS_VALUE[6] =
 #define STRESS_MEM_CAP_MAX       (100)   /* M */
 #define STRESS_MEM_PERCENT       (0.7)
 
-#define STRESS_TIME_ENOUGH(x)    ((x).day == 0 && (x).hour == 4 && (x).minute == 0 && (x).second >= 0 && (x).second <= 1)
-#define STRESS_ERROR_TIME(x)     ((x).day == 0 && (x).hour == 0 && (x).minute == 0 && (x).second >= 3 && (x).second <= 4)
-#define STRESS_HALF_HOUR_TEST(x) ((x).day == 0 && (x).hour == 0 && (x).minute == 30 && (x).second >= 0 && (x).second <= 1)
-#define STRESS_MEMTEST_ITV(x)    ((x).day == 0 && (x).hour == 0 && (x).minute == 10 && (x).second >= 0 && (x).second <= 1)
+#define STRESS_TIME_ENOUGH(x)    ((x).hour >= 4)
+#define STRESS_ERROR_TIME(x)     ((x).second >= 3)
+#define STRESS_HALF_HOUR_TEST(x) ((x).minute >= 30)
+#define STRESS_MEMTEST_ITV(x)    ((x).minute >= 10)
+#define STRESS_UPDATE_INFO(x)    ((x).day == 0 && (x).hour == 0 && (x).minute == 0 && (x).second < 5)
 
 #define STRING_RESULT(x)         ((x) ? "PASS" : "FAIL")
 #define BOOL_RESULT(x)           ((x) == "PASS" ? true : false)
