@@ -425,7 +425,11 @@ bool SoundTest::start_record()
     pthread_mutex_unlock(&gMutex);
 
     LOG_INFO("sound test record start \n");
-    pthread_create(&pid_t, NULL, record_loop, g_record_info);
+    int err = pthread_create(&pid_t, NULL, record_loop, g_record_info);
+    if (err != 0) {
+        LOG_ERROR("record loop create thread error: %s", strerror(err));
+        return false;
+    }
 
     return true;
 }
@@ -458,7 +462,11 @@ bool SoundTest::start_playback()
     pthread_mutex_unlock(&gMutex);
 
     LOG_INFO("sound test playback start\n");
-    pthread_create(&pid_t, NULL, playback_loop, g_playback_info);
+    int err = pthread_create(&pid_t, NULL, playback_loop, g_playback_info);
+    if (err != 0) {
+        LOG_ERROR("start playback create thread error: %s", strerror(err));
+        return false;
+    }
 
     return true;
 }
@@ -538,6 +546,7 @@ bool SoundTest::init(BaseInfo* baseInfo)
 
 void* SoundTest::test_all(void*)
 {
+    pthread_detach(pthread_self());
     Control *control = Control::get_control();
     UiHandle* uihandle = UiHandle::get_uihandle();
     control->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_SOUND] + " ====================", "black");
@@ -563,7 +572,10 @@ void SoundTest::start_test(BaseInfo* baseInfo)
         return;
     }
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("sound test create thread error: %s", strerror(err));
+    }
 }
 
 /* open pulseaudio when exiting software */

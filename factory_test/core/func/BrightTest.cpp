@@ -101,6 +101,8 @@ void* BrightTest::test_all(void *arg)
         LOG_ERROR("arg is null");
         return NULL;
     }
+    
+    pthread_detach(pthread_self());
     Control::get_control()->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_BRIGHT]
                 + " ====================", "black");
     BaseInfo* baseInfo = (BaseInfo*)arg;
@@ -116,7 +118,10 @@ void BrightTest::start_test(BaseInfo* baseInfo)
         return;
     }
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("bright test create thread error: %s", strerror(err));
+    }
 }
 
 

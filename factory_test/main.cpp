@@ -8,6 +8,7 @@ void* semi_auto_test_control(void*)
     Control* control = Control::get_control();
     bool* funcFinishStatus = control->get_func_finish_status();
     bool* InfcFuncTestSelectStatus = control->get_infc_func_select_status();
+    pthread_detach(pthread_self());
     while (1) {
         int testStep = control->get_test_step();
         usleep(500000);
@@ -161,7 +162,10 @@ int main(int argc, char *argv[])
     control->show_main_test_ui();
 
     pthread_t tid;
-    pthread_create(&tid, NULL, semi_auto_test_control, NULL);
+    int err = pthread_create(&tid, NULL, semi_auto_test_control, NULL);
+    if (err != 0) {
+        LOG_ERROR("semi auto test create thread error: %s", strerror(err));
+    }
 
     return a.exec();
 }

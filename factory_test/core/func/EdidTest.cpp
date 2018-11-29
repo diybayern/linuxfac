@@ -232,9 +232,9 @@ bool EdidTest::lcd_info_test(BaseInfo *baseInfo)
     
     string real_lcd = "";
     if (check_file_exit(EDID_LCD_FILE)) {
-        real_lcd = execute_command("cat " + EDID_LCD_FILE + " | grep eDP1", true);
+        real_lcd = execute_command("cat " + EDID_LCD_FILE + " | grep eDP", true);
     } else {
-        real_lcd = execute_command("xrandr -q | grep eDP1", true);
+        real_lcd = execute_command("xrandr -q | grep eDP", true);
     }
     
     if (real_lcd == "error") {
@@ -261,6 +261,8 @@ void* EdidTest::test_all(void *arg)
         LOG_ERROR("arg is null");
         return NULL;
     }
+    
+    pthread_detach(pthread_self());
     Control *control = Control::get_control();
     BaseInfo* baseInfo = (BaseInfo *)arg;
     
@@ -311,7 +313,10 @@ void EdidTest::start_test(BaseInfo* baseInfo)
         return;
     }
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("edid test create thread error: %s", strerror(err));
+    }
 }
 
 

@@ -587,9 +587,11 @@ error:
 
 void* NetTest::test_all(void*)
 {
+    //LOG_DEBUG("net test all");
     Control *control = Control::get_control();
     control->set_interface_test_status(INTERFACE_TEST_NAME[I_NET], false);
     
+    pthread_detach(pthread_self());
     screen_log_black = "";
     screen_log_red = "";
     screen_log_black += "==================== " + INTERFACE_TEST_NAME[I_NET] + " ====================\n";
@@ -617,8 +619,15 @@ void NetTest::start_test(BaseInfo* baseInfo)
         LOG_ERROR("baseInfo is null");
         return;
     }
+    //LOG_DEBUG("net thread create start");
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("net test create thread error: %s", strerror(err));
+    }
+    /*else {
+        LOG_DEBUG("net thread create end");
+    }*/
 }
 
 

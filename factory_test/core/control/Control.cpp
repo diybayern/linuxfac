@@ -836,6 +836,8 @@ void* Control::update_mes_log_thread(void* arg)
         LOG_ERROR("arg is NULL");
         return NULL;
     }
+    
+    pthread_detach(pthread_self());
     MesInfo* info = (MesInfo*)arg;
     Control::get_control()->update_mes_log(info->func, info->status);
     return NULL;
@@ -848,7 +850,10 @@ void Control::start_update_mes_log(MesInfo* info)
         return;
     }
     pthread_t tid;
-    pthread_create(&tid, NULL, update_mes_log_thread, info);
+    int err = pthread_create(&tid, NULL, update_mes_log_thread, info);
+    if (err != 0) {
+        LOG_ERROR("update mes.log create thread error: %s", strerror(err));
+    }
 }
 
 /* 

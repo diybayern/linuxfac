@@ -150,6 +150,7 @@ bool CameraTest::camera_test_all()
 
 void* CameraTest::test_all(void*)
 {
+    pthread_detach(pthread_self());
     Control* control = Control::get_control();
     control->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_CAMERA] + " ====================", "black");
     camera_test_all();    
@@ -164,7 +165,10 @@ void CameraTest::start_test(BaseInfo* baseInfo)
         return;
     }
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("camera test create thread error: %s", strerror(err));
+    }
 }
 
 /* stress test camera if camera exists */

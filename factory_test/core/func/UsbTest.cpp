@@ -323,6 +323,7 @@ bool UsbTest::usb_test_all(int num)
 
 void* UsbTest::test_all(void *arg)
 {
+    //LOG_DEBUG("usb test all");
     if (arg == NULL) {
         LOG_ERROR("arg is null");
         return NULL;
@@ -331,6 +332,7 @@ void* UsbTest::test_all(void *arg)
     control->set_interface_test_status(INTERFACE_TEST_NAME[I_USB], false);
     BaseInfo* baseInfo = (BaseInfo*)arg;
 
+    pthread_detach(pthread_self());
     screen_log_black = "";
     screen_log_red = "";
     screen_log_black += "==================== " + INTERFACE_TEST_NAME[I_USB] + " ====================\n";
@@ -375,8 +377,15 @@ void UsbTest::start_test(BaseInfo* baseInfo)
         LOG_ERROR("baseInfo is null");
         return;
     }
+    //LOG_DEBUG("usb thread create start");
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("usb test create thread error: %s", strerror(err));
+    }
+    /*else {
+        LOG_DEBUG("usb thread create end");
+    }*/
 }
 
 

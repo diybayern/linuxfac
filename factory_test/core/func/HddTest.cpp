@@ -53,10 +53,13 @@ bool HddTest::check_if_hdd_pass()
 
 void* HddTest::test_all(void *arg)
 {
+    //LOG_DEBUG("hdd test all");
     if (arg == NULL) {
         LOG_ERROR("arg is null");
         return NULL;
     }
+    
+    pthread_detach(pthread_self());
     Control *control = Control::get_control();
     control->set_interface_test_status(INTERFACE_TEST_NAME[I_HDD], false);
 
@@ -86,8 +89,15 @@ void HddTest::start_test(BaseInfo* baseInfo)
         LOG_ERROR("baseInfo is null");
         return;
     }
+    //LOG_DEBUG("hdd thread create start");
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("hdd test create thread error: %s", strerror(err));
+    }
+    /*else {
+        LOG_DEBUG("hdd thread create end");
+    }*/
 }
 
 

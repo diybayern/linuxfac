@@ -60,6 +60,7 @@ void* SsdTest::test_all(void *arg)
     Control *control = Control::get_control();
     control->set_interface_test_status(INTERFACE_TEST_NAME[I_SSD], false);
 
+    pthread_detach(pthread_self());
     screen_log_black = "";
     screen_log_red = "";
     screen_log_black += "==================== " + INTERFACE_TEST_NAME[I_SSD] + " ====================\n";
@@ -87,7 +88,10 @@ void SsdTest::start_test(BaseInfo* baseInfo)
         return;
     }
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("ssd test create thread error: %s", strerror(err));
+    }
 }
 
 

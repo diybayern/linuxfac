@@ -451,6 +451,7 @@ bool WifiTest::check_if_wifi_connect_pass()
 
 void* WifiTest::test_all(void*)
 {
+    pthread_detach(pthread_self());
     Control *control = Control::get_control();
     control->set_interface_test_status(INTERFACE_TEST_NAME[I_WIFI], false);
     bool* interfaceTestOver = control->get_interface_test_over();
@@ -503,7 +504,10 @@ void WifiTest::start_test(BaseInfo* baseInfo)
         return;
     }
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("wifi test create thread error: %s", strerror(err));
+    }
 }
 
 

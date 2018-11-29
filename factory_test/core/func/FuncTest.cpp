@@ -70,10 +70,13 @@ string FanTest::fan_speed_test(string speed)
 
 void* FanTest::test_all(void *arg)
 {
+    //LOG_DEBUG("fan test all");
     if (arg == NULL) {
         LOG_ERROR("arg is null");
         return NULL;
     }
+    
+    pthread_detach(pthread_self());
     Control *control = Control::get_control();
     control->set_interface_test_status(INTERFACE_TEST_NAME[I_FAN], false);
     BaseInfo* baseInfo = (BaseInfo*)arg;
@@ -109,8 +112,15 @@ void FanTest::start_test(BaseInfo* baseInfo)
         LOG_ERROR("baseInfo is null");
         return;
     }
+    //LOG_DEBUG("fan thread create start");
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("fan test create thread error: %s", strerror(err));
+    }
+    /*else {
+        LOG_DEBUG("fan thread create end");
+    }*/
 }
 
 void* InterfaceTest::test_all(void *arg)
@@ -119,6 +129,8 @@ void* InterfaceTest::test_all(void *arg)
         LOG_ERROR("arg is null");
         return NULL;
     }
+    
+    pthread_detach(pthread_self());
     BaseInfo* baseInfo = (BaseInfo*)arg;
     Control *control = Control::get_control();
     
@@ -245,11 +257,15 @@ void InterfaceTest::start_test(BaseInfo* baseInfo)
         return;
     }
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("interface test create thread error: %s", strerror(err));
+    }
 }
 
 void* PowerTest::test_all(void*)
 {
+    pthread_detach(pthread_self());
     Control *control = Control::get_control();
     control->update_color_screen_log("==================== " + FUNC_TEST_NAME[F_POWER] + " ====================", "black");
 
@@ -265,7 +281,10 @@ void PowerTest::start_test(BaseInfo* baseInfo)
         return;
     }
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("power test create thread error: %s", strerror(err));
+    }
 }
 
 int  StressTest::mem_stress_test_num = 0;
@@ -447,6 +466,7 @@ void* StressTest::test_all(void* arg)
     bool encode = true;
     bool decode = true;
 
+    int err = 0;
     int abnormal_exit = 0;
     bool cpuburn_test = true;  // true means cpuburn test, false means memtester 
     bool warning_box  = false; // whether show abnormal exit warning box
@@ -454,6 +474,7 @@ void* StressTest::test_all(void* arg)
     FuncBase** _funcBase = control->get_funcbase();
     CameraTest* camera = (CameraTest*)_funcBase[CAMERA];
 
+    pthread_detach(pthread_self());
     control->set_pcba_whole_lock_state(false); //
     /* confirm if last stress abnormal exited */
     if (check_file_exit(STRESS_LOCK_FILE)) {
@@ -489,7 +510,10 @@ void* StressTest::test_all(void* arg)
     uihandle->show_stress_test_ui();
     
     if (get_int_value(baseInfo->camera_exist) == 1) {
-        pthread_create(&pid_camera, NULL, camera_stress_test, camera); // if camera exist, open camera window
+        err = pthread_create(&pid_camera, NULL, camera_stress_test, camera); // if camera exist, open camera window
+        if (err != 0) {
+            LOG_ERROR("camera stress test create thread error: %s", strerror(err));
+        }
     }
 
     uihandle->update_stress_label_value("产品型号", (control->get_hw_info())->product_name);
@@ -501,7 +525,10 @@ void* StressTest::test_all(void* arg)
     uihandle->update_stress_label_value("解码状态", STRING_RESULT(decode));
 
     if (baseInfo->platform == "IDV") {
-        pthread_create(&pid_gpu, NULL, gpu_stress_test, NULL); // IDV need test GPU
+        err = pthread_create(&pid_gpu, NULL, gpu_stress_test, NULL); // IDV need test GPU
+        if (err != 0) {
+            LOG_ERROR("gpu stress test create thread error: %s", strerror(err));
+        }
     }
     start_cpuburn_stress();
     
@@ -561,7 +588,10 @@ void* StressTest::test_all(void* arg)
                 cpuburn_test = false;
                 mem_src = mem_dst;
                 stop_cpuburn_stress(); // stop cpuburn
-                pthread_create(&pid_mem, NULL, mem_stress_test, NULL); // start memtester
+                err = pthread_create(&pid_mem, NULL, mem_stress_test, NULL); // start memtester
+                if (err != 0) {
+                    LOG_ERROR("mem stress test create thread error: %s", strerror(err));
+                }
             } else {
                 cpuburn_test = true;
                 stop_mem_stress_test();
@@ -573,7 +603,10 @@ void* StressTest::test_all(void* arg)
         diff_running_time(&mem_dst, &mem_src);
         if (!cpuburn_test && STRESS_MEMTEST_ITV(mem_dst) && !mem_stress_status) {
             get_current_open_time(&mem_src);
-            pthread_create(&pid_mem, NULL, mem_stress_test, NULL);
+            err = pthread_create(&pid_mem, NULL, mem_stress_test, NULL);
+            if (err != 0) {
+                LOG_ERROR("edid test create thread error: %s", strerror(err));
+            }
         }
         
         /* After the first test, update the mem test result NULL to PASS/FAIL */
@@ -622,7 +655,10 @@ void StressTest::start_test(BaseInfo* baseInfo)
         return;
     }
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("stress test create thread error: %s", strerror(err));
+    }
 }
 
 string StressTest::get_stress_result_record()
@@ -637,11 +673,15 @@ void UploadMesLog::start_test(BaseInfo* baseInfo)
         return;
     }
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("upload mes log create thread error: %s", strerror(err));
+    }
 }
 
 void* UploadMesLog::test_all(void*)
 {
+    pthread_detach(pthread_self());
     Control* control = Control::get_control();
     control->upload_mes_log();
     return NULL;
@@ -699,6 +739,8 @@ void* NextProcess::test_all(void* arg)
         LOG_ERROR("arg is null");
         return NULL;
     }
+    
+    pthread_detach(pthread_self());
     BaseInfo* baseInfo = (BaseInfo*)arg;
     next_process_handle(baseInfo);
     return NULL;
@@ -711,7 +753,10 @@ void NextProcess::start_test(BaseInfo* baseInfo)
         return;
     }
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("next process create thread error: %s", strerror(err));
+    }
 }
 
 void NextProcess::init(){

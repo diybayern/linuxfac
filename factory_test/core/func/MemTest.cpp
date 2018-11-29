@@ -46,6 +46,7 @@ bool MemTest::mem_stability_test()
 
 void* MemTest::test_all(void *arg)
 {
+    //LOG_DEBUG("mem test all");
     if (arg == NULL) {
         LOG_ERROR("arg is null");
         return NULL;
@@ -54,6 +55,7 @@ void* MemTest::test_all(void *arg)
     BaseInfo* baseInfo = (BaseInfo*)arg;
     bool is_pass = true;
     
+    pthread_detach(pthread_self());
     control->set_interface_test_status(INTERFACE_TEST_NAME[I_MEM], false);
     screen_log_black = "";
     screen_log_red = "";
@@ -93,8 +95,15 @@ void MemTest::start_test(BaseInfo* baseInfo)
         LOG_ERROR("baseInfo is null");
         return;
     }
+    //LOG_DEBUG("mem thread create start");
     pthread_t tid;
-    pthread_create(&tid, NULL, test_all, baseInfo);
+    int err = pthread_create(&tid, NULL, test_all, baseInfo);
+    if (err != 0) {
+        LOG_ERROR("mem test create thread error: %s", strerror(err));
+    }
+    /*else {
+        LOG_DEBUG("mem thread create end");
+    }*/
 }
 
 
