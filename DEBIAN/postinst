@@ -3,5 +3,8 @@
 
 # after installing new lib, we must re-do ldconfig.
 ldconfig
-sync
 
+chmod 755 /usr/local/bin/factory/*.sh
+chmod 755 /etc/AutoStart.xinit/9000B_FactoryTest.sh
+
+sync

@@ -69,9 +69,9 @@ if [ ! -d /var/log/factory_test ]; then
     mkdir /var/log/factory_test
 fi
 
-. /etc/setrootdevinfo
 recovery_file=`ls -l /usr/bin/Unigine_Heaven-4.0/data/heaven.ung | grep "/recovery/system_files/"`
 if [ -n "$recovery_file" ]; then
+    . /etc/setrootdevinfo
     mount -o ro ${rootdevp}3 /recovery/
 fi
 
