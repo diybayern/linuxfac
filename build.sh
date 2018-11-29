@@ -5,6 +5,8 @@ BUILD_PROCESSES=8
 TOPDIR=$PWD
 DEBTMPDIR=deb_tmp
 WORKDIR=$TOPDIR/$DEBTMPDIR/usr/local/bin/factory/
+AUTOSTART=$TOPDIR/$DEBTMPDIR/etc/AutoStart.xinit/
+
 pkgName=rainsys
 VERSION=1.0.3
 
@@ -24,6 +26,7 @@ fi
 
 cd $TOPDIR
 mkdir -p $WORKDIR
+mkdir -p $AUTOSTART
 cp -rf DEBIAN $DEBTMPDIR/
 chmod +x $DEBTMPDIR/DEBIAN/*
 
@@ -33,6 +36,7 @@ sed -i "s/currentversion/$VERSION/g" $DEBTMPDIR/DEBIAN/control
 cp -rf factory_test/res $WORKDIR
 cp -f factory_test/scripts/* $WORKDIR
 cp -f factory_test/factory_test $WORKDIR
+cp -f factory_test/AutoStart/* $AUTOSTART
 
 dpkg -b $DEBTMPDIR/ $pkgName.deb
 

@@ -67,7 +67,12 @@ fi
 if [ ! -d /var/log/factory_test ]; then
     mkdir /var/log/factory_test
 fi
-    
+
+. /etc/setrootdevinfo
+if ll /usr/bin/Unigine_Heaven-4.0/data/heaven.ung | grep "/recovery/system_files/"; then 
+    mount -o ro ${rootdevp}3 /recovery/
+fi
+
 cd /usr/local/bin/factory
 ./factory_test $1 > /var/log/factory_test/factorytest_stdout.log 2>&1
 rm -f /tmp/whole_test
